@@ -1,0 +1,41 @@
+{{>header}}
+
+<div class="content">
+    <p></p>
+    <h1>Tus pedidos</h1>
+    <div class="container" style="background-color: #ffffff; padding: 20px; border-radius: 5px;">
+
+        {{#orderList}}
+        <div class="container" style="background-color: #e1dada; padding: 20px; border-radius: 5px;">
+            <p class="order-id">Pedido: {{id}}</p>
+            <p class="order-id"><b>Precio Total: {{totalPrice}} €</b></p>
+
+            {{#products}}
+            <a href="/products/{{id}}" class="product-item">
+                <img class="product-img" src="/products/{{id}}/image" alt="{{name}}">
+                <p class="product-name">{{name}}</p>
+                <p class="product-price">{{price}} €</p>
+                <p><b>Descripción:</b> {{description}}</p>
+            </a>
+
+            {{/products}}
+            <form action="/removeOrder/{{id}}" method="post">
+                <button type="submit" class="btn-danger">Cancelar pedido</button>
+                <input type="hidden" name="_csrf" value="{{token}}" />
+            </form>
+            <p></p>
+        </div>
+        <div class="container" style="background-color: #ffffff; padding: 20px; border-radius: 5px;">
+        </div>
+        </a>
+        <p></p>
+        {{/orderList}}
+
+        {{^orderList}}
+            <p style="margin-top: 20px; font-style: italic;">No has realizado ningun pedido todavia.</p>
+        {{/orderList}}
+    </div>
+</div>
+
+
+{{>footer}}

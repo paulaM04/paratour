@@ -1,0 +1,62 @@
+        body {
+			margin: 0;
+			font-family: 'Raleway', sans-serif;
+		}
+
+		header {
+			height: 100vh;
+			background: linear-gradient(135deg, #d0e8f2, #e0f7fa);
+			color: #2a2a2a;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+			position: relative;
+		}
+
+		nav {
+			position: absolute;
+			top: 0;
+			width: 100%;
+			padding: 1.2rem 2rem;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			background-color: rgba(255, 255, 255, 0.6);
+			backdrop-filter: blur(10px);
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+		}
+
+		.navbar-brand {
+			font-size: 1.8rem;
+			font-weight: 600;
+			color: #004d61;
+			text-decoration: none;
+		}
+
+		.nav-links a {
+			margin: 0 1rem;
+			text-decoration: none;
+			color: #004d61;
+			font-weight: 500;
+			transition: color 0.3s ease;
+		}
+
+		.nav-links a:hover {
+			color: #028090;
+		}
+
+		.header-title {
+			font-size: 3.5rem;
+			font-weight: 600;
+			color: #004d61;
+			margin-bottom: 1rem;
+		}
+
+		.header-subtitle {
+			font-size: 1.5rem;
+			font-weight: 300;
+			max-width: 600px;
+			color: #555;
+		}
