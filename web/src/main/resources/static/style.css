@@ -1,7 +1,9 @@
-        
-		body {
+        body {
         	margin: 0;
         	font-family: 'Raleway', sans-serif;
+        	display: flex;
+        	flex-direction: column;
+        	min-height: 100vh;
         }
 
         header {
@@ -14,7 +16,7 @@
         }
 
         nav {
-        	
+
         	align-items: center;
         	background-color: rgba(255, 255, 255, 0.6);
         	backdrop-filter: blur(10px);
@@ -22,7 +24,7 @@
         }
 
         .navbar-brand {
-   
+
         	color: #004d61;
         	text-decoration: none;
         }
@@ -73,6 +75,7 @@
 
         .header-content {
         	text-align: center;
+        	flex-grow: 1;
         	background: linear-gradient(5000000deg, #d0e8f2, #e0f7fa);
         	color: #004d61;
         }
