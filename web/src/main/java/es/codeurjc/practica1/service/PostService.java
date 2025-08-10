@@ -17,7 +17,8 @@ public class PostService {
     private PostRepository postRepository;
 
     public Optional<Post> findById(long id) {
-        return postRepository.findById(id);
+        Optional<Post> post = postRepository.findById(id);
+        return post;
     }
 
     public List<Post> findAllById(List<Long> productIds) {

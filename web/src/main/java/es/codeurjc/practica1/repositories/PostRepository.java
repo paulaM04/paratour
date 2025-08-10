@@ -12,4 +12,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     // Buscar por si el post está borrado o no
     List<Post> findByDeletedPost(boolean deletedPost);
+
+ 
 }

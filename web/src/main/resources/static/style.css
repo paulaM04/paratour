@@ -69,6 +69,34 @@ nav {
 	transition: width 0.3s ease;
 }
 
+.post-card {
+	max-width: 400px;
+	margin: 40px auto;
+	padding: 20px;
+	border: 1px solid #ccc;
+	border-radius: 12px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	text-align: center;
+	background-color: #fff;
+}
+
+.post-card img {
+	max-width: 100%;
+	border-radius: 8px;
+	margin-bottom: 15px;
+}
+
+.post-card h2 {
+	margin: 10px 0;
+	font-size: 1.5em;
+	color: #333;
+}
+
+.post-card p {
+	color: #555;
+	line-height: 1.4;
+}
+
 .nav-link:hover::after,
 .dropdown-item:hover::after {
 	width: 100%;
@@ -106,14 +134,15 @@ nav {
 	color: #555;
 	animation: fadeInSubtitle 1s ease-out 1s both;
 }
+
 .profile-photo {
-    width: 1000px;
-    height: 1000px;
-    object-fit: cover;
-    border-radius: 50%;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    margin-bottom: 20px;
-    animation: fadeInPhoto 1s ease-out;
+	width: 1000px;
+	height: 1000px;
+	object-fit: cover;
+	border-radius: 50%;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+	margin-bottom: 20px;
+	animation: fadeInPhoto 1s ease-out;
 }
 
 /* ANIMACIONES */
@@ -165,12 +194,13 @@ nav {
 }
 
 @keyframes fadeInPhoto {
-    0% {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
+	0% {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
 }

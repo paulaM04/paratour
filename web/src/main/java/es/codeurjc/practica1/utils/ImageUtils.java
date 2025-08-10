@@ -1,10 +1,13 @@
 package es.codeurjc.practica1.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Blob;
 
+import org.hibernate.engine.jdbc.BlobProxy;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -45,4 +48,23 @@ public class ImageUtils {
         }
         return null;
     }
+
+    public Blob localImageToBlob(String localFilePath){
+
+		File imageFile = new File(localFilePath);
+		
+		if (imageFile.exists()) {
+
+			try {
+				System.out.println("LA IMAGEN EXISTE");
+				return BlobProxy.generateProxy(imageFile.toURI().toURL().openStream(), imageFile.length());
+			} catch (IOException e) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ERROR at processing the IMAGE");
+			}
+		}
+		System.out.println("LA IMAGEN NO EXISTE");
+
+		return null;
+	}
+
 }

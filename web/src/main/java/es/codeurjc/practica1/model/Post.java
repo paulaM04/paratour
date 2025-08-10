@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 
 @Entity
 public class Post {
@@ -16,17 +15,14 @@ public class Post {
     private long id;
     private String title;
     private String text;
-    private int stock;
     private boolean deletedPost;
-
-    @Lob
     private List<Blob> imageFile;
 
     public Post() {
     }
 
-    public Post(String name, String description, double price, int stock, String provider) { // Blob img
-        this.title = name;
+    public Post(String title, String description) { // Blob img
+        this.title = title;
         this.text = description;
         this.deletedPost = false;
         this.imageFile = new ArrayList<>();
@@ -53,14 +49,6 @@ public class Post {
     public void setText(String text) {
         this.text = text;
     }
-
-    public int getStock() {
-        return stock;
-    }
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
     public boolean isDeletedPost() {
         return deletedPost;
     }
@@ -78,5 +66,5 @@ public class Post {
         this.imageFile.add(imageFile);
     }
 
-    
+
 }

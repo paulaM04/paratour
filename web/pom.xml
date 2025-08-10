@@ -3,107 +3,111 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.3</version>
-    <relativePath/>
-  </parent>
-
-  <groupId>es.codeurjc</groupId>
-  <artifactId>practica3</artifactId>
-  <version>1.0.0</version>
-  <name>practica3</name>
-  <description>Demo project for Spring Boot</description>
-
-  <properties>
-    <java.version>21</java.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
-  <dependencies>
-    <!-- Web + Mustache (plantillas) -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-mustache</artifactId>
-    </dependency>
-
-    <!-- JPA (Jakarta Persistence API) -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-
-    <!-- Base de datos en memoria H2 (puedes cambiarla a MySQL/PostgreSQL si quieres) -->
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-
-    <!-- OpenAPI para documentación -->
-    <dependency>
-      <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.8.5</version>
-    </dependency>
-
-    <!-- Dependencia para tests -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
-        <configuration>
-          <source>21</source>
-          <target>21</target>
-        </configuration>
-      </plugin>
-
-      <plugin>
+    <parent>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
+        <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.3</version>
-        <configuration>
-          <jmxPort>9010</jmxPort>
-          <wait>60000</wait>
-        </configuration>
-      </plugin>
+        <relativePath/>
+    </parent>
 
-      <plugin>
-        <groupId>org.springdoc</groupId>
-        <artifactId>springdoc-openapi-maven-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <apiDocsUrl>https://localhost:8443/v3/api-docs.yaml</apiDocsUrl>
-          <outputFileName>api-docs.yaml</outputFileName>
-          <outputDir>${project.basedir}/api-docs</outputDir>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+    <groupId>es.codeurjc</groupId>
+    <artifactId>practica3</artifactId>
+    <version>1.0.0</version>
+    <name>practica3</name>
+    <description>Demo project for Spring Boot</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- Web + Mustache (plantillas) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mustache</artifactId>
+        </dependency>
+
+        <!-- JPA (Jakarta Persistence API) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- Base de datos en memoria H2 (puedes cambiarla a MySQL/PostgreSQL si quieres) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- OpenAPI para documentación -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.5</version>
+        </dependency>
+
+        <!-- Dependencia para tests -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.4.3</version>
+                <configuration>
+                    <jmxPort>9010</jmxPort>
+                    <wait>60000</wait>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <apiDocsUrl>https://localhost:8443/v3/api-docs.yaml</apiDocsUrl>
+                    <outputFileName>api-docs.yaml</outputFileName>
+                    <outputDir>${project.basedir}/api-docs</outputDir>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
