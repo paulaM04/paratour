@@ -217,6 +217,21 @@ nav {
 }
 
 
+.lang-switch {
+    background-color: #00a6a6;
+    color: rgb(4, 3, 3) !important;
+    border-radius: 20px;
+    padding: 6px 14px !important;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lang-switch:hover {
+    background-color: #008b8b;
+}
+
 
 .profile-photo {
     max-width: 600px; /* foto grande pero controlada */
