@@ -40,13 +40,22 @@ public class PostController {
             }
 
             // Convertimos el Blob a Base64
-            Blob blob = post.getImageFile().get(0);
+            // Accede a la imagen del primer PostImage (si existe)
+            Blob blob = null;
+            if (post.getImages() != null && !post.getImages().isEmpty() && post.getImages().get(0).getImage() != null) {
+                blob = post.getImages().get(0).getImage();
+            }
+
+            if (blob == null) {
+                model.addAttribute("message", "No hay imagen para este post");
+                return "error";
+            }
             byte[] bytes = blob.getBytes(1, (int) blob.length());
             String base64Image = Base64.getEncoder().encodeToString(bytes);
 
             // Añadimos la imagen como cadena Base64
             model.addAttribute("post", post);
-            //model.addAttribute("imageBase64", base64Image);
+            // model.addAttribute("imageBase64", base64Image);
 
             return "home";
         } catch (Exception e) {
@@ -56,23 +65,28 @@ public class PostController {
     }
 
     @GetMapping("/post/{id}/image")
-	public ResponseEntity<Object> downloadImage(@PathVariable long id) throws SQLException, IOException {
+    public ResponseEntity<Object> downloadImage(@PathVariable long id) throws SQLException, IOException {
 
-		Optional<Post> op = postService.findById(id);
+        Optional<Post> op = postService.findById(id);
 
-		if (op.isPresent()) {
-			Post product = op.get();
-			Resource image;
-			try {
-                image = new InputStreamResource(product.getImageFile().get(0).getBinaryStream());
-			} catch (Exception e) {
-				ClassPathResource resource = new ClassPathResource("static/no-image.png");
-				byte[] imageBytes = resource.getInputStream().readAllBytes();
-				return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").body(imageBytes);
-			}
-			return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").body(image);
-		} else {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film not found");
-		}
-	}
+        if (op.isPresent()) {
+            Post post = op.get();
+            Resource image;
+            try {
+                if (post.getImages() != null && !post.getImages().isEmpty()
+                        && post.getImages().get(0).getImage() != null) {
+                    image = new InputStreamResource(post.getImages().get(0).getImage().getBinaryStream());
+                } else {
+                    throw new Exception("No image found");
+                }
+            } catch (Exception e) {
+                ClassPathResource resource = new ClassPathResource("static/no-image.png");
+                byte[] imageBytes = resource.getInputStream().readAllBytes();
+                return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").body(imageBytes);
+            }
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").body(image);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film not found");
+        }
+    }
 }
