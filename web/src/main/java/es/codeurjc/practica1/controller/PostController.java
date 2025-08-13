@@ -3,7 +3,6 @@ package es.codeurjc.practica1.controller;
 import java.io.IOException;
 import java.sql.Blob;
 import java.sql.SQLException;
-import java.util.Base64;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,6 @@ public class PostController {
                 return "error";
             }
 
-            // Convertimos el Blob a Base64
             // Accede a la imagen del primer PostImage (si existe)
             Blob blob = null;
             if (post.getImages() != null && !post.getImages().isEmpty() && post.getImages().get(0).getImage() != null) {
@@ -50,12 +48,32 @@ public class PostController {
                 model.addAttribute("message", "No hay imagen para este post");
                 return "error";
             }
-            byte[] bytes = blob.getBytes(1, (int) blob.length());
-            String base64Image = Base64.getEncoder().encodeToString(bytes);
 
             // Añadimos la imagen como cadena Base64
             model.addAttribute("post", post);
-            // model.addAttribute("imageBase64", base64Image);
+
+            // Determina el idioma según el id
+            String currentLang = (post.getId() % 2 == 1) ? "Español" : "English";
+            model.addAttribute("currentLang", currentLang);
+
+            // Calcula el id del post en inglés. Si es impar está en ESPAÑOL, si es par en
+            // INGLÉS
+            long englishId = (post.getId() % 2 == 1) ? post.getId() + 1 : post.getId();
+            model.addAttribute("englishId", englishId);
+
+            boolean isSpanish = currentLang.equals("Español");
+            // Textos traducidos
+            model.addAttribute("txtUniversidad", isSpanish ? "Universidad" : "University");
+            model.addAttribute("txtTFGComputadores", isSpanish ? "TFG Computadores" : "Computer Engineering Thesis");
+            model.addAttribute("txtTFGInformatica", isSpanish ? "TFG Informática" : "Computer Science Thesis");
+            model.addAttribute("txtProyectos", isSpanish ? "Proyectos" : "Projects");
+            model.addAttribute("txtHobbies", isSpanish ? "Hobbies" : "Hobbies");
+            model.addAttribute("txtBaile", isSpanish ? "Baile" : "Dance");
+            model.addAttribute("txtIngles", isSpanish ? "Inglés" : "English");
+            model.addAttribute("txtPatinaje", isSpanish ? "Patinaje" : "Skating");
+            model.addAttribute("txtExperiencia", isSpanish ? "Experiencia" : "Experience");
+            model.addAttribute("txtMonitora", isSpanish ? "Monitora" : "Monitor");
+            model.addAttribute("txtProfe", isSpanish ? "Profe" : "Teacher");
 
             return "home";
         } catch (Exception e) {
@@ -87,6 +105,48 @@ public class PostController {
             return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").body(image);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film not found");
+        }
+    }
+
+    @GetMapping("/post/{id}/")
+    public String downloadInformation(@PathVariable long id, Model model) {
+
+        Optional<Post> op = postService.findById(id);
+
+        if (op.isPresent()) {
+            Post post = op.get();
+
+            // Determina el idioma según el id
+            String currentLang = (id % 2 == 1) ? "Español" : "English";
+            model.addAttribute("currentLang", currentLang);
+
+            // Calcula el id del post en inglés. Si es impar está en ESPAÑOL, si es par en
+            // INGLÉS
+            long englishId = (post.getId() % 2 == 1) ? post.getId() + 1 : post.getId();
+            model.addAttribute("englishId", englishId);
+
+            // Añadimos la imagen como cadena Base64
+            model.addAttribute("post", post);
+
+            boolean isSpanish = currentLang.equals("Español");
+            // Textos traducidos
+            model.addAttribute("txtUniversidad", isSpanish ? "Universidad" : "University");
+            model.addAttribute("txtTFGComputadores", isSpanish ? "TFG Computadores" : "Computer Engineering Thesis");
+            model.addAttribute("txtTFGInformatica", isSpanish ? "TFG Informática" : "Computer Science Thesis");
+            model.addAttribute("txtProyectos", isSpanish ? "Proyectos" : "Projects");
+            model.addAttribute("txtHobbies", isSpanish ? "Hobbies" : "Hobbies");
+            model.addAttribute("txtBaile", isSpanish ? "Baile" : "Dance");
+            model.addAttribute("txtIngles", isSpanish ? "Inglés" : "English");
+            model.addAttribute("txtPatinaje", isSpanish ? "Patinaje" : "Skating");
+            model.addAttribute("txtExperiencia", isSpanish ? "Experiencia" : "Experience");
+            model.addAttribute("txtMonitora", isSpanish ? "Monitora" : "Monitor");
+            model.addAttribute("txtProfe", isSpanish ? "Profe" : "Teacher");
+            return "home";
+
+        } else {
+            model.addAttribute("message", "No se encontró el post con id=" + id);
+            return "error";
+
         }
     }
 }

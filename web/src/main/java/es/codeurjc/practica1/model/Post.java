@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 
 @Entity
@@ -17,6 +18,7 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
     private String title;
+    @Lob // Large Object for storing large text data
     private String text;
     private boolean deletedPost;
 

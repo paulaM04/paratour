@@ -25,7 +25,7 @@ nav {
 .navbar-brand {
 	color: #004d61;
 	text-decoration: none;
-	font-weight: 800;
+	font-weight: 500;
 }
 
 .nav-links a {
@@ -99,13 +99,14 @@ nav {
 
 .nav-link:hover::after,
 .dropdown-item:hover::after {
-	width: 100%;
+	display: block;
+    margin-top: 0; /* Asegura que el menú esté justo debajo */
 }
 
 .dropdown-menu {
-	background-color: #e0f7fa;
-	border: none;
-	border-radius: 8px;
+    left: 0 !important;
+    right: auto !important;
+    top: 100% !important;
 }
 
 .header-content {
@@ -204,15 +205,14 @@ nav {
 		transform: scale(1);
 	}
 }
-
 .intro-container {
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* alinea a la izquierda todo el bloque */
+    justify-content: flex-start;
     gap: 40px;
-    max-width: 100%; /* usa todo el ancho */
-    margin: 0; /* quita el centrado automático */
-    padding-left: 20px; /* margen pequeño a la izquierda */
+    max-width: 100%;
+    margin: 0;
+    padding-left: 20px;
     flex-wrap: wrap;
 }
 
@@ -244,16 +244,16 @@ nav {
 .intro-photo {
     flex: 1;
     display: flex;
-    justify-content: flex-start; /* mueve la foto hacia la izquierda */
-    padding-left: 40px; /* espacio desde el borde izquierdo */
+    justify-content: flex-start;
+    padding-left: 40px;
 }
 
 .intro-text {
-    flex: 1;
-    min-width: 480px;
+    flex: 2;
+    min-width: 80px;
     text-align: left;
-    font-size: 1.2rem; /* texto más grande */
-    line-height: 1.6;  /* más aire entre líneas */
+    font-size: 1.2rem;
+    line-height: 1.6;
 }
 .align-left {
     display: block;
