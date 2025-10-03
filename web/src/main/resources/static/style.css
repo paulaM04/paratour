@@ -261,3 +261,52 @@ nav {
     margin-right: auto;
 }
 
+/* Botones navbar personalizados */
+.navbar .btn {
+    border-width: 2px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: 
+        background 0.2s,
+        color 0.2s,
+        box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,77,97,0.04);
+    padding: 6px 22px;
+    margin: 0 4px;
+}
+
+.navbar .btn-outline-primary {
+    color: #004d61 !important;
+    border-color: #004d61 !important;
+    background: transparent;
+}
+.navbar .btn-outline-primary:hover,
+.navbar .btn-outline-primary:focus {
+    background: #004d61 !important;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(0,77,97,0.10);
+}
+
+.navbar .btn-outline-success {
+    color: #008b8b !important;
+    border-color: #7fdbdb !important;
+    background: transparent;
+}
+.navbar .btn-outline-success:hover,
+.navbar .btn-outline-success:focus {
+    background: #7fdbdb !important;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(0,139,139,0.10);
+}
+
+.navbar .btn-outline-dark {
+    color: #024859 !important;
+    border-color: #7fdbdb !important;
+    background: transparent;
+}
+.navbar .btn-outline-dark:hover,
+.navbar .btn-outline-dark:focus {
+    background: #7fdbdb !important;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(2,72,89,0.10);
+}

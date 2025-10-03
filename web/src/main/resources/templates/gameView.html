@@ -1,0 +1,110 @@
+{{>header}}
+
+<body style="background-color: #f8f9fa;">
+  <div class="container py-4">
+
+    <!-- Datos del juego -->
+    <div class="text-center mb-4">
+      <h1 class="fw-bold">{{game.name}}</h1>
+      <p class="text-muted">{{game.description}}</p>
+    </div>
+
+    {{#game.image}}
+    <div class="text-center mb-3">
+      <img src="{{game.image}}" class="rounded shadow-sm" alt="Imagen del juego"
+        style="max-height:180px; object-fit:cover;">
+    </div>
+    {{/game.image}}
+
+    {{#game.video}}
+    <div class="mb-4">
+      <video class="w-100 rounded shadow-sm" controls>
+        <source src="{{game.video}}" type="video/mp4">
+        Tu navegador no soporta video.
+      </video>
+    </div>
+    {{/game.video}}
+
+    <div class="row text-center mb-4">
+      <div class="col-md-3"><strong>Tipo:</strong> {{game.gameType}}</div>
+      <div class="col-md-3"><strong>Enigmas:</strong> {{game.numberOfRiddles}}</div>
+      <div class="col-md-3"><strong>Leaderboard:</strong>
+        {{#game.hasLeaderboard}}Sí{{/game.hasLeaderboard}}{{^game.hasLeaderboard}}No{{/game.hasLeaderboard}}</div>
+      <div class="col-md-3"><strong>Manual:</strong>
+        {{#game.manual}}Sí{{/game.manual}}{{^game.manual}}No{{/game.manual}}</div>
+    </div>
+
+    <!-- Fases -->
+    <h2 class="mb-3">Fases</h2>
+
+    {{^phases}}
+    <div class="alert alert-warning">Este juego aún no tiene fases.</div>
+    {{/phases}}
+
+    {{#phases}}
+    <div class="card mb-4 border-primary shadow">
+      <div class="card-header bg-primary text-white">
+        <h3 class="mb-0">{{phaseName}}</h3>
+      </div>
+      <div class="card-body">
+        <p>{{description}}</p>
+
+        {{#image}}
+        <div class="mb-2 text-center">
+          <img src="{{image}}" class="img-fluid rounded" style="max-height:120px; object-fit:cover;"
+            alt="Imagen de fase">
+        </div>
+        {{/image}}
+
+        {{#video}}
+        <div class="mb-3">
+          <video class="w-100 rounded" controls>
+            <source src="{{video}}" type="video/mp4">
+          </video>
+        </div>
+        {{/video}}
+
+        {{#latitude}}
+        <p><strong>Ubicación:</strong> {{latitude}}, {{longitude}}</p>
+        {{/latitude}}
+
+        {{#mapUrl}}
+        <p><a href="{{mapUrl}}" target="_blank" class="btn btn-sm btn-outline-primary">Ver en mapa</a></p>
+        {{/mapUrl}}
+
+        <!-- Enigmas -->
+        <div class="mt-4">
+          <h4 class="fw-bold text-white p-2 rounded" style="background-color:#6c757d;">
+            🔍 Enigmas
+          </h4>
+
+          {{^enigmas}}
+          <div class="alert alert-secondary mt-2">No hay enigmas en esta fase.</div>
+          {{/enigmas}}
+
+          {{#enigmas}}
+          <div class="card mb-3 border-0 shadow-sm" style="background-color:#f8f9fa; border-left:5px solid #6c757d;">
+            <div class="card-body">
+              <h6 class="fw-bold text-dark">Enigma #{{enigmaNumber}}</h6>
+              <p class="mb-2"><span class="fw-semibold text-secondary">Pregunta:</span> {{enigma}}</p>
+              <p class="mb-2"><span class="fw-semibold text-secondary">Respuesta:</span> {{answer}}</p>
+              <p class="mb-1"><span class="fw-semibold text-secondary">Pista 1:</span> {{hint1}}</p>
+              <p class="mb-1"><span class="fw-semibold text-secondary">Pista 2:</span> {{hint2}}</p>
+              <p class="text-muted small mb-0"><strong>Formato:</strong> {{answerFormat}}</p>
+            </div>
+          </div>
+          {{/enigmas}}
+        </div>
+
+      </div>
+    </div>
+    {{/phases}}
+
+
+    <div class="text-center">
+      <a href="/" class="btn btn-secondary mt-3">Volver</a>
+    </div>
+  </div>
+</body>
+
+{{>footer}}

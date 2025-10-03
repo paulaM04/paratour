@@ -2,10 +2,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Spring Boot-Practica1Application<paratour>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.code.paratour.Practica1Application",
+            "projectName": "paratour",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-Practica1Application<practica3>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "mainClass": "es.codeurjc.practica1.Practica1Application",
+            "mainClass": "com.code.paratour.Practica1Application",
             "projectName": "practica3",
             "args": "",
             "envFile": "${workspaceFolder}/.env"

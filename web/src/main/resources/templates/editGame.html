@@ -1,0 +1,159 @@
+{{>header}}
+
+<body style="background-color: #f8f9fa;">
+  <div class="container py-5">
+
+    <h1 class="mb-4 text-center" style="font-weight: 600;">
+      Editar juego: {{game.name}}
+    </h1>
+    <a href="/" class="btn btn-outline-secondary">⬅ Volver</a>
+
+    {{#successMessage}}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{successMessage}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {{/successMessage}}
+
+    <!-- Formulario global -->
+    <form action="/edit/game/{{game.id}}" method="post">
+
+      <!-- Datos del juego -->
+      <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="name" class="form-control" value="{{game.name}}" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Tipo de juego</label>
+        <input type="text" name="gameType" class="form-control" value="{{game.gameType}}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <textarea name="description" class="form-control" rows="3">{{game.description}}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Imagen (URL)</label>
+        <input type="text" name="image" class="form-control" value="{{game.image}}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Video (URL)</label>
+        <input type="text" name="video" class="form-control" value="{{game.video}}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Número de fases</label>
+        <input type="number" name="numberOfRiddles" class="form-control" value="{{game.numberOfRiddles}}">
+      </div>
+
+      <div class="form-check mb-2">
+        <input type="checkbox" name="hasLeaderboard" class="form-check-input"
+          {{#game.hasLeaderboard}}checked{{/game.hasLeaderboard}}>
+        <label class="form-check-label">Tiene leaderboard</label>
+      </div>
+
+      <div class="form-check mb-4">
+        <input type="checkbox" name="manual" class="form-check-input" {{#game.manual}}checked{{/game.manual}}>
+        <label class="form-check-label">Manual</label>
+      </div>
+
+      <!--Fases-->
+      <h3>Fases del juego</h3>
+      <div class="accordion" id="phasesAccordion">
+        {{#phases}}
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="phase-{{id}}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              data-bs-target="#collapse-{{id}}" aria-expanded="false" aria-controls="collapse-{{id}}">
+              {{phaseName}}
+            </button>
+          </h2>
+          <div id="collapse-{{id}}" class="accordion-collapse collapse" data-bs-parent="#phasesAccordion">
+            <div class="accordion-body">
+              <!--Datos de fase -->
+              <input type="hidden" name="phases[{{idFalse}}].id" value="{{id}}">
+              <div class="mb-3">
+                <label class="form-label">Nombre de fase</label>
+                <input type="text" name="phases[{{idFalse}}].phaseName" class="form-control" value="{{phaseName}}">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea name="phases[{{idFalse}}].description" class="form-control">{{description}}</textarea>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Latitud</label>
+                <input type="text" name="phases[{{idFalse}}].latitude" class="form-control" value="{{latitude}}">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Longitud</label>
+                <input type="text" name="phases[{{idFalse}}].longitude" class="form-control" value="{{longitude}}">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Mapa (URL)</label>
+                <input type="text" name="phases[{{idFalse}}].mapUrl" class="form-control" value="{{mapUrl}}">
+              </div>
+
+              <!-- Enigmas de la fase -->
+              <h5 class="mt-4 text-secondary">Enigmas</h5>
+              {{^enigmas}}
+              <p class="text-muted">No hay enigmas en esta fase.</p>
+              {{/enigmas}}
+
+              {{#enigmas}}
+              <div class="card mb-3 border-light shadow-sm" style="background-color:#fdfdfd;">
+                <div class="card-body">
+                  <input type="hidden" name="phases[{{idFalse}}].enigmas[{{idFalse}}].id" value="{{id}}">
+
+                  <h6 class="fw-bold text-dark">Enigma #{{enigmaNumber}}</h6>
+
+                  <div class="mb-2">
+                    <label class="form-label">Pregunta</label>
+                    <textarea name="phases[{{idFalse}}].enigmas[{{idFalse}}].enigma"
+                      class="form-control">{{enigma}}</textarea>
+                  </div>
+
+                  <div class="mb-2">
+                    <label class="form-label">Respuesta</label>
+                    <input type="text" name="phases[{{idFalse}}].enigmas[{{idFalse}}].answer" class="form-control"
+                      value="{{answer}}">
+                  </div>
+
+                  <div class="mb-2">
+                    <label class="form-label">Pista 1</label>
+                    <input type="text" name="phases[{{idFalse}}].enigmas[{{idFalse}}].hint1" class="form-control"
+                      value="{{hint1}}">
+                  </div>
+
+                  <div class="mb-2">
+                    <label class="form-label">Pista 2</label>
+                    <input type="text" name="phases[{{idFalse}}].enigmas[{{idFalse}}].hint2" class="form-control"
+                      value="{{hint2}}">
+                  </div>
+
+                  <p class="text-muted small mb-0"><strong>Formato:</strong> {{answerFormat}}</p>
+                </div>
+              </div>
+              {{/enigmas}}
+
+            </div>
+          </div>
+        </div>
+        {{/phases}}
+      </div>
+
+      <!-- Botones globales -->
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">💾 Guardar todo</button>
+      </div>
+    </form>
+
+  </div>
+  {{>footer}}
+</body>

@@ -20,7 +20,7 @@
 	<nav class="navbar navbar-expand-lg navbar-light">
 		<div class="container">
 			<!-- Logo -->
-			<a class="navbar-brand fw-bold" href="#">Paula</a>
+			<a class="navbar-brand fw-bold" href="#">EXPLORA_MO</a>
 
 			<!-- Botón responsive -->
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
@@ -29,58 +29,24 @@
 			</button>
 
 			<div class="collapse navbar-collapse" id="navbarContent">
-				<!-- Idioma a la izquierda -->
-				<ul class="navbar-nav me-auto">
-					<li class="nav-item dropdown">
-						<a id="langSwitcher" class="nav-link dropdown-toggle" href="#" role="button"
-							data-bs-toggle="dropdown" aria-expanded="false">
-							🌐 {{currentLang}}
-						</a>
-						<ul class="dropdown-menu">
-							<li><a class="dropdown-item" href="/post/{{spanishId}}/" data-lang="Español">🇪🇸 Español</a></li>
-							<li><a class="dropdown-item" href="/post/{{englishId}}/" data-lang="English">🇬🇧 English</a></li>
-						</ul>
-					</li>
-				</ul>
+
 
 				<!-- Menú principal a la derecha -->
 				<ul class="navbar-nav ms-auto">
-					<!-- Universidad -->
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-							aria-expanded="false">
-							{{txtUniversidad}}
+					<li class="nav-item">
+						<a class="nav-link btn btn-outline-primary mx-1" href="/" role="button">
+							Usuarios
 						</a>
-						<ul class="dropdown-menu">
-							<li><a class="dropdown-item" href="#tfg-computadores">{{txtTFGComputadores}}</a></li>
-							<li><a class="dropdown-item" href="#tfg-informatica">{{txtTFGInformatica}}</a></li>
-							<li><a class="dropdown-item" href="#proyectos-universidad">{{txtProyectos}}</a></li>
-						</ul>
 					</li>
-
-					<!-- Hobbies -->
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-							aria-expanded="false">
-							{{txtHobbies}}
+					<li class="nav-item">
+						<a class="nav-link btn btn-outline-primary mx-1" href="/" role="button">
+							Juegos
 						</a>
-						<ul class="dropdown-menu">
-							<li><a class="dropdown-item" href="#baile">{{txtBaile}}</a></li>
-							<li><a class="dropdown-item" href="#ingles">{{txtIngles}}</a></li>
-							<li><a class="dropdown-item" href="#patinaje">{{txtPatinaje}}</a></li>
-						</ul>
 					</li>
-
-					<!-- Experiencia -->
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-							aria-expanded="false">
-							{{txtExperiencia}}
+					<li class="nav-item">
+						<a class="nav-link btn btn-outline-primary mx-1" href="/" role="button">
+							Administración
 						</a>
-						<ul class="dropdown-menu">
-							<li><a class="dropdown-item" href="#monitora">{{txtMonitora}}</a></li>
-							<li><a class="dropdown-item" href="#profe">{{txtProfe}}</a></li>
-						</ul>
 					</li>
 				</ul>
 			</div>

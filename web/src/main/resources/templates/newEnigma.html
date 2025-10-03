@@ -1,0 +1,191 @@
+{{>header}}
+
+<div class="container my-5">
+  <h2 class="mb-4 text-center">Panel de Enigmas</h2>
+
+  <form action="/savePhases" method="post">
+    {{#phases}}
+    <div class="card mb-4">
+      <div class="card-header">
+        <strong>Fase {{display}} — {{phaseName}}</strong> ({{numRiddles}} enigmas)
+      </div>
+      <div class="card-body">
+
+        <input type="hidden" name="phaseName" value="{{phaseName}}">
+        <input type="hidden" name="description" value="{{description}}">
+        <input type="hidden" name="numRiddles" value="{{numRiddles}}">
+        <input type="hidden" name="literalText" value="{{literalText}}">
+        <input type="hidden" name="latitude" value="{{latitude}}">
+        <input type="hidden" name="longitude" value="{{longitude}}">
+
+
+        {{#riddles}}
+        <div class="card mb-3">
+          <div class="card-header bg-light">Enigma {{display}}</div>
+          <div class="card-body">
+
+            <!-- Campos básicos -->
+            <div class="mb-2">
+              <label class="form-label">Literal (titulo/pregunta)</label>
+              <input type="text" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].literalText"
+                required>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Imagen (URL)</label>
+                <input type="url" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].image">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Localización (texto)</label>
+                <input type="text" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].location">
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label">Introducción</label>
+              <textarea class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].introduction"></textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Video intro avatar (URL)</label>
+                <input type="url" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].introAvatarVideo">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Video enigma (URL)</label>
+                <input type="url" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].enigmaVideo">
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label">Enigma (enunciado completo)</label>
+              <textarea class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].enigma"></textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Formato de respuesta</label>
+                <input type="text" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].answerFormat">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Respuesta</label>
+                <input type="text" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].answer">
+              </div>
+            </div>
+
+            <!-- Puntuaciones -->
+            <div class="row">
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Puntos acierto</label>
+                <input type="number" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].pointsCorrect"
+                  min="0">
+              </div>
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Puntos fallo</label>
+                <input type="number" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].pointsFail"
+                  min="0">
+              </div>
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Puntos pista 1</label>
+                <input type="number" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].pointsHint1"
+                  min="0">
+              </div>
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Puntos pista 2</label>
+                <input type="number" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].pointsHint2"
+                  min="0">
+              </div>
+            </div>
+
+            <!-- Pistas -->
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Pista 1</label>
+                <textarea class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].hint1"></textarea>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Pista 2</label>
+                <textarea class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].hint2"></textarea>
+              </div>
+            </div>
+
+            <!-- Explicación final -->
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Explicación (spot)</label>
+                <textarea class="form-control"
+                  name="phases[{{phaseIndex}}].riddles[{{idx}}].explanationSpot"></textarea>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Video explicación (URL)</label>
+                <input type="url" class="form-control"
+                  name="phases[{{phaseIndex}}].riddles[{{idx}}].explanationSpotVideo">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Foto localización resolución (URL)</label>
+                <input type="url" class="form-control"
+                  name="phases[{{phaseIndex}}].riddles[{{idx}}].locationResolutionPhoto">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Tiempo máximo (segundos)</label>
+                <input type="number" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].maxTime"
+                  min="0">
+              </div>
+            </div>
+
+            <!-- Coordenadas -->
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Latitud</label>
+                <input type="text" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].latitude">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Longitud</label>
+                <input type="text" class="form-control" name="phases[{{phaseIndex}}].riddles[{{idx}}].longitude">
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label">Instrucciones adicionales</label>
+              <textarea class="form-control"
+                name="phases[{{phaseIndex}}].riddles[{{idx}}].additionalInstructions"></textarea>
+            </div>
+
+            <!-- Manual (checkbox) -->
+            <div class="form-check mb-2">
+              <!-- patrón para asegurar que llega false si no se marca -->
+              <input type="hidden" name="phases[{{phaseIndex}}].riddles[{{idx}}].manual" value="false">
+              <input type="checkbox" class="form-check-input" id="manual-{{phaseIndex}}-{{idx}}"
+                name="phases[{{phaseIndex}}].riddles[{{idx}}].manual" value="true">
+              <label class="form-check-label" for="manual-{{phaseIndex}}-{{idx}}">Manual</label>
+            </div>
+
+          </div>
+        </div>
+        {{/riddles}}
+
+      </div>
+    </div>
+    {{/phases}}
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-success btn-lg px-5">Guardar fases y enigmas</button>
+      <a href="/" class="btn btn-secondary ms-2">Cancelar</a>
+    </div>
+    <!-- HIDDEN del juego -->
+    <input type="hidden" name="gameName" value="{{gameName}}">
+    <input type="hidden" name="gameDescription" value="{{gameDescription}}">
+    <input type="hidden" name="gameType" value="{{gameType}}">
+    <input type="hidden" name="gameImage" value="{{gameImage}}">
+    <input type="hidden" name="gameVideo" value="{{gameVideo}}">
+    <input type="hidden" name="hasLeaderboard" value="{{hasLeaderboard}}">
+    <input type="hidden" name="manual" value="{{manual}}">
+
+  </form>
+</div>
+
+{{>footer}}

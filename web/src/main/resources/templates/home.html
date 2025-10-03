@@ -1,15 +1,70 @@
 {{>header}}
 
-<div class="header-content">
-    <div class="intro-container">
-        <div class="intro-photo">
-            <img class="profile-photo" src="/post/{{post.id}}/image" alt="Foto de Paula">
+<body style="background-color: #f8f9fa;">
+    <div class="container py-5">
+
+        <h1 class="mb-4 text-center" style="font-weight: 600;">Bienvenid@ !!! 🤗</h1>
+
+        <!-- Botón para crear nuevo juego -->
+        <div class="d-flex justify-content-end gap-3 mb-4">
+            <a href="/setupNumPhases" 
+               class="btn btn-success btn-lg rounded-circle" 
+               title="Crear nuevo juego"
+               style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                ➕
+            </a>
         </div>
-        <div class="intro-text">
-            <h1 class="header-title" id="header-title">{{post.title}}</h1>
-            <p id="header-description"> {{post.text}}    </p>
+
+        <!-- Listado de juegos -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {{#games}}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    
+                    {{#image}}
+                    <img src="{{image}}" class="card-img-top" alt="Imagen de {{name}}"
+                        style="object-fit:cover; height:200px;">
+                    {{/image}}
+                    
+                    <div class="card-body">
+                        <!-- Título + botón papelera alineados -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0">{{name}}</h5>
+                            <a href="/deleteGame/{{id}}" 
+                               class="btn btn-danger btn-lg rounded-circle" 
+                               title="Eliminar juego"
+                               style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background-color: #dc3545; border: none;">
+                                🗑️
+                            </a>
+                        </div>
+
+                        <p class="card-text"><strong>ID:</strong> {{id}}</p>
+                        <p class="card-text"><strong>Tipo de juego:</strong> {{gameType}}</p>
+                        <p class="card-text"><strong>Descripción:</strong> {{description}}</p>
+
+                        {{#video}}
+                        <p class="card-text">
+                            <strong>Video:</strong>
+                            <a href="{{video}}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">Ver video</a>
+                        </p>
+                        {{/video}}
+
+                        <p class="card-text"><strong>Número de enigmas:</strong> {{numberOfRiddles}}</p>
+                        <p class="card-text"><strong>Leaderboard:</strong>
+                            {{#hasLeaderboard}}Sí{{/hasLeaderboard}}{{^hasLeaderboard}}No{{/hasLeaderboard}}
+                        </p>
+                        <p class="card-text"><strong>Manual:</strong> 
+                            {{#manual}}Sí{{/manual}}{{^manual}}No{{/manual}}
+                        </p>
+
+                        <a href="/games/{{id}}" class="btn btn-primary mt-2">Ver juego</a>
+                        <a href="/editGame/{{id}}" class="btn btn-primary mt-2">Editar juego</a>
+
+                    </div>
+                </div>
+            </div>
+            {{/games}}
         </div>
     </div>
-</div>
-
-{{>footer}}
+    {{>footer}}
+</body>

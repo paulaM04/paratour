@@ -1,0 +1,73 @@
+{{>header}}
+
+<div class="container my-5">
+  <h2 class="mb-4 text-center header-title">Configura las Fases y Enigmas</h2>
+
+  <form action="/prepareEnigmas" method="post" id="phaseSetupForm">
+
+    <div class="accordion" id="phasesAccordion">
+      {{#phases}}
+      <div class="accordion-item mb-4 shadow-sm rounded">
+        <h2 class="accordion-header" id="heading{{idFalse}}">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapse{{idFalse}}" aria-expanded="false" aria-controls="collapse{{idFalse}}">
+            <span class="fw-bold" style="color:#004d61;">Fase {{idFalse}}</span>
+          </button>
+        </h2>
+        <div id="collapse{{idFalse}}" class="accordion-collapse collapse" aria-labelledby="heading{{idFalse}}"
+          data-bs-parent="#phasesAccordion">
+          <div class="accordion-body bg-white rounded">
+
+            <div class="mb-3">
+              <label class="form-label fw-bold" style="color:#024859;">Número de enigmas</label>
+              <input type="number" class="form-control" name="numRiddles" min="1" required>
+            </div>
+
+            <hr>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold" style="color:#024859;">Nombre de la fase</label>
+              <input type="text" class="form-control" name="phaseName" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold" style="color:#024859;">Descripción</label>
+              <textarea class="form-control" name="description" rows="2" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Texto literal</label>
+              <input type="text" class="form-control" name="literalText" required>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Latitud</label>
+                <input type="text" class="form-control" name="latitude" required>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Longitud</label>
+                <input type="text" class="form-control" name="longitude" required>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      {{/phases}}
+    </div>
+
+    <!-- HIDDEN del juego para arrastrarlos a /prepareEnigmas -->
+    <input type="hidden" name="gameName" value="{{gameName}}">
+    <input type="hidden" name="gameDescription" value="{{gameDescription}}">
+    <input type="hidden" name="gameType" value="{{gameType}}">
+    <input type="hidden" name="gameImage" value="{{gameImage}}">
+    <input type="hidden" name="gameVideo" value="{{gameVideo}}">
+    <input type="hidden" name="hasLeaderboard" value="{{hasLeaderboard}}">
+    <input type="hidden" name="manual" value="{{manual}}">
+
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-success btn-lg px-5">Continuar a enigmas</button>
+      <a href="/" class="btn btn-secondary ms-2">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+{{>footer}}
