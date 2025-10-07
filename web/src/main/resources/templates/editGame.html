@@ -37,22 +37,20 @@
 
         <!-- Imagen -->
         <div class="mb-2">
-          {{#image}}
-          <img src="{{game.image}}" alt="Imagen de {{game.name}}" class="img-fluid rounded shadow-sm"
-            style="max-height: 200px; object-fit: cover;">
+          {{^image}}
+          <input type="text" name="image" class="form-control" value="{{game.image}}"
+            placeholder="Introduce la URL de la imagen">
           {{/image}}
         </div>
-        <input type="text" name="image" class="form-control" value="{{game.image}}"
-          placeholder="Introduce la URL de la imagen">
+
 
         <!-- Video -->
         <div class="mb-2">
-          {{#video}}
-          <a href="{{video}}" target="_blank" class="btn btn-sm btn-outline-primary">▶ Ver video</a>
+          {{^video}}
+          <input type="text" name="video" class="form-control" value="{{game.video}}"
+            placeholder="Introduce la URL del video">
           {{/video}}
         </div>
-        <input type="text" name="video" class="form-control" value="{{game.video}}"
-          placeholder="Introduce la URL del video">
 
         <div class="mb-3">
           <label class="form-label">Número de fases</label>
@@ -95,7 +93,7 @@
 
                   <div class="mb-3">
                     <label class="form-label">Descripción</label>
-                    <textarea name="phases[{{idFalse}}].description" class="form-control">{{description}}</textarea>
+                    <input type="text" name="phases[{{idFalse}}].description" class="form-control"value="{{description}}">
                   </div>
 
                   <div class="mb-3">

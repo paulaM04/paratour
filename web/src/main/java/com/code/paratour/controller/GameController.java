@@ -358,15 +358,31 @@ public class GameController {
         for (Phase phase : game.getPhases()) {
             phase.setIdFalse(i++);
             int j = 0;
+            if (phase.getDescription() == null || phase.getDescription().isBlank()) {
+                phase.setDescription("");
+            }
             if (phase.getEnigmas() != null) {
                 for (Enigma e : phase.getEnigmas()) {
                     e.setIdidTreak(j++);
                     enigmas.add(e);
+                    if (e.getEnigma() == null || e.getEnigma().isBlank()) {
+                        e.setEnigma("");
+                    }
+                    if (e.getAnswerFormat() == null || e.getAnswerFormat().isBlank()) {
+                        e.setAnswerFormat("");
+                    }
                 }
             } else {
                 phase.setEnigmas(new ArrayList<>()); // nunca null
             }
         }
+        if (game.getVideo() == null || game.getVideo().isBlank()) {
+            game.setVideo("");
+        }
+        if (game.getImage() == null || game.getImage().isBlank()) {
+            game.setImage("");
+        }
+
         model.addAttribute("enigmas", enigmas);
         model.addAttribute("phases", game.getPhases());
         model.addAttribute("game", game);
@@ -402,10 +418,6 @@ public class GameController {
             if (dbPhase.getLiteralText() == null || dbPhase.getLiteralText().isBlank()) {
                 dbPhase.setLiteralText("Fase " + dbPhase.getPhaseName());
             }
-
-            System.out.println("PHASE CON ID original " + dbPhase.getPhaseName());
-            System.out.println("PHASE CON ID FORM " + formPhase.getPhaseName());
-            System.out.println("ENIGMAS= " + dbPhase.getEnigmas());
 
             // Actualizar enigmas por índice
             if (formPhase.getEnigmas() != null) {
@@ -450,17 +462,20 @@ public class GameController {
         gameService.saveGame(dbGame);
         return "redirect:/editGame/" + id + "?success=1";
     }
-private String safe(String value) {
-    return (value == null) ? "" : value;
-}
-private Integer safeInt(Integer value) {
-    return (value == null) ? 0 : value;
-}
 
-// Para decimales (Double)
-private Boolean safeBool(Boolean value) {
-    return (value == null) ? true : value;
-}
+    private String safe(String value) {
+        return (value == null) ? "" : value;
+    }
+
+    private Integer safeInt(Integer value) {
+        return (value == null) ? 0 : value;
+    }
+
+    // Para decimales (Double)
+    private Boolean safeBool(Boolean value) {
+        return (value == null) ? true : value;
+    }
+
     private void copyGameParamsToModel(Map<String, String> params, Model model) {
         model.addAttribute("gameName", params.getOrDefault("gameName", ""));
         model.addAttribute("gameDescription", params.getOrDefault("gameDescription", ""));
