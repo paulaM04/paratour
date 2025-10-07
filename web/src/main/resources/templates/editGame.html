@@ -24,11 +24,16 @@
           <label class="form-label">Nombre</label>
           <input type="text" name="name" class="form-control" value="{{game.name}}" required>
         </div>
-
         <div class="mb-3">
           <label class="form-label">Tipo de juego</label>
-          <input type="text" name="gameType" class="form-control" value="{{game.gameType}}">
+          <select name="gameType" class="form-select" required>
+            <option value="">Selecciona un tipo de juego</option>
+            {{#typesGame}}
+            <option value="{{name}}">{{name}}</option>
+            {{/typesGame}}
+          </select>
         </div>
+
 
         <div class="mb-3">
           <label class="form-label">Descripción</label>
@@ -93,7 +98,8 @@
 
                   <div class="mb-3">
                     <label class="form-label">Descripción</label>
-                    <input type="text" name="phases[{{idFalse}}].description" class="form-control"value="{{description}}">
+                    <input type="text" name="phases[{{idFalse}}].description" class="form-control"
+                      value="{{description}}">
                   </div>
 
                   <div class="mb-3">

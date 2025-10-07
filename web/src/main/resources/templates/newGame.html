@@ -16,12 +16,12 @@
 
     <div class="mb-3">
       <label for="gameType" class="form-label">Tipo de juego</label>
-      <select id="gameType" name="gameType" class="form-control" required>
-        <!-- Asegúrate de que los value coinciden con tipos_de_juego.codigo -->
-        <option value="escape">Escape Room</option>
-        <option value="quiz">Quiz</option>
-        <option value="gymkhana">Gymkhana</option>
-      </select>
+                <select name="gameType" class="form-select" required>
+            <option value="">Selecciona un tipo de juego</option>
+            {{#typesGame}}
+            <option value="{{name}}">{{name}}</option>
+            {{/typesGame}}
+          </select>
     </div>
 
     <div class="row">

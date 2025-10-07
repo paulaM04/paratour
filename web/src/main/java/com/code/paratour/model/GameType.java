@@ -10,10 +10,10 @@ import jakarta.persistence.Table;
 public class GameType {
 
     @Id
-    @Column(name = "codigo", length = 20)   // 👈 antes tenías "code"
+    @Column(name = "codigo", length = 20)   
     private String code;
 
-    @Column(name = "nombre", length = 120)  // 👈 antes tenías "name"
+    @Column(name = "nombre", length = 120)  
     private String name;
 
     @Column(name = "descripcion", length = 350)
@@ -40,4 +40,5 @@ public class GameType {
     public void setDescription(String description) {
         this.description = description;
     }
+
 }

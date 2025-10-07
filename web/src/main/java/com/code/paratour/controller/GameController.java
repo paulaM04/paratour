@@ -18,12 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.code.paratour.model.Enigma;
 import com.code.paratour.model.Game;
-import com.code.paratour.model.GameType;
 import com.code.paratour.model.Phase;
 import com.code.paratour.service.EnigmaService;
 import com.code.paratour.service.GameService;
-import com.code.paratour.service.GameTypeService;
 import com.code.paratour.service.PhaseService;
+import com.code.paratour.service.TypeGameService;
 
 @Controller
 public class GameController {
@@ -35,15 +34,22 @@ public class GameController {
     private PhaseService phaseService;
 
     @Autowired
-    private GameTypeService tiposJuegoService;
+    private EnigmaService enigmaService;
 
     @Autowired
-    private EnigmaService enigmaService;
+    private TypeGameService typeGameService;
 
     @GetMapping("/")
     public String home(Model model) {
 
         try {
+            for (Game game : gameService.findAllGames()) {
+                if (game.getImage() == null || game.getImage().isBlank()) {
+                    game.setImage(
+                            "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+                }
+            }
+
             model.addAttribute("games", gameService.findAllGames());
             return "home";
 
@@ -75,13 +81,9 @@ public class GameController {
         return "newGame";
     }
 
-    @Autowired
-    private GameTypeService gameTypeService;
-
     @GetMapping("/setupNumPhases")
     public String setupNumPhases(Model model) {
-        List<GameType> gameTypes = gameTypeService.findAll();
-        model.addAttribute("gameTypes", gameTypes);
+        model.addAttribute("typesGame", typeGameService.findAll());
         return "newGameNumberPhase";
     }
 
@@ -343,7 +345,7 @@ public class GameController {
         }
 
         List<Phase> phases = phaseService.findByGameId(id);
-
+        //model.addAttribute("typesGame", typeGameService.findAll());
         model.addAttribute("game", game);
         model.addAttribute("phases", phases);
         return "gameView";
@@ -380,9 +382,9 @@ public class GameController {
             game.setVideo("");
         }
         if (game.getImage() == null || game.getImage().isBlank()) {
-            game.setImage("");
+            game.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
         }
-
+        model.addAttribute("typesGame", typeGameService.findAll());
         model.addAttribute("enigmas", enigmas);
         model.addAttribute("phases", game.getPhases());
         model.addAttribute("game", game);
