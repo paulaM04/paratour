@@ -31,9 +31,6 @@ public class EnigmaService {
         enigmaRepository.deleteById(idPhase);
     }
 
-    public List<Enigma> findByPhaseName(Long gameId) {
-        return enigmaRepository.findByPhaseName(gameId);
-    }
 
 
 }

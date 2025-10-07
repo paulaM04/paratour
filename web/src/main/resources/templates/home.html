@@ -27,17 +27,8 @@
                     {{/image}}
                     
                     <div class="card-body">
-                        <!-- Título + botón papelera alineados -->
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="card-title mb-0">{{name}}</h5>
-                            <a href="/deleteGame/{{id}}" 
-                               class="btn btn-danger btn-lg rounded-circle" 
-                               title="Eliminar juego"
-                               style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background-color: #dc3545; border: none;">
-                                🗑️
-                            </a>
-                        </div>
-
+                        <h5 class="card-title mb-0">{{name}}</h5>
+                        
                         <p class="card-text"><strong>ID:</strong> {{id}}</p>
                         <p class="card-text"><strong>Tipo de juego:</strong> {{gameType}}</p>
                         <p class="card-text"><strong>Descripción:</strong> {{description}}</p>
@@ -59,7 +50,32 @@
 
                         <a href="/games/{{id}}" class="btn btn-primary mt-2">Ver juego</a>
                         <a href="/editGame/{{id}}" class="btn btn-primary mt-2">Editar juego</a>
+                         <button type="button"
+                                class="btn btn-danger mt-2 w-100"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal{{id}}">
+                            Eliminar juego
+                        </button>
 
+                        <div class="modal fade" id="deleteModal{{id}}" tabindex="-1" aria-labelledby="deleteModalLabel{{id}}" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                              <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="deleteModalLabel{{id}}">Eliminar juego</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                              </div>
+                              <div class="modal-body">
+                                <p>¿Estás seguro de que quieres eliminar el juego <strong>«{{name}}»</strong>?</p>
+                                <p class="text-muted mb-0">Esta acción no se puede deshacer.</p>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <a href="/deleteGame/{{id}}" class="btn btn-danger">Eliminar definitivamente</a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
                     </div>
                 </div>
             </div>

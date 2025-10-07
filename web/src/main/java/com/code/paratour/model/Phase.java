@@ -28,6 +28,7 @@ public class Phase {
     @JoinColumn(name = "id_juego", nullable = true) // ← en tu DDL es NULLABLE; déjalo así si tienes fases “huérfanas”
     private Game game;
 
+
     @Column(name = "fase")
     private String phaseName;
 
@@ -63,7 +64,7 @@ public class Phase {
     @Transient
     private int idFalse; // Para evitar que se muestre el ID en el formulario
 
-    public Game getGame() {
+ public Game getGame() {
         return game;
     }
 

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.code.paratour.model.Enigma;
 import com.code.paratour.model.Game;
@@ -25,8 +24,6 @@ import com.code.paratour.service.EnigmaService;
 import com.code.paratour.service.GameService;
 import com.code.paratour.service.GameTypeService;
 import com.code.paratour.service.PhaseService;
-
-import jakarta.transaction.Transactional;
 
 @Controller
 public class GameController {
@@ -114,15 +111,6 @@ public class GameController {
         }
     }
 
-    // helper
-    private Integer parseIntSafe(String val) {
-        try {
-            return (val != null && !val.isEmpty()) ? Integer.parseInt(val) : 0;
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
     @PostMapping("/setupPhases")
     public String setupPhasesFromGame(
             @RequestParam("gameName") String gameName,
@@ -160,8 +148,6 @@ public class GameController {
                 phases.add(p);
             }
             model.addAttribute("phases", phases);
-
-            // Volcamos de nuevo TODOS los campos del juego al modelo
             copyGameParamsToModel(params, model);
 
             return "newPhaseAndEnigma";
@@ -210,10 +196,141 @@ public class GameController {
 
             // Reinyectar los datos del juego
             copyGameParamsToModel(params, model);
-
             return "newEnigma";
         } catch (Exception e) {
             model.addAttribute("message", e.getMessage());
+            return "error";
+        }
+    }
+
+    @PostMapping("/savePhases")
+    public String savePhases(
+            @RequestParam("phaseName") List<String> phaseNames,
+            @RequestParam("description") List<String> descriptions,
+            @RequestParam("numRiddles") List<Integer> numRiddles,
+            @RequestParam Map<String, String> params,
+            Model model) {
+        try {
+            Game game = new Game();
+
+            game.setName(params.get("gameName"));
+            game.setDescription(params.get("gameDescription"));
+            game.setGameType(params.get("gameType"));
+            game.setImage(params.get("gameImage"));
+            game.setVideo(params.get("gameVideo"));
+            game.setHasLeaderboard(Boolean.parseBoolean(params.getOrDefault("hasLeaderboard", "true")));
+            game.setManual(Boolean.parseBoolean(params.getOrDefault("manual", "true")));
+            game.setNumberOfRiddles(0);
+
+            gameService.saveGame(game);
+
+            List<Phase> savedPhases = new ArrayList<>();
+
+            for (int i = 0; i < phaseNames.size(); i++) {
+                Phase phase = new Phase();
+                phase.setPhaseName(phaseNames.get(i));
+                phase.setDescription(descriptions.get(i));
+
+                phase.setLiteralText(params.getOrDefault("literalText[" + i + "]", ""));
+                phase.setLatitude(params.getOrDefault("latitude[" + i + "]", "0.0"));
+                phase.setLongitude(params.getOrDefault("longitude[" + i + "]", "0.0"));
+                phase.setManual(Boolean.TRUE);
+                phase.setGame(game);
+
+                Phase savedPhase = phaseService.save(phase);
+                savedPhases.add(savedPhase);
+
+                int riddlesCount = numRiddles.get(i);
+
+                for (int r = 0; r < riddlesCount; r++) {
+                    String prefix = "phases[" + i + "].riddles[" + r + "].";
+
+                    Enigma enigma = new Enigma();
+                    enigma.setPhase(savedPhase);
+                    enigma.setPhaseId(savedPhase.getId());
+                    enigma.setEnigmaNumber(r + 1);
+                    enigma.setLiteralText(params.getOrDefault(prefix + "literalText", ""));
+                    enigma.setEnigma(params.getOrDefault(prefix + "enigma", ""));
+                    enigma.setAnswer(params.getOrDefault(prefix + "answer", ""));
+                    enigma.setAnswerFormat(params.getOrDefault(prefix + "answerFormat", ""));
+                    enigma.setHint1(params.getOrDefault(prefix + "hint1", ""));
+                    enigma.setHint2(params.getOrDefault(prefix + "hint2", ""));
+                    enigma.setExplanationSpot(params.getOrDefault(prefix + "explanationSpot", ""));
+                    enigma.setImage(params.getOrDefault(prefix + "image", ""));
+                    enigma.setLocation(params.getOrDefault(prefix + "location", ""));
+                    enigma.setIntroduction(params.getOrDefault(prefix + "introduction", ""));
+                    enigma.setIntroAvatarVideo(params.getOrDefault(prefix + "introAvatarVideo", ""));
+                    enigma.setEnigmaVideo(params.getOrDefault(prefix + "enigmaVideo", ""));
+                    enigma.setExplanationSpotVideo(params.getOrDefault(prefix + "explanationSpotVideo", ""));
+                    enigma.setLocationResolutionPhoto(params.getOrDefault(prefix + "locationResolutionPhoto", ""));
+                    enigma.setLatitude(params.getOrDefault(prefix + "latitude", "0.0"));
+                    enigma.setLongitude(params.getOrDefault(prefix + "longitude", "0.0"));
+                    enigma.setAdditionalInstructions(params.getOrDefault(prefix + "additionalInstructions", ""));
+                    enigma.setPointsCorrect(parseIntSafe(params.get(prefix + "pointsCorrect")));
+                    enigma.setPointsFail(parseIntSafe(params.get(prefix + "pointsFail")));
+                    enigma.setPointsHint1(parseIntSafe(params.get(prefix + "pointsHint1")));
+                    enigma.setPointsHint2(parseIntSafe(params.get(prefix + "pointsHint2")));
+                    enigma.setMaxTime(parseIntSafe(params.get(prefix + "maxTime")));
+                    enigma.setManual(Boolean.parseBoolean(params.getOrDefault(prefix + "manual", "true")));
+                    enigmaService.save(enigma);
+                }
+            }
+
+            int totalRiddles = numRiddles.stream().mapToInt(Integer::intValue).sum();
+            game.setNumberOfRiddles(totalRiddles);
+
+            gameService.saveGame(game);
+            model.addAttribute("games", gameService.findAllGames());
+            return "home";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("message", e.getMessage());
+            return "error";
+        }
+    }
+
+    private Integer parseIntSafe(String value) {
+        try {
+            return (value == null || value.isEmpty()) ? 0 : Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    @GetMapping("/deleteGame/{id}")
+    public String deleteGame(@PathVariable Long id, Model model) {
+        try {
+            Game game = gameService.findGameById(id);
+
+            if (game == null) {
+                model.addAttribute("message", "El juego con ID " + id + " no existe.");
+                return "error";
+            }
+
+            // 🔹 Primero eliminar los enigmas de cada fase
+            for (Phase phase : game.getPhases()) {
+                if (phase.getEnigmas() != null) {
+                    for (Enigma enigma : phase.getEnigmas()) {
+                        enigmaService.delete(enigma.getId());
+                    }
+                }
+            }
+
+            for (Phase phase : game.getPhases()) {
+                phaseService.delete(phase.getId());
+            }
+
+            gameService.deleteGame(id);
+
+            model.addAttribute("games", gameService.findAllGames());
+            model.addAttribute("successMessage", "Juego eliminado correctamente ✅");
+
+            return "home";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("message", "Error al eliminar el juego: " + e.getMessage());
             return "error";
         }
     }
@@ -226,9 +343,7 @@ public class GameController {
         }
 
         List<Phase> phases = phaseService.findByGameId(id);
-        phases.forEach(phase -> {
-            phase.setEnigmas(enigmaService.findByPhaseName(phase.getId()));
-        });
+
         model.addAttribute("game", game);
         model.addAttribute("phases", phases);
         return "gameView";
@@ -245,7 +360,7 @@ public class GameController {
             int j = 0;
             if (phase.getEnigmas() != null) {
                 for (Enigma e : phase.getEnigmas()) {
-                    e.setIdFalse(j++);
+                    e.setIdidTreak(j++);
                     enigmas.add(e);
                 }
             } else {
@@ -273,7 +388,7 @@ public class GameController {
         dbGame.setManual(formGame.getManual());
 
         // Actualizar fases por índice
-        for (int i = 0; i < formGame.getPhases().size(); i++) {
+        for (int i = 0; i < dbGame.getPhases().size(); i++) {
             Phase formPhase = formGame.getPhases().get(i);
             Phase dbPhase = dbGame.getPhases().get(i); // fase original con id real
 
@@ -290,38 +405,41 @@ public class GameController {
 
             System.out.println("PHASE CON ID original " + dbPhase.getPhaseName());
             System.out.println("PHASE CON ID FORM " + formPhase.getPhaseName());
-
+            System.out.println("ENIGMAS= " + dbPhase.getEnigmas());
 
             // Actualizar enigmas por índice
             if (formPhase.getEnigmas() != null) {
-                for (int j = 0; j < formPhase.getEnigmas().size(); j++) {
-                    Enigma formEnigma = formPhase.getEnigmas().get(j);
-                    Enigma dbEnigma= dbPhase.getEnigmas().get(j); // enigma original con id real
-            System.out.println("ENIGMA CON ID original " + formEnigma.getId());
-            System.out.println("ENIGMA CON ID FORM " + dbEnigma.getId());
+                for (int j = 0; j < dbPhase.getEnigmas().size(); j++) {
 
-                    dbEnigma.setEnigma(formEnigma.getEnigma());
-                    dbEnigma.setAnswer(formEnigma.getAnswer());
-                    dbEnigma.setHint1(formEnigma.getHint1());
-                    dbEnigma.setHint2(formEnigma.getHint2());
-                    dbEnigma.setAnswerFormat(formEnigma.getAnswerFormat());
-                    dbEnigma.setPointsCorrect(formEnigma.getPointsCorrect());
-                    dbEnigma.setPointsFail(formEnigma.getPointsFail());
-                    dbEnigma.setPointsHint1(formEnigma.getPointsHint1());
-                    dbEnigma.setPointsHint2(formEnigma.getPointsHint2());
-                    dbEnigma.setImage(formEnigma.getImage());
-                    dbEnigma.setLocation(formEnigma.getLocation());
-                    dbEnigma.setIntroduction(formEnigma.getIntroduction());
-                    dbEnigma.setIntroAvatarVideo(formEnigma.getIntroAvatarVideo());
-                    dbEnigma.setEnigmaVideo(formEnigma.getEnigmaVideo());
-                    dbEnigma.setExplanationSpot(formEnigma.getExplanationSpot());
-                    dbEnigma.setExplanationSpotVideo(formEnigma.getExplanationSpotVideo());
-                    dbEnigma.setLocationResolutionPhoto(formEnigma.getLocationResolutionPhoto());
-                    dbEnigma.setMaxTime(formEnigma.getMaxTime());
-                    dbEnigma.setLatitude(formEnigma.getLatitude());
-                    dbEnigma.setLongitude(formEnigma.getLongitude());
-                    dbEnigma.setAdditionalInstructions(formEnigma.getAdditionalInstructions());
-                    dbEnigma.setManual(formEnigma.getManual());
+                    Enigma formEnigma = formPhase.getEnigmas().get(j);
+                    System.out.println("ITERACION " + j);
+                    Enigma dbEnigma = dbPhase.getEnigmas().get(j); // enigma original con id real
+
+                    System.out.println("ENIGMA CON ID original " + formEnigma.getId());
+                    System.out.println("ENIGMA CON ID FORM " + dbEnigma.getId());
+
+                    dbEnigma.setEnigma(safe(formEnigma.getEnigma()));
+                    dbEnigma.setAnswer(safe(formEnigma.getAnswer()));
+                    dbEnigma.setHint1(safe(formEnigma.getHint1()));
+                    dbEnigma.setHint2(safe(formEnigma.getHint2()));
+                    dbEnigma.setAnswerFormat(safe(formEnigma.getAnswerFormat()));
+                    dbEnigma.setPointsCorrect(safeInt(formEnigma.getPointsCorrect()));
+                    dbEnigma.setPointsFail(safeInt(formEnigma.getPointsFail()));
+                    dbEnigma.setPointsHint1(safeInt(formEnigma.getPointsHint1()));
+                    dbEnigma.setPointsHint2(safeInt(formEnigma.getPointsHint2()));
+                    dbEnigma.setImage(safe(formEnigma.getImage()));
+                    dbEnigma.setLocation(safe(formEnigma.getLocation()));
+                    dbEnigma.setIntroduction(safe(formEnigma.getIntroduction()));
+                    dbEnigma.setIntroAvatarVideo(safe(formEnigma.getIntroAvatarVideo()));
+                    dbEnigma.setEnigmaVideo(safe(formEnigma.getEnigmaVideo()));
+                    dbEnigma.setExplanationSpot(safe(formEnigma.getExplanationSpot()));
+                    dbEnigma.setExplanationSpotVideo(safe(formEnigma.getExplanationSpotVideo()));
+                    dbEnigma.setLocationResolutionPhoto(safe(formEnigma.getLocationResolutionPhoto()));
+                    dbEnigma.setMaxTime(safeInt(formEnigma.getMaxTime()));
+                    dbEnigma.setLatitude(safe(formEnigma.getLatitude()));
+                    dbEnigma.setLongitude(safe(formEnigma.getLongitude()));
+                    dbEnigma.setAdditionalInstructions(safe(formEnigma.getAdditionalInstructions()));
+                    dbEnigma.setManual(safeBool(formEnigma.getManual()));
 
                     dbEnigma.setPhase(dbPhase);
                 }
@@ -332,7 +450,17 @@ public class GameController {
         gameService.saveGame(dbGame);
         return "redirect:/editGame/" + id + "?success=1";
     }
+private String safe(String value) {
+    return (value == null) ? "" : value;
+}
+private Integer safeInt(Integer value) {
+    return (value == null) ? 0 : value;
+}
 
+// Para decimales (Double)
+private Boolean safeBool(Boolean value) {
+    return (value == null) ? true : value;
+}
     private void copyGameParamsToModel(Map<String, String> params, Model model) {
         model.addAttribute("gameName", params.getOrDefault("gameName", ""));
         model.addAttribute("gameDescription", params.getOrDefault("gameDescription", ""));

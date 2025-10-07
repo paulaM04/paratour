@@ -17,7 +17,9 @@ public class Enigma {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+    @Column(name = "fase", nullable = false)
+private Long phaseId;
+
     @ManyToOne
     @JoinColumn(name = "fase", insertable = false, updatable = false)
     private Phase phase;
@@ -92,19 +94,26 @@ public class Enigma {
     private String additionalInstructions;
     
     @Transient
-    private int idFalse; // Para evitar que se muestre el ID en el formulario
+    private int idTreak; // Para evitar que se muestre el ID en el formulario
     private Boolean manual;
 
 
     // getters and setters
+    public void setPhaseId(Long phaseId) {
+        this.phaseId = phaseId;
+    }
+
+    public Long getIdPhase(){
+        return this.phaseId;
+    }
 public Phase getPhase() {
         return phase;
     }
     public void setPhase(Phase phase) {
         this.phase = phase;
     }
-    public void setIdFalse(int idFalse) {
-        this.idFalse = idFalse;
+    public void setIdidTreak(int idFalse) {
+        this.idTreak = idFalse;
     }
     public Long getId() {
         return id;
