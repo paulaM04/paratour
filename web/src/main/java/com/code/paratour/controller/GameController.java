@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.code.paratour.model.Enigma;
 import com.code.paratour.model.Game;
+import com.code.paratour.model.GameType;
 import com.code.paratour.model.Phase;
 import com.code.paratour.service.EnigmaService;
 import com.code.paratour.service.GameService;
@@ -343,9 +344,35 @@ public class GameController {
         if (game == null) {
             throw new IllegalArgumentException("Juego no encontrado con id: " + id);
         }
-
+        if (game.getImage() == null || game.getImage().isBlank()) {
+            game.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+        }
+        if (game.getVideo() == null || game.getVideo().isBlank()) {
+            game.setVideo("");
+        }
+        if (game.getDescription() == null || game.getDescription().isBlank()) {
+            game.setDescription("Sin descripción por el momento");
+        }
         List<Phase> phases = phaseService.findByGameId(id);
-        //model.addAttribute("typesGame", typeGameService.findAll());
+        for (Phase phase : phases) {
+            if (phase.getDescription() == null || phase.getDescription().isBlank()) {
+                phase.setDescription("Sin descripción por el momento");
+            }
+            if (phase.getLiteralText() == null || phase.getLiteralText().isBlank()) {
+                phase.setLiteralText("Fase " + phase.getPhaseName());
+            }
+            List<Enigma> enigmas = phase.getEnigmas();
+            for (Enigma e : enigmas) {
+                if (e.getEnigma() == null || e.getEnigma().isBlank()) {
+                    e.setEnigma("Sin enigma por el momento");
+                }
+                if (e.getAnswerFormat() == null || e.getAnswerFormat().isBlank()) {
+                    e.setAnswerFormat("sin formato por el momento");
+                }
+            }
+        }
+
+        // model.addAttribute("typesGame", typeGameService.findAll());
         model.addAttribute("game", game);
         model.addAttribute("phases", phases);
         return "gameView";
@@ -384,7 +411,30 @@ public class GameController {
         if (game.getImage() == null || game.getImage().isBlank()) {
             game.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
         }
-        model.addAttribute("typesGame", typeGameService.findAll());
+        List<GameType> tipos = typeGameService.findAll();
+        List<GameType> tiposOrdenados = new ArrayList<>();
+
+        // Identifica el tipo actual del juego
+        String tipoActual = game.getGameType() == null ? "" : game.getGameType().trim().toLowerCase();
+
+        // Recorre todos los tipos
+        for (GameType tipo : tipos) {
+            boolean isSelected = tipo.getCode().trim().equalsIgnoreCase(tipoActual) ||
+                    tipo.getName().trim().equalsIgnoreCase(tipoActual);
+
+            tipo.setIsSelected(isSelected);
+            if (isSelected) {
+                // Añade primero el tipo actual
+                tiposOrdenados.add(0, tipo);
+            } else {
+                // Añade el resto detrás
+                tiposOrdenados.add(tipo);
+            }
+        }
+
+        // Envía al modelo la lista reordenada
+        model.addAttribute("typesGame", tiposOrdenados);
+
         model.addAttribute("enigmas", enigmas);
         model.addAttribute("phases", game.getPhases());
         model.addAttribute("game", game);

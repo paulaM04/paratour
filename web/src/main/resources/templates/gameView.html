@@ -3,7 +3,7 @@
 <body style="background-color: #f8f9fa;">
   <div class="container py-4">
 
-    <!-- Datos del juego -->
+    <!-- DATOS DEL JUEGO -->
     <div class="text-center mb-4">
       <h1 class="fw-bold">{{game.name}}</h1>
       <p class="text-muted">{{game.description}}</p>
@@ -29,81 +29,99 @@
       <div class="col-md-3"><strong>Tipo:</strong> {{game.gameType}}</div>
       <div class="col-md-3"><strong>Enigmas:</strong> {{game.numberOfRiddles}}</div>
       <div class="col-md-3"><strong>Leaderboard:</strong>
-        {{#game.hasLeaderboard}}Sí{{/game.hasLeaderboard}}{{^game.hasLeaderboard}}No{{/game.hasLeaderboard}}</div>
+        {{#game.hasLeaderboard}}Sí{{/game.hasLeaderboard}}{{^game.hasLeaderboard}}No{{/game.hasLeaderboard}}
+      </div>
       <div class="col-md-3"><strong>Manual:</strong>
-        {{#game.manual}}Sí{{/game.manual}}{{^game.manual}}No{{/game.manual}}</div>
+        {{#game.manual}}Sí{{/game.manual}}{{^game.manual}}No{{/game.manual}}
+      </div>
     </div>
 
-    <!-- Fases -->
-    <h2 class="mb-3">Fases</h2>
+    <!-- FASES -->
+    <h2 class="mb-3 text-success fw-semibold">✅ Fases del juego</h2>
 
     {{^phases}}
     <div class="alert alert-warning">Este juego aún no tiene fases.</div>
     {{/phases}}
 
-    {{#phases}}
-    <div class="card mb-4 border-primary shadow">
-      <div class="card-header bg-primary text-white">
-        <h3 class="mb-0">{{phaseName}}</h3>
-      </div>
-      <div class="card-body">
-        <p>{{description}}</p>
+    <div class="accordion" id="phasesAccordion">
+      {{#phases}}
+      <div class="accordion-item shadow-sm border border-success-subtle mb-3" style="background-color:#e9fcef;">
+        <h2 class="accordion-header" id="phase-{{id}}">
+          <button class="accordion-button collapsed fw-semibold text-success" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapse-{{id}}" aria-expanded="false" aria-controls="collapse-{{id}}">
+            ✅ {{phaseName}}
+          </button>
+        </h2>
+        <div id="collapse-{{id}}" class="accordion-collapse collapse" data-bs-parent="#phasesAccordion">
+          <div class="accordion-body">
 
-        {{#image}}
-        <div class="mb-2 text-center">
-          <img src="{{image}}" class="img-fluid rounded" style="max-height:120px; object-fit:cover;"
-            alt="Imagen de fase">
-        </div>
-        {{/image}}
+            <p>{{description}}</p>
 
-        {{#video}}
-        <div class="mb-3">
-          <video class="w-100 rounded" controls>
-            <source src="{{video}}" type="video/mp4">
-          </video>
-        </div>
-        {{/video}}
+            {{#image}}
+            <div class="text-center mb-3">
+              <img src="{{image}}" class="img-fluid rounded shadow-sm" style="max-height:150px; object-fit:cover;"
+                alt="Imagen de fase">
+            </div>
+            {{/image}}
 
-        {{#latitude}}
-        <p><strong>Ubicación:</strong> {{latitude}}, {{longitude}}</p>
-        {{/latitude}}
+            {{#video}}
+            <div class="mb-3">
+              <video class="w-100 rounded shadow-sm" controls>
+                <source src="{{video}}" type="video/mp4">
+              </video>
+            </div>
+            {{/video}}
 
-        {{#mapUrl}}
-        <p><a href="{{mapUrl}}" target="_blank" class="btn btn-sm btn-outline-primary">Ver en mapa</a></p>
-        {{/mapUrl}}
+            {{#latitude}}
+            <p><strong>📍 Ubicación:</strong> {{latitude}}, {{longitude}}</p>
+            {{/latitude}}
 
-        <!-- Enigmas -->
-        <div class="mt-4">
-          <h4 class="fw-bold text-white p-2 rounded" style="background-color:#6c757d;">
-            🔍 Enigmas
-          </h4>
+            {{#mapUrl}}
+            <p><a href="{{mapUrl}}" target="_blank" class="btn btn-sm btn-outline-success">🌍 Ver en mapa</a></p>
+            {{/mapUrl}}
 
-          {{^enigmas}}
-          <div class="alert alert-secondary mt-2">No hay enigmas en esta fase.</div>
-          {{/enigmas}}
+            <!-- ENIGMAS -->
+            <div class="mt-4 p-3 rounded-4 border border-warning-subtle" style="background-color:#fff9e6;">
+              <h5 class="text-warning fw-semibold mb-3">💡 Enigmas de la fase</h5>
 
-          {{#enigmas}}
-          <div class="card mb-3 border-0 shadow-sm" style="background-color:#f8f9fa; border-left:5px solid #6c757d;">
-            <div class="card-body">
-              <h6 class="fw-bold text-dark">Enigma #{{enigmaNumber}}</h6>
-              <p class="mb-2"><span class="fw-semibold text-secondary">Pregunta:</span> {{enigma}}</p>
-              <p class="mb-2"><span class="fw-semibold text-secondary">Respuesta:</span> {{answer}}</p>
-              <p class="mb-1"><span class="fw-semibold text-secondary">Pista 1:</span> {{hint1}}</p>
-              <p class="mb-1"><span class="fw-semibold text-secondary">Pista 2:</span> {{hint2}}</p>
-              <p class="text-muted small mb-0"><strong>Formato:</strong> {{answerFormat}}</p>
+              {{^enigmas}}
+              <div class="alert alert-secondary mt-2">No hay enigmas en esta fase.</div>
+              {{/enigmas}}
+
+              <div class="accordion" id="enigmasAccordion-{{id}}">
+                {{#enigmas}}
+                <div class="accordion-item mb-2 border-0 shadow-sm">
+                  <h2 class="accordion-header" id="enigma-{{id}}">
+                    <button class="accordion-button collapsed fw-semibold text-dark" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#collapseEnigma-{{id}}" aria-expanded="false"
+                      aria-controls="collapseEnigma-{{id}}">
+                      Enigma #{{enigmaNumber}}
+                    </button>
+                  </h2>
+                  <div id="collapseEnigma-{{id}}" class="accordion-collapse collapse"
+                    data-bs-parent="#enigmasAccordion-{{id}}">
+                    <div class="accordion-body">
+                      <p><strong>❓ Pregunta:</strong> {{enigma}}</p>
+                      <p><strong>✅ Respuesta:</strong> {{answer}}</p>
+                      {{#hint1}}<p><strong>💡 Pista 1:</strong> {{hint1}}</p>{{/hint1}}
+                      {{#hint2}}<p><strong>💡 Pista 2:</strong> {{hint2}}</p>{{/hint2}}
+                      <p class="text-muted small mb-0"><strong>Formato:</strong> {{answerFormat}}</p>
+                    </div>
+                  </div>
+                </div>
+                {{/enigmas}}
+              </div>
             </div>
           </div>
-          {{/enigmas}}
         </div>
-
       </div>
+      {{/phases}}
     </div>
-    {{/phases}}
-
 
     <div class="text-center">
-      <a href="/" class="btn btn-secondary mt-3">Volver</a>
+      <a href="/" class="btn btn-secondary mt-4">Volver</a>
     </div>
+
   </div>
 </body>
 
