@@ -5,7 +5,7 @@
 
     <!-- DATOS DEL JUEGO -->
     <div class="text-center mb-4">
-      <h1 class="fw-bold">{{game.name}}</h1>
+      <h1 class="fw-bold text-primary">{{game.name}}</h1>
       <p class="text-muted">{{game.description}}</p>
     </div>
 
@@ -25,14 +25,27 @@
     </div>
     {{/game.video}}
 
-    <div class="row text-center mb-4">
-      <div class="col-md-3"><strong>Tipo:</strong> {{game.gameType}}</div>
-      <div class="col-md-3"><strong>Enigmas:</strong> {{game.numberOfRiddles}}</div>
-      <div class="col-md-3"><strong>Leaderboard:</strong>
-        {{#game.hasLeaderboard}}Sí{{/game.hasLeaderboard}}{{^game.hasLeaderboard}}No{{/game.hasLeaderboard}}
-      </div>
-      <div class="col-md-3"><strong>Manual:</strong>
-        {{#game.manual}}Sí{{/game.manual}}{{^game.manual}}No{{/game.manual}}
+    <!-- BLOQUE DE ATRIBUTOS -->
+    <div class="p-4 rounded-4 mb-4 shadow-sm" style="background-color:#e7f1ff; border:1px solid #cfe2ff;">
+      <div class="row text-center align-items-center">
+        <div class="col-md-3 mb-2 mb-md-0">
+          <strong class="text-primary">Tipo:</strong><br> {{game.gameType}}
+        </div>
+        <div class="col-md-3 mb-2 mb-md-0">
+          <strong class="text-primary">Enigmas:</strong><br> {{game.numberOfRiddles}}
+        </div>
+        <div class="col-md-3 mb-2 mb-md-0">
+          <strong class="text-primary">Leaderboard:</strong><br>
+          {{#game.hasLeaderboard}}Sí{{/game.hasLeaderboard}}{{^game.hasLeaderboard}}No{{/game.hasLeaderboard}}
+          <span class="help-tip" tabindex="0"
+            data-tip="Si está activado, el juego muestra una tabla de clasificación con las puntuaciones de los jugadores.">i</span>
+        </div>
+        <div class="col-md-3">
+          <strong class="text-primary">Manual:</strong><br>
+          {{#game.manual}}Sí{{/game.manual}}{{^game.manual}}No{{/game.manual}}
+          <span class="help-tip" tabindex="0"
+            data-tip="Indica que este registro fue creado o configurado manualmente desde el panel de administración.">i</span>
+        </div>
       </div>
     </div>
 
@@ -54,7 +67,6 @@
         </h2>
         <div id="collapse-{{id}}" class="accordion-collapse collapse" data-bs-parent="#phasesAccordion">
           <div class="accordion-body">
-
             <p>{{description}}</p>
 
             {{#image}}

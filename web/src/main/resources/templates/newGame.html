@@ -13,16 +13,14 @@
       <label for="gameDescription" class="form-label">Descripción</label>
       <textarea class="form-control" id="gameDescription" name="gameDescription" required></textarea>
     </div>
+<select name="gameType" class="form-select" required>
+  <option value="">Selecciona un tipo de juego</option>
+  {{#typesGame}}
+    <option value="{{code}}">{{name}}</option>
+  {{/typesGame}}
+</select>
 
-    <div class="mb-3">
-      <label for="gameType" class="form-label">Tipo de juego</label>
-                <select name="gameType" class="form-select" required>
-            <option value="">Selecciona un tipo de juego</option>
-            {{#typesGame}}
-            <option value="{{name}}">{{name}}</option>
-            {{/typesGame}}
-          </select>
-    </div>
+
 
     <div class="row">
       <div class="col-md-6 mb-3">

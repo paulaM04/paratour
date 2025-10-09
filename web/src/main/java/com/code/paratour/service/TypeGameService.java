@@ -10,14 +10,22 @@ import com.code.paratour.repositories.TypeGameRepository;
 @Service
 public class TypeGameService {
 
-	private final TypeGameRepository typeGameRepository;
+    private final TypeGameRepository typeGameRepository;
 
     public TypeGameService(TypeGameRepository typeGameRepository) {
         this.typeGameRepository = typeGameRepository;
     }
 
-    public List<GameType> findAll(){
+    public List<GameType> findAll() {
         return typeGameRepository.findAll();
+    }
+
+    public GameType findByCode(String code) {
+        return typeGameRepository.findById(code).orElse(null);
+    }
+
+    public GameType findByName(String name) {
+        return typeGameRepository.findByName(name);
     }
 
 }

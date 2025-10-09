@@ -9,5 +9,6 @@ import com.code.paratour.model.GameType;
 public interface TypeGameRepository extends JpaRepository<GameType, String>{
 
     public List<GameType> findAll();
-
+GameType findByCode(String code);
+GameType findByName(String name);
 }

@@ -310,3 +310,76 @@ nav {
     color: #fff !important;
     box-shadow: 0 4px 16px rgba(2,72,89,0.10);
 }
+
+/* Tooltip CSS-only */
+.help-tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: .35rem;
+  border-radius: 50%;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 700;
+  background: #e9ecef;
+  color: #495057;
+  cursor: help;
+  user-select: none;
+  vertical-align: text-bottom;
+  text-transform: none;
+}
+
+.help-tip:focus {
+  outline: 2px solid #86b7fe;
+  outline-offset: 2px;
+}
+
+.help-tip[data-tip]::after {
+  /* oculto por defecto */
+  content: attr(data-tip);
+  position: absolute;
+  z-index: 1000;
+  left: 50%;
+  top: calc(100% + .5rem);
+  transform: translateX(-50%);
+  min-width: 220px;
+  max-width: 320px;
+  padding: .5rem .75rem;
+  border: 1px solid #dee2e6;
+  border-radius: .5rem;
+  background: #fff;
+  color: #212529;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  font-weight: 400;
+  font-size: .9rem;
+  line-height: 1.25rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease-in-out;
+  white-space: normal;
+}
+
+/* flechita */
+.help-tip[data-tip]::before {
+  content: "";
+  position: absolute;
+  top: calc(100% + .2rem);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: #dee2e6; /* borde */
+  opacity: 0;
+  transition: opacity .12s ease-in-out;
+}
+.help-tip[data-tip]:hover::before,
+.help-tip[data-tip]:focus::before,
+.help-tip[data-tip]:hover::after,
+.help-tip[data-tip]:focus::after {
+  opacity: 1;
+}
+
+/* por si algún contenedor corta el tooltip */
+.row, .container, .accordion-body { overflow: visible; }

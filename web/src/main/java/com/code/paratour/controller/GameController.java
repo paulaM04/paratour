@@ -215,7 +215,11 @@ public class GameController {
             Model model) {
         try {
             Game game = new Game();
-
+            String tipoSeleccionado = params.get("gameType");
+            GameType tipo = typeGameService.findByName(tipoSeleccionado);
+            if (tipo == null) {
+                throw new IllegalArgumentException("Tipo de juego inválido: " + tipoSeleccionado);
+            }
             game.setName(params.get("gameName"));
             game.setDescription(params.get("gameDescription"));
             game.setGameType(params.get("gameType"));
