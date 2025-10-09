@@ -14,17 +14,16 @@
             <label for="gameName" class="form-label">Nombre</label>
             <input type="text" class="form-control" id="gameName" name="gameName" required>
           </div>
-          
-          <div class="mb-3">
-  <label class="form-label">Tipo de juego</label>
-  <select name="gameType" class="form-select" required>
-    <option value="">Selecciona un tipo de juego</option>
-    {{#typesGame}}
-            <option value="{{name}}">{{name}}</option>
-    {{/typesGame}}
-  </select>
-</div>
 
+          <div class="mb-3">
+            <label class="form-label">Tipo de juego</label>
+            <select name="gameType" class="form-select" required>
+              <option value="">Selecciona un tipo de juego</option>
+              {{#typesGame}}
+              <option value="{{name}}">{{name}}</option>
+              {{/typesGame}}
+            </select>
+          </div>
         </div>
 
         <div class="mb-3">
@@ -49,14 +48,23 @@
             <input type="hidden" name="hasLeaderboard" value="false">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="hasLeaderboard" name="hasLeaderboard" value="true" checked>
-              <label class="form-check-label" for="hasLeaderboard">Mostrar leaderboard</label>
+              <label class="form-check-label" for="hasLeaderboard">
+                Mostrar leaderboard
+                <span class="help-tip" tabindex="0"
+                      data-tip="Si está activado, el juego mostrará una tabla de clasificación con las puntuaciones de los jugadores.">i</span>
+              </label>
             </div>
           </div>
+
           <div class="col-md-6 mb-2">
             <input type="hidden" name="manual" value="false">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="manual" name="manual" value="true">
-              <label class="form-check-label" for="manual">Juego manual</label>
+              <label class="form-check-label" for="manual">
+                Juego manual
+                <span class="help-tip" tabindex="0"
+                      data-tip="Indica que el juego se configuró o gestiona manualmente desde el panel de administración.">i</span>
+              </label>
             </div>
           </div>
         </div>
