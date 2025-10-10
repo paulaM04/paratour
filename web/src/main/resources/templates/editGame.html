@@ -15,74 +15,76 @@
     </div>
     {{/successMessage}}
 
-   <!-- ZONA DE JUEGO -->
-<div class="p-4 rounded-4 mb-5 shadow-sm border border-primary-subtle" style="background-color:#e9f2ff;">
-  <h3 class="mb-4 text-primary fw-semibold">🎮 Datos del juego</h3>
+    <!-- ZONA DE JUEGO -->
+    <div class="p-4 rounded-4 mb-5 shadow-sm border border-primary-subtle" style="background-color:#e9f2ff;">
+      <h3 class="mb-4 text-primary fw-semibold">🎮 Datos del juego</h3>
 
-  <form id="editGameForm" action="/edit/game/{{game.id}}" method="post">
-    <div class="mb-3">
-      <label class="form-label text-primary">Nombre</label>
-      <input type="text" name="name" class="form-control" value="{{game.name}}" required>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label text-primary">Tipo de juego</label>
-      <select name="gameType" class="form-select" required>
-        {{#typesGame}}
-        <option value="{{code}}" {{#isSelected}}selected{{/isSelected}}>{{name}}</option>
-        {{/typesGame}}
-      </select>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label text-primary">Descripción</label>
-      <textarea name="description" class="form-control" rows="3">{{game.description}}</textarea>
-    </div>
-
-    <!-- Imagen -->
-    <div class="mb-3">
-      <label class="form-label text-primary">Imagen (URL)</label>
-      <input type="text" name="image" class="form-control" value="{{game.image}}" placeholder="Introduce la URL de la imagen">
-    </div>
-
-    <!-- Video -->
-    <div class="mb-3">
-      <label class="form-label text-primary">Video (URL)</label>
-      <input type="text" name="video" class="form-control" value="{{game.video}}" placeholder="Introduce la URL del video">
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label text-primary">Número de fases</label>
-      <input type="number" name="numberOfRiddles" class="form-control" value="{{game.numberOfRiddles}}">
-    </div>
-
-    <!-- CHECKBOXES con tooltips -->
-    <div class="row">
-      <div class="col-md-6 mb-2">
-        <div class="form-check">
-          <input type="checkbox" name="hasLeaderboard" class="form-check-input"
-            {{#game.hasLeaderboard}}checked{{/game.hasLeaderboard}}>
-          <label class="form-check-label text-primary">
-            Tiene leaderboard
-            <span class="help-tip" tabindex="0"
-              data-tip="Si está activado, el juego muestra una tabla de clasificación con las puntuaciones de los jugadores.">i</span>
-          </label>
+      <form id="editGameForm" action="/edit/game/{{game.id}}" method="post">
+        <div class="mb-3">
+          <label class="form-label text-primary">Nombre</label>
+          <input type="text" name="name" class="form-control" value="{{game.name}}" required>
         </div>
-      </div>
 
-      <div class="col-md-6 mb-2">
-        <div class="form-check">
-          <input type="checkbox" name="manual" class="form-check-input" {{#game.manual}}checked{{/game.manual}}>
-          <label class="form-check-label text-primary">
-            Manual
-            <span class="help-tip" tabindex="0"
-              data-tip="Indica que este registro fue creado o configurado manualmente desde el panel de administración.">i</span>
-          </label>
+        <div class="mb-3">
+          <label class="form-label text-primary">Tipo de juego</label>
+          <select name="gameType" class="form-select" required>
+            {{#typesGame}}
+            <option value="{{code}}" {{#isSelected}}selected{{/isSelected}}>{{name}}</option>
+            {{/typesGame}}
+          </select>
         </div>
-      </div>
+
+        <div class="mb-3">
+          <label class="form-label text-primary">Descripción</label>
+          <textarea name="description" class="form-control" rows="3">{{game.description}}</textarea>
+        </div>
+
+        <!-- Imagen -->
+        <div class="mb-3">
+          <label class="form-label text-primary">Imagen Portada (URL)</label>
+          <input type="text" name="image" class="form-control" value="{{game.image}}"
+            placeholder="Introduce la URL de la imagen">
+        </div>
+
+        <!-- Video -->
+        <div class="mb-3">
+          <label class="form-label text-primary">Video Portada (URL)</label>
+          <input type="text" name="video" class="form-control" value="{{game.video}}"
+            placeholder="Introduce la URL del video">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-primary">Número de fases</label>
+          <input type="number" name="numberOfRiddles" class="form-control" value="{{game.numberOfRiddles}}">
+        </div>
+
+        <!-- CHECKBOXES -->
+        <div class="row">
+          <div class="col-md-6 mb-2">
+            <div class="form-check">
+              <input type="checkbox" name="hasLeaderboard" class="form-check-input"
+                {{#game.hasLeaderboard}}checked{{/game.hasLeaderboard}}>
+              <label class="form-check-label text-primary">
+                Tiene leaderboard
+                <span class="help-tip" tabindex="0"
+                  data-tip="Si está activado, el juego muestra una tabla de clasificación.">i</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-2">
+            <div class="form-check">
+              <input type="checkbox" name="manual" class="form-check-input" {{#game.manual}}checked{{/game.manual}}>
+              <label class="form-check-label text-primary">
+                Manual
+                <span class="help-tip" tabindex="0"
+                  data-tip="Indica que este registro fue creado o configurado manualmente.">i</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
-  </form>
-</div>
 
     <!-- ZONA DE FASES -->
     <div class="p-4 rounded-4 mb-4 shadow-sm border border-success-subtle" style="background-color:#e9fcef;">
@@ -111,6 +113,21 @@
                 <input type="text" name="phases[{{idFalse}}].description" class="form-control" value="{{description}}">
               </div>
 
+
+              <!-- Imagen y Video -->
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Imagen Fase (URL)</label>
+                  <input type="text" name="phases[{{idFalse}}].image" class="form-control" value="{{image}}"
+                    placeholder="Introduce la URL de la imagen de la fase">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Video Fase (URL)</label>
+                  <input type="text" name="phases[{{idFalse}}].video" class="form-control" value="{{video}}"
+                    placeholder="Introduce la URL del video de la fase">
+                </div>
+              </div>
+
               <div class="mb-3">
                 <label class="form-label">Latitud</label>
                 <input type="text" name="phases[{{idFalse}}].latitude" class="form-control" value="{{latitude}}">
@@ -123,16 +140,8 @@
 
               <div class="mb-3">
                 <label class="form-label">Mapa (URL)</label>
-                {{#mapUrl}}
-                <div class="mb-2">
-                  <a href="{{mapUrl}}" target="_blank" class="btn btn-sm btn-outline-success">🌍 Ver mapa</a>
-                </div>
-                <input type="text" name="phases[{{idFalse}}].mapUrl" class="form-control" value="{{mapUrl}}">
-                {{/mapUrl}}
-                {{^mapUrl}}
-                <input type="text" name="phases[{{idFalse}}].mapUrl" class="form-control"
+                <input type="text" name="phases[{{idFalse}}].mapUrl" class="form-control" value="{{mapUrl}}"
                   placeholder="Introduce la URL del mapa">
-                {{/mapUrl}}
               </div>
 
               <!-- ZONA DE ENIGMAS -->
@@ -159,6 +168,21 @@
                       <label class="form-label">Respuesta</label>
                       <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].answer" class="form-control"
                         value="{{answer}}">
+                    </div>
+
+                    <!-- Imagen y Video del Enigma -->
+                    <div class="row">
+                      <div class="col-md-6 mb-2">
+                        <label class="form-label">Imagen Enigma (URL)</label>
+                        <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].image" class="form-control"
+                          value="{{image}}" placeholder="Introduce la URL de la imagen del enigma">
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <label class="form-label">Video Enigma (URL)</label>
+                        <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].enigmaVideo"
+                          class="form-control" value="{{enigmaVideo}}"
+                          placeholder="Introduce la URL del video del enigma">
+                      </div>
                     </div>
 
                     <div class="mb-2">

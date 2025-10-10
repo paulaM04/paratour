@@ -82,228 +82,7 @@ public class GameController {
         return "newGame";
     }
 
-    @GetMapping("/setupNumPhases")
-    public String setupNumPhases(Model model) {
-        model.addAttribute("typesGame", typeGameService.findAll());
-        return "newGameNumberPhase";
-    }
 
-    @GetMapping("/createPhasesForm")
-    public String createPhasesFormIni(
-            @RequestParam("numPhases") int numPhases,
-            @RequestParam Map<String, String> params,
-            Model model) {
-        try {
-            // Genera placeholders de fases
-            List<Phase> phases = new ArrayList<>();
-            for (int i = 0; i < numPhases; i++) {
-                Phase p = new Phase();
-                p.setIdFalse(i + 1);
-                phases.add(p);
-            }
-            model.addAttribute("phases", phases);
-
-            // Reinyecta TODOS los datos de juego para que el siguiente form los envíe como
-            // hidden:
-            copyGameParamsToModel(params, model);
-
-            return "newPhaseAndEnigma";
-        } catch (Exception e) {
-            model.addAttribute("message", e.getMessage());
-            return "error";
-        }
-    }
-
-    @PostMapping("/setupPhases")
-    public String setupPhasesFromGame(
-            @RequestParam("gameName") String gameName,
-            @RequestParam("gameDescription") String gameDescription,
-            @RequestParam("gameType") String gameType,
-            @RequestParam(value = "gameImage", required = false) String gameImage,
-            @RequestParam(value = "gameVideo", required = false) String gameVideo,
-            @RequestParam(value = "hasLeaderboard", required = false) String hasLeaderboard,
-            @RequestParam(value = "manual", required = false) String manual,
-            Model model) {
-
-        // defaults por si vienen nulos (checkboxes)
-        model.addAttribute("gameName", gameName);
-        model.addAttribute("gameDescription", gameDescription);
-        model.addAttribute("gameType", gameType);
-        model.addAttribute("gameImage", gameImage);
-        model.addAttribute("gameVideo", gameVideo);
-        model.addAttribute("hasLeaderboard", (hasLeaderboard == null) ? "true" : hasLeaderboard);
-        model.addAttribute("manual", (manual == null) ? "true" : manual);
-
-        return "newGameNumberPhase";
-    }
-
-    // === 2) nº de fases -> formulario de fases (POST) ===
-    @PostMapping("/createPhasesForm")
-    public String createPhasesForm(
-            @RequestParam("numPhases") int numPhases,
-            @RequestParam Map<String, String> params,
-            Model model) {
-        try {
-            List<Phase> phases = new ArrayList<>();
-            for (int i = 0; i < numPhases; i++) {
-                Phase p = new Phase();
-                p.setIdFalse(i + 1);
-                phases.add(p);
-            }
-            model.addAttribute("phases", phases);
-            copyGameParamsToModel(params, model);
-
-            return "newPhaseAndEnigma";
-        } catch (Exception e) {
-            model.addAttribute("message", e.getMessage());
-            return "error";
-        }
-    }
-
-    @PostMapping("/prepareEnigmas")
-    public String prepareEnigmas(
-            @RequestParam("phaseName") List<String> phaseNames,
-            @RequestParam("description") List<String> descriptions,
-            @RequestParam("numRiddles") List<Integer> numRiddles,
-            @RequestParam("literalText") List<String> literalTexts,
-            @RequestParam("latitude") List<String> latitudes,
-            @RequestParam("longitude") List<String> longitudes,
-            @RequestParam Map<String, String> params,
-            Model model) {
-        try {
-            List<Map<String, Object>> phasesForView = new ArrayList<>();
-            for (int i = 0; i < phaseNames.size(); i++) {
-                Map<String, Object> phase = new java.util.HashMap<>();
-                phase.put("index", i);
-                phase.put("phaseName", phaseNames.get(i));
-                phase.put("description", descriptions.get(i));
-                phase.put("numRiddles", numRiddles.get(i));
-                phase.put("literalText", literalTexts.get(i));
-                phase.put("latitude", latitudes.get(i));
-                phase.put("longitude", longitudes.get(i));
-
-                phase.put("display", i + 1);
-
-                List<Map<String, Object>> riddles = new ArrayList<>();
-                for (int r = 0; r < numRiddles.get(i); r++) {
-                    Map<String, Object> rid = new java.util.HashMap<>();
-                    rid.put("phaseIndex", i);
-                    rid.put("idx", r);
-                    rid.put("display", r + 1);
-                    riddles.add(rid);
-                }
-                phase.put("riddles", riddles);
-                phasesForView.add(phase);
-            }
-            model.addAttribute("phases", phasesForView);
-
-            // Reinyectar los datos del juego
-            copyGameParamsToModel(params, model);
-            return "newEnigma";
-        } catch (Exception e) {
-            model.addAttribute("message", e.getMessage());
-            return "error";
-        }
-    }
-
-    @PostMapping("/savePhases")
-    public String savePhases(
-            @RequestParam("phaseName") List<String> phaseNames,
-            @RequestParam("description") List<String> descriptions,
-            @RequestParam("numRiddles") List<Integer> numRiddles,
-            @RequestParam Map<String, String> params,
-            Model model) {
-        try {
-            Game game = new Game();
-            String tipoSeleccionado = params.get("gameType");
-            GameType tipo = typeGameService.findByName(tipoSeleccionado);
-            if (tipo == null) {
-                throw new IllegalArgumentException("Tipo de juego inválido: " + tipoSeleccionado);
-            }
-            game.setName(params.get("gameName"));
-            game.setDescription(params.get("gameDescription"));
-            game.setGameType(params.get("gameType"));
-            game.setImage(params.get("gameImage"));
-            game.setVideo(params.get("gameVideo"));
-            game.setHasLeaderboard(Boolean.parseBoolean(params.getOrDefault("hasLeaderboard", "true")));
-            game.setManual(Boolean.parseBoolean(params.getOrDefault("manual", "true")));
-            game.setNumberOfRiddles(0);
-
-            gameService.saveGame(game);
-
-            List<Phase> savedPhases = new ArrayList<>();
-
-            for (int i = 0; i < phaseNames.size(); i++) {
-                Phase phase = new Phase();
-                phase.setPhaseName(phaseNames.get(i));
-                phase.setDescription(descriptions.get(i));
-
-                phase.setLiteralText(params.getOrDefault("literalText[" + i + "]", ""));
-                phase.setLatitude(params.getOrDefault("latitude[" + i + "]", "0.0"));
-                phase.setLongitude(params.getOrDefault("longitude[" + i + "]", "0.0"));
-                phase.setManual(Boolean.TRUE);
-                phase.setGame(game);
-
-                Phase savedPhase = phaseService.save(phase);
-                savedPhases.add(savedPhase);
-
-                int riddlesCount = numRiddles.get(i);
-
-                for (int r = 0; r < riddlesCount; r++) {
-                    String prefix = "phases[" + i + "].riddles[" + r + "].";
-
-                    Enigma enigma = new Enigma();
-                    enigma.setPhase(savedPhase);
-                    enigma.setPhaseId(savedPhase.getId());
-                    enigma.setEnigmaNumber(r + 1);
-                    enigma.setLiteralText(params.getOrDefault(prefix + "literalText", ""));
-                    enigma.setEnigma(params.getOrDefault(prefix + "enigma", ""));
-                    enigma.setAnswer(params.getOrDefault(prefix + "answer", ""));
-                    enigma.setAnswerFormat(params.getOrDefault(prefix + "answerFormat", ""));
-                    enigma.setHint1(params.getOrDefault(prefix + "hint1", ""));
-                    enigma.setHint2(params.getOrDefault(prefix + "hint2", ""));
-                    enigma.setExplanationSpot(params.getOrDefault(prefix + "explanationSpot", ""));
-                    enigma.setImage(params.getOrDefault(prefix + "image", ""));
-                    enigma.setLocation(params.getOrDefault(prefix + "location", ""));
-                    enigma.setIntroduction(params.getOrDefault(prefix + "introduction", ""));
-                    enigma.setIntroAvatarVideo(params.getOrDefault(prefix + "introAvatarVideo", ""));
-                    enigma.setEnigmaVideo(params.getOrDefault(prefix + "enigmaVideo", ""));
-                    enigma.setExplanationSpotVideo(params.getOrDefault(prefix + "explanationSpotVideo", ""));
-                    enigma.setLocationResolutionPhoto(params.getOrDefault(prefix + "locationResolutionPhoto", ""));
-                    enigma.setLatitude(params.getOrDefault(prefix + "latitude", "0.0"));
-                    enigma.setLongitude(params.getOrDefault(prefix + "longitude", "0.0"));
-                    enigma.setAdditionalInstructions(params.getOrDefault(prefix + "additionalInstructions", ""));
-                    enigma.setPointsCorrect(parseIntSafe(params.get(prefix + "pointsCorrect")));
-                    enigma.setPointsFail(parseIntSafe(params.get(prefix + "pointsFail")));
-                    enigma.setPointsHint1(parseIntSafe(params.get(prefix + "pointsHint1")));
-                    enigma.setPointsHint2(parseIntSafe(params.get(prefix + "pointsHint2")));
-                    enigma.setMaxTime(parseIntSafe(params.get(prefix + "maxTime")));
-                    enigma.setManual(Boolean.parseBoolean(params.getOrDefault(prefix + "manual", "true")));
-                    enigmaService.save(enigma);
-                }
-            }
-
-            int totalRiddles = numRiddles.stream().mapToInt(Integer::intValue).sum();
-            game.setNumberOfRiddles(totalRiddles);
-
-            gameService.saveGame(game);
-            model.addAttribute("games", gameService.findAllGames());
-            return "home";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            model.addAttribute("message", e.getMessage());
-            return "error";
-        }
-    }
-
-    private Integer parseIntSafe(String value) {
-        try {
-            return (value == null || value.isEmpty()) ? 0 : Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
 
     @GetMapping("/deleteGame/{id}")
     public String deleteGame(@PathVariable Long id, Model model) {
@@ -519,41 +298,19 @@ public class GameController {
         return "redirect:/editGame/" + id + "?success=1";
     }
 
-    private String safe(String value) {
+    public String safe(String value) {
         return (value == null) ? "" : value;
     }
 
-    private Integer safeInt(Integer value) {
+    public Integer safeInt(Integer value) {
         return (value == null) ? 0 : value;
     }
 
     // Para decimales (Double)
-    private Boolean safeBool(Boolean value) {
+    public Boolean safeBool(Boolean value) {
         return (value == null) ? true : value;
     }
-
-    private void copyGameParamsToModel(Map<String, String> params, Model model) {
-        model.addAttribute("gameName", params.getOrDefault("gameName", ""));
-        model.addAttribute("gameDescription", params.getOrDefault("gameDescription", ""));
-        model.addAttribute("gameType", params.getOrDefault("gameType", ""));
-        model.addAttribute("gameImage", params.getOrDefault("gameImage", ""));
-        model.addAttribute("gameVideo", params.getOrDefault("gameVideo", ""));
-        model.addAttribute("hasLeaderboard", params.getOrDefault("hasLeaderboard", "true"));
-        model.addAttribute("manual", params.getOrDefault("manual", "false"));
-    }
-
-    private String defaultIfBlank(String s, String d) {
-        return (s == null || s.isBlank()) ? d : s;
-    }
-
-    private boolean parseBoolDefault(String s, boolean def) {
-        return (s == null || s.isBlank()) ? def : Boolean.parseBoolean(s);
-    }
-
-    private boolean isBlank(String s) {
-        return s == null || s.isBlank();
-    }
-
+    
     @ControllerAdvice
     public class GlobalExceptionHandler {
 

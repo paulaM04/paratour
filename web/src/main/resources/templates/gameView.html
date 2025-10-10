@@ -5,12 +5,13 @@
 
     <!-- DATOS DEL JUEGO -->
     <div class="text-center mb-4">
+      <strong class="text-primary">Nombre del Juego:</strong><br>
       <h1 class="fw-bold text-primary">{{game.name}}</h1>
-      <p class="text-muted">{{game.description}}</p>
     </div>
 
     {{#game.image}}
     <div class="text-center mb-3">
+      <strong class="text-primary">Imagen Juego:</strong><br>
       <img src="{{game.image}}" class="rounded shadow-sm" alt="Imagen del juego"
         style="max-height:180px; object-fit:cover;">
     </div>
@@ -18,6 +19,7 @@
 
     {{#game.video}}
     <div class="mb-4">
+      <strong class="text-primary">Imagen Juego:</strong><br>
       <video class="w-100 rounded shadow-sm" controls>
         <source src="{{game.video}}" type="video/mp4">
         Tu navegador no soporta video.
@@ -28,6 +30,9 @@
     <!-- BLOQUE DE ATRIBUTOS -->
     <div class="p-4 rounded-4 mb-4 shadow-sm" style="background-color:#e7f1ff; border:1px solid #cfe2ff;">
       <div class="row text-center align-items-center">
+        <strong class="text-primary">Descripción:</strong><br>
+        <p class="text-muted">{{game.description}}</p>
+
         <div class="col-md-3 mb-2 mb-md-0">
           <strong class="text-primary">Tipo:</strong><br> {{game.gameType}}
         </div>
@@ -71,6 +76,8 @@
 
             {{#image}}
             <div class="text-center mb-3">
+              <strong class="text-primary">Imagen Fase:</strong><br>
+
               <img src="{{image}}" class="img-fluid rounded shadow-sm" style="max-height:150px; object-fit:cover;"
                 alt="Imagen de fase">
             </div>
@@ -78,6 +85,7 @@
 
             {{#video}}
             <div class="mb-3">
+              <strong class="text-primary">Video Fase:</strong><br>
               <video class="w-100 rounded shadow-sm" controls>
                 <source src="{{video}}" type="video/mp4">
               </video>
@@ -118,6 +126,23 @@
                       {{#hint1}}<p><strong>💡 Pista 1:</strong> {{hint1}}</p>{{/hint1}}
                       {{#hint2}}<p><strong>💡 Pista 2:</strong> {{hint2}}</p>{{/hint2}}
                       <p class="text-muted small mb-0"><strong>Formato:</strong> {{answerFormat}}</p>
+                      {{#image}}
+                      <div class="text-center mb-3">
+                        <strong class="text-primary">Imagen Enigma:</strong><br>
+
+                        <img src="{{image}}" class="img-fluid rounded shadow-sm"
+                          style="max-height:150px; object-fit:cover;" alt="Imagen de fase">
+                      </div>
+                      {{/image}}
+
+                      {{#video}}
+                      <div class="mb-3">
+                        <strong class="text-primary">Video Enigma:</strong><br>
+                        <video class="w-100 rounded shadow-sm" controls>
+                          <source src="{{video}}" type="video/mp4">
+                        </video>
+                      </div>
+                      {{/video}}
                     </div>
                   </div>
                 </div>
