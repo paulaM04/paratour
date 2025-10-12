@@ -35,14 +35,14 @@ public class PhaseController {
     @Autowired
     private TypeGameService typeGameService;
 
-    @GetMapping("/setupNumPhases")
-    public String setupNumPhases(Model model) {
+    @GetMapping("/newGame_get1")
+    public String newGame_get1(Model model) {
         model.addAttribute("typesGame", typeGameService.findAll());
-        return "newGameNumberPhase";
+        return "newGame_1";
     }
 
-    @GetMapping("/createPhasesForm")
-    public String createPhasesFormIni(
+    @GetMapping("/newGame_get2")
+    public String newGame_get2(
             @RequestParam("numPhases") int numPhases,
             @RequestParam Map<String, String> params,
             Model model) {
@@ -55,40 +55,43 @@ public class PhaseController {
                 phases.add(p);
             }
             model.addAttribute("phases", phases);
-
-            // Reinyecta TODOS los datos de juego para que el siguiente form los envíe como
-            // hidden:
             copyGameParamsToModel(params, model);
-
-            return "newPhaseAndEnigma";
+            return "newGame_2";
         } catch (Exception e) {
             model.addAttribute("message", e.getMessage());
             return "error";
         }
     }
 
-    @PostMapping("/setupPhases")
-    public String setupPhasesFromGame(
-            @RequestParam("gameName") String gameName,
-            @RequestParam("gameDescription") String gameDescription,
-            @RequestParam("gameType") String gameType,
-            @RequestParam(value = "gameImage", required = false) String gameImage,
-            @RequestParam(value = "gameVideo", required = false) String gameVideo,
-            @RequestParam(value = "hasLeaderboard", required = false) String hasLeaderboard,
-            @RequestParam(value = "manual", required = false) String manual,
-            Model model) {
+    @PostMapping("/newGame_post1")
+public String newGame_post1(
+        @RequestParam("gameName") String gameName,
+        @RequestParam("gameDescription") String gameDescription,
+        @RequestParam("gameType") String gameType,
+        @RequestParam(value = "gameImage", required = false) String gameImage,
+        @RequestParam(value = "gameVideo", required = false) String gameVideo,
+        @RequestParam(value = "hasLeaderboard", required = false) String hasLeaderboard,
+        @RequestParam(value = "manual", required = false) String manual,
+        @RequestParam("numPhases") int numPhases,
+        org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
 
-        // defaults por si vienen nulos (checkboxes)
-        model.addAttribute("gameName", gameName);
-        model.addAttribute("gameDescription", gameDescription);
-        model.addAttribute("gameType", gameType);
-        model.addAttribute("gameImage", gameImage);
-        model.addAttribute("gameVideo", gameVideo);
-        model.addAttribute("hasLeaderboard", (hasLeaderboard == null) ? "true" : hasLeaderboard);
-        model.addAttribute("manual", (manual == null) ? "true" : manual);
+    // Normaliza checkboxes
+    hasLeaderboard = (hasLeaderboard == null) ? "true" : hasLeaderboard;
+    manual        = (manual == null) ? "true" : manual;
 
-        return "newGameNumberPhase";
-    }
+    // Añade TODO al querystring del redirect
+    ra.addAttribute("numPhases", numPhases);
+    ra.addAttribute("gameName", gameName);
+    ra.addAttribute("gameDescription", gameDescription);
+    ra.addAttribute("gameType", gameType);
+    ra.addAttribute("gameImage", gameImage);
+    ra.addAttribute("gameVideo", gameVideo);
+    ra.addAttribute("hasLeaderboard", hasLeaderboard);
+    ra.addAttribute("manual", manual);
+
+    return "redirect:/newGame_get2";
+}
+
 
     @PostMapping("/createPhasesForm")
     public String createPhasesForm(

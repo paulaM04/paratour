@@ -3,9 +3,9 @@
 <div class="container my-5">
   <h2 class="mb-4 text-center">Crear un juego y configura sus fases</h2>
 
-  <form action="/createPhasesForm" method="post" novalidate>
+  <form action="/newGame_post1" method="post" novalidate>
 
-    <!-- Campos del JUEGO -->
+    <!-- GAME -->
     <div class="card mb-4">
       <div class="card-header"><strong>Datos del juego</strong></div>
       <div class="card-body">
@@ -43,7 +43,6 @@
 
         <div class="row align-items-center">
           <div class="col-md-6 mb-2">
-            <!-- patrón hidden+checkbox para asegurar false cuando no se marca -->
             <input type="hidden" name="hasLeaderboard" value="false">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="hasLeaderboard" name="hasLeaderboard" value="true" checked>
@@ -70,7 +69,7 @@
       </div>
     </div>
 
-    <!-- Nº de fases -->
+    <!-- PHASES -->
     <div class="card mb-4">
       <div class="card-header"><strong>Fases</strong></div>
       <div class="card-body">
