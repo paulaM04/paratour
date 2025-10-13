@@ -31,8 +31,8 @@ public class EnigmaController {
     private TypeGameService typeGameService;
 
 
-    @PostMapping("/prepareEnigmas")
-    public String prepareEnigmas(
+    @PostMapping("/newGame_post3")
+    public String newGame_post3(
             @RequestParam("phaseName") List<String> phaseNames,
             @RequestParam("description") List<String> descriptions,
             @RequestParam("numRiddles") List<Integer> numRiddles,
@@ -70,7 +70,7 @@ public class EnigmaController {
 
             // Reinyectar los datos del juego
             copyGameParamsToModel(params, model);
-            return "newEnigma";
+            return "newGame_3";
         } catch (Exception e) {
             model.addAttribute("message", e.getMessage());
             return "error";

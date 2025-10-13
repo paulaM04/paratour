@@ -115,8 +115,8 @@ public String newGame_post1(
         }
     }
 
-    @PostMapping("/savePhases")
-    public String savePhases(
+    @PostMapping("/newGame_lastPost")
+    public String newGame_lastPost(
             @RequestParam("phaseName") List<String> phaseNames,
             @RequestParam("description") List<String> descriptions,
             @RequestParam("numRiddles") List<Integer> numRiddles,
@@ -125,7 +125,7 @@ public String newGame_post1(
         try {
             Game game = new Game();
             String tipoSeleccionado = params.get("gameType");
-            GameType tipo = typeGameService.findByName(tipoSeleccionado);
+            GameType tipo = typeGameService.findByCode(tipoSeleccionado);
             if (tipo == null) {
                 throw new IllegalArgumentException("Tipo de juego inválido: " + tipoSeleccionado);
             }
