@@ -3,11 +3,13 @@
 <body style="background-color: #f8f9fa;">
   <div class="container py-5">
 
+    <!-- Page title and navigation -->
     <h1 class="mb-4 text-center" style="font-weight: 600;">
       Editar juego: {{game.name}}
     </h1>
     <a href="/" class="btn btn-outline-secondary mb-4">⬅ Volver</a>
 
+    <!-- Success alert displayed after saving changes -->
     {{#successMessage}}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
       {{successMessage}}
@@ -15,18 +17,20 @@
     </div>
     {{/successMessage}}
 
-    <!-- FORMULARIO COMPLETO -->
+    <!-- MAIN FORM: handles all game data updates -->
     <form id="editGameForm" action="/edit/game/{{game.id}}" method="post">
 
-      <!-- ZONA DE JUEGO -->
+      <!-- SECTION: Game general information -->
       <div class="p-4 rounded-4 mb-5 shadow-sm border border-primary-subtle" style="background-color:#e9f2ff;">
         <h3 class="mb-4 text-primary fw-semibold">🎮 Datos del juego</h3>
 
+        <!-- Game name input -->
         <div class="mb-3">
           <label class="form-label text-primary">Nombre</label>
           <input type="text" name="name" class="form-control" value="{{game.name}}" required>
         </div>
 
+        <!-- Game type dropdown selector -->
         <div class="mb-3">
           <label class="form-label text-primary">Tipo de juego</label>
           <select name="gameType" class="form-select" required>
@@ -36,32 +40,35 @@
           </select>
         </div>
 
+        <!-- Game description text area -->
         <div class="mb-3">
           <label class="form-label text-primary">Descripción</label>
           <textarea name="description" class="form-control" rows="3">{{game.description}}</textarea>
         </div>
 
-        <!-- Imagen -->
+        <!-- Cover image URL input -->
         <div class="mb-3">
           <label class="form-label text-primary">Imagen Portada (URL)</label>
           <input type="text" name="image" class="form-control" value="{{game.image}}"
             placeholder="Introduce la URL de la imagen">
         </div>
 
-        <!-- Video -->
+        <!-- Cover video URL input -->
         <div class="mb-3">
           <label class="form-label text-primary">Video Portada (URL)</label>
           <input type="text" name="video" class="form-control" value="{{game.video}}"
             placeholder="Introduce la URL del video">
         </div>
 
+        <!-- Total number of phases -->
         <div class="mb-3">
           <label class="form-label text-primary">Número de fases</label>
           <input type="number" name="numberOfRiddles" class="form-control" value="{{game.numberOfRiddles}}">
         </div>
 
-        <!-- CHECKBOXES -->
+        <!-- CHECKBOX OPTIONS for leaderboard and manual configuration -->
         <div class="row">
+          <!-- Option: leaderboard -->
           <div class="col-md-6 mb-2">
             <div class="form-check">
               <input type="checkbox" name="hasLeaderboard" class="form-check-input"
@@ -74,6 +81,7 @@
             </div>
           </div>
 
+          <!-- Option: manual flag -->
           <div class="col-md-6 mb-2">
             <div class="form-check">
               <input type="checkbox" name="manual" class="form-check-input" {{#game.manual}}checked{{/game.manual}}>
@@ -87,35 +95,44 @@
         </div>
       </div>
 
-      <!-- ZONA DE FASES -->
+      <!-- SECTION: Game phases -->
       <div class="p-4 rounded-4 mb-4 shadow-sm border border-success-subtle" style="background-color:#e9fcef;">
         <h3 class="mb-3 text-success fw-semibold">✅ Fases del juego</h3>
 
+        <!-- Accordion structure to display each phase -->
         <div class="accordion" id="phasesAccordion">
           {{#phases}}
           <div class="accordion-item">
+
+            <!-- Accordion header -->
             <h2 class="accordion-header" id="phase-{{id}}">
               <button class="accordion-button collapsed fw-semibold text-success" type="button" data-bs-toggle="collapse"
                 data-bs-target="#collapse-{{id}}" aria-expanded="false" aria-controls="collapse-{{id}}">
                 {{phaseName}}
               </button>
             </h2>
+
+            <!-- Collapsible content for each phase -->
             <div id="collapse-{{id}}" class="accordion-collapse collapse" data-bs-parent="#phasesAccordion">
               <div class="accordion-body">
+
+                <!-- Hidden ID for backend identification -->
                 <input type="hidden" name="phases[{{idFalse}}].id" value="{{id}}">
 
+                <!-- Phase name field -->
                 <div class="mb-3">
                   <label class="form-label">Nombre de fase</label>
                   <input type="text" name="phases[{{idFalse}}].phaseName" class="form-control" value="{{phaseName}}">
                 </div>
 
+                <!-- Phase description field -->
                 <div class="mb-3">
                   <label class="form-label">Descripción</label>
                   <input type="text" name="phases[{{idFalse}}].description" class="form-control"
                     value="{{description}}">
                 </div>
 
-                <!-- Imagen y Video -->
+                <!-- Phase media inputs -->
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Imagen Fase (URL)</label>
@@ -129,6 +146,7 @@
                   </div>
                 </div>
 
+                <!-- Phase coordinates inputs -->
                 <div class="mb-3">
                   <label class="form-label">Latitud</label>
                   <input type="text" name="phases[{{idFalse}}].latitude" class="form-control" value="{{latitude}}">
@@ -139,39 +157,47 @@
                   <input type="text" name="phases[{{idFalse}}].longitude" class="form-control" value="{{longitude}}">
                 </div>
 
+                <!-- Map URL input -->
                 <div class="mb-3">
                   <label class="form-label">Mapa (URL)</label>
                   <input type="text" name="phases[{{idFalse}}].mapUrl" class="form-control" value="{{mapUrl}}"
                     placeholder="Introduce la URL del mapa">
                 </div>
 
-                <!-- ZONA DE ENIGMAS -->
+                <!-- SECTION: Enigmas (puzzles) associated with this phase -->
                 <div class="p-3 rounded-4 mt-4 border border-warning-subtle" style="background-color:#fff9e6;">
                   <h5 class="text-warning fw-semibold mb-3">💡 Enigmas de la fase</h5>
 
+                  <!-- Message when no enigmas are defined -->
                   {{^enigmas}}
                   <p class="text-muted">No hay enigmas en esta fase.</p>
                   {{/enigmas}}
 
+                  <!-- Loop through enigmas list -->
                   {{#enigmas}}
                   <div class="card mb-3 border-light shadow-sm">
                     <div class="card-body">
+
+                      <!-- Hidden enigma ID -->
                       <input type="hidden" name="phases[{{idFalse}}].enigmas[{{idTreak}}].id" value="{{id}}">
+
                       <h6 class="fw-bold text-dark">Enigma #{{enigmaNumber}}</h6>
 
+                      <!-- Enigma question -->
                       <div class="mb-2">
                         <label class="form-label">Pregunta</label>
                         <textarea name="phases[{{idFalse}}].enigmas[{{idTreak}}].enigma"
                           class="form-control">{{enigma}}</textarea>
                       </div>
 
+                      <!-- Enigma answer -->
                       <div class="mb-2">
                         <label class="form-label">Respuesta</label>
                         <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].answer" class="form-control"
                           value="{{answer}}">
                       </div>
 
-                      <!-- Imagen y Video del Enigma -->
+                      <!-- Media (image/video) for each enigma -->
                       <div class="row">
                         <div class="col-md-6 mb-2">
                           <label class="form-label">Imagen Enigma (URL)</label>
@@ -186,6 +212,7 @@
                         </div>
                       </div>
 
+                      <!-- Enigma hints -->
                       <div class="mb-2">
                         <label class="form-label">Pista 1</label>
                         <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].hint1" class="form-control"
@@ -198,6 +225,7 @@
                           value="{{hint2}}">
                       </div>
 
+                      <!-- Display answer format -->
                       <p class="text-muted small mb-0"><strong>Formato:</strong> {{answerFormat}}</p>
                     </div>
                   </div>
@@ -210,7 +238,7 @@
         </div>
       </div>
 
-      <!-- BOTÓN GUARDAR -->
+      <!-- SAVE BUTTON -->
       <div class="mt-4">
         <button type="button" class="btn btn-primary w-100 py-2" data-bs-toggle="modal"
           data-bs-target="#saveModal{{game.id}}">
@@ -218,20 +246,25 @@
         </button>
       </div>
 
-      <!-- MODAL CONFIRMACIÓN GUARDAR -->
+      <!-- SAVE CONFIRMATION MODAL -->
       <div class="modal fade" id="saveModal{{game.id}}" tabindex="-1" aria-labelledby="saveModalLabel{{game.id}}"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
+            <!-- Modal header -->
             <div class="modal-header bg-primary text-white">
               <h5 class="modal-title" id="saveModalLabel{{game.id}}">Guardar</h5>
               <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                 aria-label="Cerrar"></button>
             </div>
+
+            <!-- Modal body -->
             <div class="modal-body">
               <p>¿Deseas guardar los cambios realizados en el juego <strong>«{{game.name}}»</strong>?</p>
               <p class="text-muted mb-0">Se actualizarán todas las fases y enigmas asociados.</p>
             </div>
+
+            <!-- Modal actions -->
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
               <button type="submit" form="editGameForm" class="btn btn-primary">Guardar cambios</button>

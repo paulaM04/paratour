@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.code.paratour.model.Enigma;
 import com.code.paratour.model.Game;
@@ -48,7 +49,8 @@ public class GameController {
             // Ensure that each game has a valid preview image
             for (Game game : gameService.findAllGames()) {
                 if (game.getImage() == null || game.getImage().isBlank()) {
-                    game.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+                    game.setImage(
+                            "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
                 }
             }
 
@@ -63,7 +65,8 @@ public class GameController {
 
     /**
      * Displays the initial form for creating a new game.
-     * Default values are only applied if they are not already present (e.g. from redirects).
+     * Default values are only applied if they are not already present (e.g. from
+     * redirects).
      */
     @GetMapping("/newGame")
     public String newGameForm(Model model) {
@@ -87,7 +90,8 @@ public class GameController {
     }
 
     /**
-     * Deletes a game by ID, including all related phases and enigmas (cascade delete).
+     * Deletes a game by ID, including all related phases and enigmas (cascade
+     * delete).
      */
     @GetMapping("/deleteGame/{id}")
     public String deleteGame(@PathVariable Long id, Model model) {
@@ -178,7 +182,8 @@ public class GameController {
 
     /**
      * Displays the edit form for a game, including its phases and enigmas.
-     * It also reorders the list of game types so that the current type appears first.
+     * It also reorders the list of game types so that the current type appears
+     * first.
      */
     @GetMapping("/editGame/{id}")
     public String editGameForm(@PathVariable Long id, Model model) {
@@ -248,7 +253,7 @@ public class GameController {
      * Uses index-based iteration to match form data with existing entities.
      */
     @PostMapping("/edit/game/{id}")
-    public String updateGame(@PathVariable Long id, @ModelAttribute Game formGame) {
+    public String updateGame(@PathVariable Long id, @ModelAttribute Game formGame, RedirectAttributes redirectAttributes) {
         Game dbGame = gameService.findGameById(id);
 
         // Update main game attributes
@@ -315,6 +320,8 @@ public class GameController {
 
         // Persist updates (phases and enigmas are cascaded automatically)
         gameService.saveGame(dbGame);
+        redirectAttributes.addFlashAttribute("successMessage", "✅ El juego se ha guardado correctamente.");
+
         return "redirect:/editGame/" + id + "?success=1";
     }
 
