@@ -131,4 +131,9 @@ private List<Phase> phases = new ArrayList<>();
     public void setPhases(List<Phase> phases) {
         this.phases = phases;
     }
+
+    public void addPhase(Phase phase) {
+        phases.add(phase);
+        phase.setGame(this);
+    }
 }

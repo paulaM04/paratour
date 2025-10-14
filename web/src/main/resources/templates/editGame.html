@@ -3,13 +3,9 @@
 <body style="background-color: #f8f9fa;">
   <div class="container py-5">
 
-    <!-- Page title and navigation -->
-    <h1 class="mb-4 text-center" style="font-weight: 600;">
-      Editar juego: {{game.name}}
-    </h1>
+    <h1 class="mb-4 text-center fw-semibold">Editar juego: {{game.name}}</h1>
     <a href="/" class="btn btn-outline-secondary mb-4">⬅ Volver</a>
 
-    <!-- Success alert displayed after saving changes -->
     {{#successMessage}}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
       {{successMessage}}
@@ -17,262 +13,183 @@
     </div>
     {{/successMessage}}
 
-    <!-- MAIN FORM: handles all game data updates -->
     <form id="editGameForm" action="/edit/game/{{game.id}}" method="post">
 
-      <!-- SECTION: Game general information -->
+      <!-- DATOS DEL JUEGO -->
       <div class="p-4 rounded-4 mb-5 shadow-sm border border-primary-subtle" style="background-color:#e9f2ff;">
         <h3 class="mb-4 text-primary fw-semibold">🎮 Datos del juego</h3>
 
-        <!-- Game name input -->
         <div class="mb-3">
           <label class="form-label text-primary">Nombre</label>
           <input type="text" name="name" class="form-control" value="{{game.name}}" required>
         </div>
 
-        <!-- Game type dropdown selector -->
-        <div class="mb-3">
-          <label class="form-label text-primary">Tipo de juego</label>
-          <select name="gameType" class="form-select" required>
-            {{#typesGame}}
-            <option value="{{code}}" {{#isSelected}}selected{{/isSelected}}>{{name}}</option>
-            {{/typesGame}}
-          </select>
-        </div>
-
-        <!-- Game description text area -->
         <div class="mb-3">
           <label class="form-label text-primary">Descripción</label>
           <textarea name="description" class="form-control" rows="3">{{game.description}}</textarea>
         </div>
 
-        <!-- Cover image URL input -->
-        <div class="mb-3">
-          <label class="form-label text-primary">Imagen Portada (URL)</label>
-          <input type="text" name="image" class="form-control" value="{{game.image}}"
-            placeholder="Introduce la URL de la imagen">
-        </div>
-
-        <!-- Cover video URL input -->
-        <div class="mb-3">
-          <label class="form-label text-primary">Video Portada (URL)</label>
-          <input type="text" name="video" class="form-control" value="{{game.video}}"
-            placeholder="Introduce la URL del video">
-        </div>
-
-        <!-- Total number of phases -->
-        <div class="mb-3">
-          <label class="form-label text-primary">Número de fases</label>
-          <input type="number" name="numberOfRiddles" class="form-control" value="{{game.numberOfRiddles}}">
-        </div>
-
-        <!-- CHECKBOX OPTIONS for leaderboard and manual configuration -->
         <div class="row">
-          <!-- Option: leaderboard -->
           <div class="col-md-6 mb-2">
             <div class="form-check">
-              <input type="checkbox" name="hasLeaderboard" class="form-check-input"
-                {{#game.hasLeaderboard}}checked{{/game.hasLeaderboard}}>
-              <label class="form-check-label text-primary">
-                Tiene leaderboard
-                <span class="help-tip" tabindex="0"
-                  data-tip="Si está activado, el juego muestra una tabla de clasificación.">i</span>
-              </label>
+              <input type="checkbox" name="hasLeaderboard" class="form-check-input" {{#game.hasLeaderboard}}checked{{/game.hasLeaderboard}}>
+              <label class="form-check-label text-primary">Tiene leaderboard</label>
             </div>
           </div>
-
-          <!-- Option: manual flag -->
           <div class="col-md-6 mb-2">
             <div class="form-check">
               <input type="checkbox" name="manual" class="form-check-input" {{#game.manual}}checked{{/game.manual}}>
-              <label class="form-check-label text-primary">
-                Manual
-                <span class="help-tip" tabindex="0"
-                  data-tip="Indica que este registro fue creado o configurado manualmente.">i</span>
-              </label>
+              <label class="form-check-label text-primary">Manual</label>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- SECTION: Game phases -->
+      <!-- FASES -->
       <div class="p-4 rounded-4 mb-4 shadow-sm border border-success-subtle" style="background-color:#e9fcef;">
-        <h3 class="mb-3 text-success fw-semibold">✅ Fases del juego</h3>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="text-success fw-semibold mb-0">✅ Fases del juego</h3>
 
-        <!-- Accordion structure to display each phase -->
+          <!-- Botón que despliega el bloque con slots de nuevas fases -->
+          <button class="btn btn-success btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#addPhasesBlock" aria-expanded="false" aria-controls="addPhasesBlock">
+            ➕ Añadir fase
+          </button>
+        </div>
+
         <div class="accordion" id="phasesAccordion">
+          <!-- Fases existentes -->
           {{#phases}}
           <div class="accordion-item">
-
-            <!-- Accordion header -->
             <h2 class="accordion-header" id="phase-{{id}}">
-              <button class="accordion-button collapsed fw-semibold text-success" type="button" data-bs-toggle="collapse"
-                data-bs-target="#collapse-{{id}}" aria-expanded="false" aria-controls="collapse-{{id}}">
+              <button class="accordion-button collapsed fw-semibold text-success" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapse-{{id}}" aria-expanded="false" aria-controls="collapse-{{id}}">
                 {{phaseName}}
               </button>
             </h2>
 
-            <!-- Collapsible content for each phase -->
             <div id="collapse-{{id}}" class="accordion-collapse collapse" data-bs-parent="#phasesAccordion">
               <div class="accordion-body">
-
-                <!-- Hidden ID for backend identification -->
                 <input type="hidden" name="phases[{{idFalse}}].id" value="{{id}}">
 
-                <!-- Phase name field -->
                 <div class="mb-3">
                   <label class="form-label">Nombre de fase</label>
                   <input type="text" name="phases[{{idFalse}}].phaseName" class="form-control" value="{{phaseName}}">
                 </div>
 
-                <!-- Phase description field -->
                 <div class="mb-3">
                   <label class="form-label">Descripción</label>
-                  <input type="text" name="phases[{{idFalse}}].description" class="form-control"
-                    value="{{description}}">
+                  <input type="text" name="phases[{{idFalse}}].description" class="form-control" value="{{description}}">
                 </div>
 
-                <!-- Phase media inputs -->
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Imagen Fase (URL)</label>
-                    <input type="text" name="phases[{{idFalse}}].image" class="form-control" value="{{image}}"
-                      placeholder="Introduce la URL de la imagen de la fase">
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Video Fase (URL)</label>
-                    <input type="text" name="phases[{{idFalse}}].video" class="form-control" value="{{video}}"
-                      placeholder="Introduce la URL del video de la fase">
-                  </div>
-                </div>
+                <!-- Botón Añadir enigma (desplegable solo con descripción del enigma nuevo) -->
+                <button class="btn btn-warning btn-sm mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#addEnigmas-{{idFalse}}" aria-expanded="false">
+                  ➕ Añadir enigma
+                </button>
 
-                <!-- Phase coordinates inputs -->
-                <div class="mb-3">
-                  <label class="form-label">Latitud</label>
-                  <input type="text" name="phases[{{idFalse}}].latitude" class="form-control" value="{{latitude}}">
-                </div>
+                <!-- Enigmas existentes -->
+                {{#enigmas}}
+                <div class="card mb-3 border-light shadow-sm">
+                  <div class="card-body">
+                    <input type="hidden" name="phases[{{idFalse}}].enigmas[{{idTreak}}].id" value="{{id}}">
 
-                <div class="mb-3">
-                  <label class="form-label">Longitud</label>
-                  <input type="text" name="phases[{{idFalse}}].longitude" class="form-control" value="{{longitude}}">
-                </div>
-
-                <!-- Map URL input -->
-                <div class="mb-3">
-                  <label class="form-label">Mapa (URL)</label>
-                  <input type="text" name="phases[{{idFalse}}].mapUrl" class="form-control" value="{{mapUrl}}"
-                    placeholder="Introduce la URL del mapa">
-                </div>
-
-                <!-- SECTION: Enigmas (puzzles) associated with this phase -->
-                <div class="p-3 rounded-4 mt-4 border border-warning-subtle" style="background-color:#fff9e6;">
-                  <h5 class="text-warning fw-semibold mb-3">💡 Enigmas de la fase</h5>
-
-                  <!-- Message when no enigmas are defined -->
-                  {{^enigmas}}
-                  <p class="text-muted">No hay enigmas en esta fase.</p>
-                  {{/enigmas}}
-
-                  <!-- Loop through enigmas list -->
-                  {{#enigmas}}
-                  <div class="card mb-3 border-light shadow-sm">
-                    <div class="card-body">
-
-                      <!-- Hidden enigma ID -->
-                      <input type="hidden" name="phases[{{idFalse}}].enigmas[{{idTreak}}].id" value="{{id}}">
-
-                      <h6 class="fw-bold text-dark">Enigma #{{enigmaNumber}}</h6>
-
-                      <!-- Enigma question -->
-                      <div class="mb-2">
-                        <label class="form-label">Pregunta</label>
-                        <textarea name="phases[{{idFalse}}].enigmas[{{idTreak}}].enigma"
-                          class="form-control">{{enigma}}</textarea>
-                      </div>
-
-                      <!-- Enigma answer -->
-                      <div class="mb-2">
-                        <label class="form-label">Respuesta</label>
-                        <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].answer" class="form-control"
-                          value="{{answer}}">
-                      </div>
-
-                      <!-- Media (image/video) for each enigma -->
-                      <div class="row">
-                        <div class="col-md-6 mb-2">
-                          <label class="form-label">Imagen Enigma (URL)</label>
-                          <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].image" class="form-control"
-                            value="{{image}}" placeholder="Introduce la URL de la imagen del enigma">
-                        </div>
-                        <div class="col-md-6 mb-2">
-                          <label class="form-label">Video Enigma (URL)</label>
-                          <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].enigmaVideo"
-                            class="form-control" value="{{enigmaVideo}}"
-                            placeholder="Introduce la URL del video del enigma">
-                        </div>
-                      </div>
-
-                      <!-- Enigma hints -->
-                      <div class="mb-2">
-                        <label class="form-label">Pista 1</label>
-                        <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].hint1" class="form-control"
-                          value="{{hint1}}">
-                      </div>
-
-                      <div class="mb-2">
-                        <label class="form-label">Pista 2</label>
-                        <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].hint2" class="form-control"
-                          value="{{hint2}}">
-                      </div>
-
-                      <!-- Display answer format -->
-                      <p class="text-muted small mb-0"><strong>Formato:</strong> {{answerFormat}}</p>
+                    <div class="mb-2">
+                      <label class="form-label">Pregunta</label>
+                      <textarea name="phases[{{idFalse}}].enigmas[{{idTreak}}].enigma" class="form-control">{{enigma}}</textarea>
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label">Respuesta</label>
+                      <input type="text" name="phases[{{idFalse}}].enigmas[{{idTreak}}].answer" class="form-control" value="{{answer}}">
                     </div>
                   </div>
-                  {{/enigmas}}
                 </div>
+                {{/enigmas}}
+
+                <!-- Desplegable con SLOTS de nuevos enigmas (solo descripción) -->
+                <div id="addEnigmas-{{idFalse}}" class="collapse">
+                  {{#extraEnigmas}}
+                  <div class="card mb-3 border-warning-subtle">
+                    <div class="card-body bg-light">
+                      <h6 class="fw-semibold mb-2">➕ Nuevo enigma</h6>
+                      <!-- descripción del nuevo enigma; el backend decidirá cómo mapearla (ej. a 'enigma' o un campo 'description' si existe) -->
+                      <div class="mb-2">
+                        <label class="form-label">Descripción del enigma</label>
+                        <textarea name="phases[{{idFalse}}].enigmas[{{.}}].enigma" class="form-control" placeholder="Escribe la descripción / enunciado"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                  {{/extraEnigmas}}
+                </div>
+
               </div>
             </div>
           </div>
           {{/phases}}
-        </div>
-      </div>
 
-      <!-- SAVE BUTTON -->
-      <div class="mt-4">
-        <button type="button" class="btn btn-primary w-100 py-2" data-bs-toggle="modal"
-          data-bs-target="#saveModal{{game.id}}">
-          💾 Guardar todo
-        </button>
-      </div>
+          <!-- Bloque desplegable: añadir NUEVAS FASES (solo descripción) -->
+          <div id="addPhasesBlock" class="collapse mt-3">
+            {{#extraPhases}}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="new-phase-{{index}}">
+                <button class="accordion-button collapsed fw-semibold text-success" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#collapse-new-{{index}}" aria-expanded="false"
+                  aria-controls="collapse-new-{{index}}">
+                  (Nueva fase {{index}})
+                </button>
+              </h2>
 
-      <!-- SAVE CONFIRMATION MODAL -->
-      <div class="modal fade" id="saveModal{{game.id}}" tabindex="-1" aria-labelledby="saveModalLabel{{game.id}}"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <!-- Modal header -->
-            <div class="modal-header bg-primary text-white">
-              <h5 class="modal-title" id="saveModalLabel{{game.id}}">Guardar</h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                aria-label="Cerrar"></button>
+              <div id="collapse-new-{{index}}" class="accordion-collapse collapse" data-bs-parent="#phasesAccordion">
+                <div class="accordion-body">
+                  <!-- Solo descripción de la fase nueva -->
+                  <div class="mb-3">
+                    <label class="form-label">Nombre de fase</label>
+                    <input type="text" name="phases[{{index}}].phaseName" class="form-control" placeholder="Ej. Fase X">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Descripción de la fase</label>
+                    <textarea name="phases[{{index}}].description" class="form-control" rows="2" placeholder="Describe brevemente la fase"></textarea>
+                  </div>
+
+                  <!-- Botón para desplegar 'añadir enigma' dentro de la nueva fase -->
+                  <button class="btn btn-warning btn-sm mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#addEnigmasNew-{{index}}" aria-expanded="false">
+                    ➕ Añadir enigma
+                  </button>
+
+                  <div id="addEnigmasNew-{{index}}" class="collapse">
+                    <!-- Uno o más slots de enigma nuevo (solo descripción) -->
+                    <div class="card mb-3 border-warning-subtle">
+                      <div class="card-body bg-light">
+                        <h6 class="fw-semibold mb-2">➕ Nuevo enigma</h6>
+                        <div class="mb-2">
+                          <label class="form-label">Descripción del enigma</label>
+                          <textarea name="phases[{{index}}].enigmas[0].enigma" class="form-control" placeholder="Escribe la descripción / enunciado"></textarea>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="card mb-3 border-warning-subtle">
+                      <div class="card-body bg-light">
+                        <h6 class="fw-semibold mb-2">➕ Nuevo enigma</h6>
+                        <div class="mb-2">
+                          <label class="form-label">Descripción del enigma</label>
+                          <textarea name="phases[{{index}}].enigmas[1].enigma" class="form-control" placeholder="(opcional) Otro enigma"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
             </div>
-
-            <!-- Modal body -->
-            <div class="modal-body">
-              <p>¿Deseas guardar los cambios realizados en el juego <strong>«{{game.name}}»</strong>?</p>
-              <p class="text-muted mb-0">Se actualizarán todas las fases y enigmas asociados.</p>
-            </div>
-
-            <!-- Modal actions -->
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="submit" form="editGameForm" class="btn btn-primary">Guardar cambios</button>
-            </div>
+            {{/extraPhases}}
           </div>
         </div>
       </div>
 
+      <!-- GUARDAR -->
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary w-100 py-2">💾 Guardar todo</button>
+      </div>
     </form>
   </div>
 

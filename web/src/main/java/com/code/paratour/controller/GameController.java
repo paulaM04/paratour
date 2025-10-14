@@ -253,7 +253,10 @@ public class GameController {
      * Uses index-based iteration to match form data with existing entities.
      */
     @PostMapping("/edit/game/{id}")
-    public String updateGame(@PathVariable Long id, @ModelAttribute Game formGame, RedirectAttributes redirectAttributes) {
+    public String updateGame(@PathVariable Long id, 
+                            @ModelAttribute Game formGame, 
+                            RedirectAttributes redirectAttributes,
+                            @ModelAttribute("newPhase") Phase newPhase) {
         Game dbGame = gameService.findGameById(id);
 
         // Update main game attributes
@@ -266,6 +269,10 @@ public class GameController {
         dbGame.setHasLeaderboard(formGame.isHasLeaderboard());
         dbGame.setManual(formGame.getManual());
 
+        int sizeFormPhases=formGame.getPhases() == null ? 0 : formGame.getPhases().size();
+        int sizeDbPhases=dbGame.getPhases() == null ? 0 : dbGame.getPhases().size();
+
+        
         // Synchronize each phase using its list index
         for (int i = 0; i < dbGame.getPhases().size(); i++) {
             Phase formPhase = formGame.getPhases().get(i);
@@ -316,6 +323,9 @@ public class GameController {
                     dbEnigma.setPhase(dbPhase);
                 }
             }
+        }
+        if (sizeFormPhases != sizeDbPhases) {
+           dbGame.addPhase(newPhase);
         }
 
         // Persist updates (phases and enigmas are cascaded automatically)
