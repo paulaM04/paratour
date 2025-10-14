@@ -68,4 +68,10 @@ public class EnigmaService {
     public void delete(Long idPhase) {
         enigmaRepository.deleteById(idPhase);
     }
+
+    public void deleteAll(List<Enigma> enigmas) {
+        enigmaRepository.deleteAll(enigmas);
+    }
+
+    
 }

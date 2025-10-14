@@ -81,6 +81,9 @@ public class Phase {
     }
 
     // getters and setters
+    public int getIdFalse() {
+        return idFalse;
+    }
     public Long getId() {
         return id;
     }
@@ -169,4 +172,13 @@ public class Phase {
         this.manual = manual;
     }
 
+    public void deleteEnigma(Enigma enigma) {
+        enigmas.remove(enigma);
+        enigma.setPhase(null);
+    }
+
+    public void addEnigma(Enigma enigma) {
+        enigmas.add(enigma);
+        enigma.setPhase(this);
+    }
 }

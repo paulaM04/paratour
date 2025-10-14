@@ -202,7 +202,7 @@ public class PhaseController {
 
                     // Populate all possible fields for the enigma
                     enigma.setLiteralText(params.getOrDefault(prefix + "literalText", ""));
-                    enigma.setEnigma(params.getOrDefault(prefix + "enigma", ""));
+                    enigma.setStatement(params.getOrDefault(prefix + "enigma", ""));
                     enigma.setAnswer(params.getOrDefault(prefix + "answer", ""));
                     enigma.setAnswerFormat(params.getOrDefault(prefix + "answerFormat", ""));
                     enigma.setHint1(params.getOrDefault(prefix + "hint1", ""));

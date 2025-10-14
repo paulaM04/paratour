@@ -78,4 +78,8 @@ public class PhaseService {
     public List<Phase> findByGameId(Long gameId) {
         return phaseRepository.findByGameId(gameId);
     }
+
+    public void deleteAll(List<Phase> phases) {
+        phaseRepository.deleteAll(phases);
+    }
 }

@@ -45,8 +45,8 @@ private Long phaseId;
     @Column(name = "video_enigma", columnDefinition = "TEXT")
     private String enigmaVideo;
 
-    @Column(columnDefinition = "TEXT")
-    private String enigma;
+    @Column(name = "enigma", columnDefinition = "TEXT")
+    private String statement;
 
     @Column(name = "formato_respuesta", columnDefinition = "TEXT")
     private String answerFormat;
@@ -179,12 +179,12 @@ public Phase getPhase() {
         this.enigmaVideo = enigmaVideo;
     }
 
-    public String getEnigma() {
-        return enigma;
+    public String getStatement() {
+        return statement;
     }
 
-    public void setEnigma(String enigma) {
-        this.enigma = enigma;
+    public void setStatement(String enigma) {
+        this.statement = enigma;
     }
 
     public String getAnswerFormat() {
@@ -313,5 +313,9 @@ public Phase getPhase() {
 
     public void setManual(Boolean manual) {
         this.manual = manual;
+    }
+
+    public void setGame(Game game) {
+        this.phase.setGame(game);
     }
 }

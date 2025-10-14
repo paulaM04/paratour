@@ -166,8 +166,8 @@ public class GameController {
 
             List<Enigma> enigmas = phase.getEnigmas();
             for (Enigma e : enigmas) {
-                if (e.getEnigma() == null || e.getEnigma().isBlank()) {
-                    e.setEnigma("No riddle defined yet");
+                if (e.getStatement() == null || e.getStatement().isBlank()) {
+                    e.setStatement("No riddle defined yet");
                 }
                 if (e.getAnswerFormat() == null || e.getAnswerFormat().isBlank()) {
                     e.setAnswerFormat("No format defined");
@@ -202,8 +202,8 @@ public class GameController {
                 for (Enigma e : phase.getEnigmas()) {
                     e.setIdidTreak(j++); // helper index for the template
                     enigmas.add(e);
-                    if (e.getEnigma() == null || e.getEnigma().isBlank()) {
-                        e.setEnigma("");
+                    if (e.getStatement() == null || e.getStatement().isBlank()) {
+                        e.setStatement("");
                     }
                     if (e.getAnswerFormat() == null || e.getAnswerFormat().isBlank()) {
                         e.setAnswerFormat("");
@@ -253,10 +253,10 @@ public class GameController {
      * Uses index-based iteration to match form data with existing entities.
      */
     @PostMapping("/edit/game/{id}")
-    public String updateGame(@PathVariable Long id, 
-                            @ModelAttribute Game formGame, 
-                            RedirectAttributes redirectAttributes,
-                            @ModelAttribute("newPhase") Phase newPhase) {
+    public String updateGame(@PathVariable Long id,
+            @ModelAttribute Game formGame,
+            RedirectAttributes redirectAttributes,
+            @ModelAttribute("newPhase") Phase newPhase) {
         Game dbGame = gameService.findGameById(id);
 
         // Update main game attributes
@@ -269,10 +269,9 @@ public class GameController {
         dbGame.setHasLeaderboard(formGame.isHasLeaderboard());
         dbGame.setManual(formGame.getManual());
 
-        int sizeFormPhases=formGame.getPhases() == null ? 0 : formGame.getPhases().size();
-        int sizeDbPhases=dbGame.getPhases() == null ? 0 : dbGame.getPhases().size();
+        int sizeFormPhases = formGame.getPhases() == null ? 0 : formGame.getPhases().size();
+        int sizeDbPhases = dbGame.getPhases() == null ? 0 : dbGame.getPhases().size();
 
-        
         // Synchronize each phase using its list index
         for (int i = 0; i < dbGame.getPhases().size(); i++) {
             Phase formPhase = formGame.getPhases().get(i);
@@ -297,7 +296,7 @@ public class GameController {
                     Enigma dbEnigma = dbPhase.getEnigmas().get(j); // existing enigma with persistent ID
 
                     // Update all mutable fields safely
-                    dbEnigma.setEnigma(safe(formEnigma.getEnigma()));
+                    dbEnigma.setStatement(safe(formEnigma.getStatement()));
                     dbEnigma.setAnswer(safe(formEnigma.getAnswer()));
                     dbEnigma.setHint1(safe(formEnigma.getHint1()));
                     dbEnigma.setHint2(safe(formEnigma.getHint2()));
@@ -325,7 +324,7 @@ public class GameController {
             }
         }
         if (sizeFormPhases != sizeDbPhases) {
-           dbGame.addPhase(newPhase);
+            dbGame.addPhase(newPhase);
         }
 
         // Persist updates (phases and enigmas are cascaded automatically)
@@ -362,6 +361,96 @@ public class GameController {
             model.addAttribute("message", "Missing required parameter: " + ex.getParameterName());
             return "error";
         }
+    }
+
+    @PostMapping("/addPhase/{gameId}")
+    public String addPhase(@PathVariable Long gameId,
+            @ModelAttribute Phase newPhase,
+            RedirectAttributes redirectAttributes) {
+        Game game = gameService.findGameById(gameId);
+
+        if (newPhase.getPhaseName() != null && !newPhase.getPhaseName().isBlank()) {
+            newPhase.setGame(game);
+            if (newPhase.getLiteralText() == null || newPhase.getLiteralText().isBlank()) {
+                newPhase.setLiteralText("Phase " + newPhase.getPhaseName());
+            }
+            if (newPhase.getLatitude() == null || newPhase.getLatitude().isBlank()) {
+                newPhase.setLatitude("");
+            }
+            if (newPhase.getLongitude() == null || newPhase.getLongitude().isBlank()) {
+                newPhase.setLongitude("");
+            }
+            game.addPhase(newPhase);
+            gameService.saveGame(game);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "✅ Nueva fase añadida correctamente.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "❌ Debes introducir un nombre para la fase.");
+        }
+
+        return "redirect:/editGame/" + gameId;
+    }
+
+    @PostMapping("/deletePhase/{phaseId}")
+    public String deletePhase(@PathVariable Long phaseId,
+            RedirectAttributes redirectAttributes) {
+
+        Long gameId = phaseService.findPhaseById(phaseId).getGame().getId();
+        Game game = gameService.findGameById(gameId);
+        if (game == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
+            return "redirect:/games";
+        }
+
+        Phase phaseToDelete = phaseService.findPhaseById(phaseId);
+        if (phaseToDelete == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
+            return "redirect:/editGame/" + gameId;
+        }
+        enigmaService.deleteAll(phaseToDelete.getEnigmas());
+
+        phaseService.delete(phaseToDelete.getId());
+
+        redirectAttributes.addFlashAttribute("successMessage", "✅ Fase eliminada correctamente.");
+        return "redirect:/editGame/" + gameId;
+    }
+
+    @PostMapping("/addEnigma/{phaseId}")
+    public String addEnigma(@PathVariable Long phaseId,
+            @ModelAttribute Enigma newEnigma,
+            RedirectAttributes redirectAttributes) {
+        
+        Phase phase = phaseService.findPhaseById(phaseId);
+        if (phase == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
+            return "redirect:/games";
+        }
+        Game game = phase.getGame();
+
+        if (newEnigma.getStatement() != null && !newEnigma.getStatement().isBlank()) {
+            newEnigma.setGame(game);
+            if (newEnigma.getLiteralText() == null || newEnigma.getLiteralText().isBlank()) {
+                newEnigma.setLiteralText("Enigma " + newEnigma.getStatement());
+            }
+            if (newEnigma.getLatitude() == null || newEnigma.getLatitude().isBlank()) {
+                newEnigma.setLatitude("");
+            }
+            if (newEnigma.getLongitude() == null || newEnigma.getLongitude().isBlank()) {
+                newEnigma.setLongitude("");
+            }
+            phase.addEnigma(newEnigma);
+            enigmaService.save(newEnigma);
+            phaseService.save(phase);
+            gameService.saveGame(game);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "✅ Nueva fase añadida correctamente.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "❌ Debes introducir un nombre para la fase.");
+        }
+
+        return "redirect:/editGame/" + game.getId();
     }
 
 }

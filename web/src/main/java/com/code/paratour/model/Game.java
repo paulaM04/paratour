@@ -136,4 +136,13 @@ private List<Phase> phases = new ArrayList<>();
         phases.add(phase);
         phase.setGame(this);
     }
+
+    public void deletePhase(Phase phase) {
+        for (Enigma enigma : phase.getEnigmas()) {
+            enigma.setPhase(null);
+            enigma.setGame(null);
+        }
+        phases.remove(phase.getIdFalse());
+    }
+
 }
