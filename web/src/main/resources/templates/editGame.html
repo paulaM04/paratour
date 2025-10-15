@@ -115,7 +115,53 @@
                     </div>
                   </div>
                 </div>
+<div class="mt-4 p-3 rounded-4 border border-warning-subtle" style="background-color:#fff9e6;">
+              <h5 class="text-warning fw-semibold mb-3">💡 Enigmas de la fase</h5>
 
+              {{^enigmas}}
+              <div class="alert alert-secondary mt-2">No hay enigmas en esta fase.</div>
+              {{/enigmas}}
+
+              <div class="accordion" id="enigmasAccordion-{{id}}">
+                {{#enigmas}}
+                <div class="accordion-item mb-2 border-0 shadow-sm">
+                  <h2 class="accordion-header" id="enigma-{{id}}">
+                    <button class="accordion-button collapsed fw-semibold text-dark" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#collapseEnigma-{{id}}" aria-expanded="false"
+                      aria-controls="collapseEnigma-{{id}}">
+                      Enigma #{{enigmaNumber}}
+                    </button>
+                  </h2>
+                  <div id="collapseEnigma-{{id}}" class="accordion-collapse collapse"
+                    data-bs-parent="#enigmasAccordion-{{id}}">
+                    <div class="accordion-body">
+                      <p><strong>❓ Pregunta:</strong> {{statement}}</p>
+                      <p><strong>✅ Respuesta:</strong> {{answer}}</p>
+                      {{#hint1}}<p><strong>💡 Pista 1:</strong> {{hint1}}</p>{{/hint1}}
+                      {{#hint2}}<p><strong>💡 Pista 2:</strong> {{hint2}}</p>{{/hint2}}
+                      <p class="text-muted small mb-0"><strong>Formato:</strong> {{answerFormat}}</p>
+                      {{#image}}
+                      <div class="text-center mb-3">
+                        <strong class="text-primary">Imagen Enigma:</strong><br>
+
+                        <img src="{{image}}" class="img-fluid rounded shadow-sm"
+                          style="max-height:150px; object-fit:cover;" alt="Imagen de fase">
+                      </div>
+                      {{/image}}
+
+                      {{#video}}
+                      <div class="mb-3">
+                        <strong class="text-primary">Video Enigma:</strong><br>
+                        <video class="w-100 rounded shadow-sm" controls>
+                          <source src="{{video}}" type="video/mp4">
+                        </video>
+                      </div>
+                      {{/video}}
+                    </div>
+                  </div>
+                </div>
+                {{/enigmas}}
+              </div>
               </div>
             </div>
           </div>

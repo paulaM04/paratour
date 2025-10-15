@@ -19,7 +19,7 @@
 
     {{#game.video}}
     <div class="mb-4">
-      <strong class="text-primary">Imagen Juego:</strong><br>
+      <strong class="text-primary">Video del Juego:</strong><br>
       <video class="w-100 rounded shadow-sm" controls>
         <source src="{{game.video}}" type="video/mp4">
         Tu navegador no soporta video.
@@ -121,7 +121,7 @@
                   <div id="collapseEnigma-{{id}}" class="accordion-collapse collapse"
                     data-bs-parent="#enigmasAccordion-{{id}}">
                     <div class="accordion-body">
-                      <p><strong>❓ Pregunta:</strong> {{enigma}}</p>
+                      <p><strong>❓ Pregunta:</strong> {{statement}}</p>
                       <p><strong>✅ Respuesta:</strong> {{answer}}</p>
                       {{#hint1}}<p><strong>💡 Pista 1:</strong> {{hint1}}</p>{{/hint1}}
                       {{#hint2}}<p><strong>💡 Pista 2:</strong> {{hint2}}</p>{{/hint2}}

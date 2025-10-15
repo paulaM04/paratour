@@ -106,7 +106,7 @@ private Long phaseId;
     public Long getIdPhase(){
         return this.phaseId;
     }
-public Phase getPhase() {
+    public Phase getPhase() {
         return phase;
     }
     public void setPhase(Phase phase) {

@@ -240,10 +240,8 @@ public class GameController {
                 orderedTypes.add(type);
             }
         }
-
-        model.addAttribute("typesGame", orderedTypes);
-        model.addAttribute("enigmas", enigmas);
         model.addAttribute("phases", game.getPhases());
+        model.addAttribute("typesGame", orderedTypes);
         model.addAttribute("game", game);
         return "editGame";
     }
@@ -256,6 +254,7 @@ public class GameController {
     public String updateGame(@PathVariable Long id,
             @ModelAttribute Game formGame,
             RedirectAttributes redirectAttributes,
+            Model model,
             @ModelAttribute("newPhase") Phase newPhase) {
         Game dbGame = gameService.findGameById(id);
 
@@ -330,6 +329,7 @@ public class GameController {
         // Persist updates (phases and enigmas are cascaded automatically)
         gameService.saveGame(dbGame);
         redirectAttributes.addFlashAttribute("successMessage", "✅ El juego se ha guardado correctamente.");
+        model.addAttribute("phases", dbGame.getPhases());
 
         return "redirect:/editGame/" + id + "?success=1";
     }
