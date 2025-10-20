@@ -1,6 +1,7 @@
 package com.code.paratour.service;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -33,8 +34,9 @@ public class TypeGameService {
      * 
      * @return a list containing all {@link GameType} entities
      */
-    public List<GameType> findAll() {
-        return typeGameRepository.findAll();
+    public Set<GameType> findAll() {
+        Set<GameType> types = new HashSet<>(typeGameRepository.findAll());
+        return types;
     }
 
     /**

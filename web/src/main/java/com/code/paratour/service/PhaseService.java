@@ -1,6 +1,7 @@
 package com.code.paratour.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -75,7 +76,7 @@ public class PhaseService {
      * @param gameId the ID of the game whose phases are to be retrieved
      * @return a list of {@link Phase} entities related to the given game ID
      */
-    public List<Phase> findByGameId(Long gameId) {
+    public Set<Phase> findByGameId(Long gameId) {
         return phaseRepository.findByGameId(gameId);
     }
 

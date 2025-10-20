@@ -1,11 +1,12 @@
 package com.code.paratour.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,10 +41,8 @@ public class Game {
     @Column(name = "tiene_leaderboard")
     private Boolean hasLeaderboard;
 
-@OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-private List<Phase> phases = new ArrayList<>();
-
-
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Phase> phases = new HashSet<>();
 
     private Boolean manual;
 
@@ -124,11 +123,11 @@ private List<Phase> phases = new ArrayList<>();
         throw new UnsupportedOperationException("Unimplemented method 'orElseThrow'");
     }
 
-    public List<Phase> getPhases() {
+    public Set<Phase> getPhases() {
         return phases;
     }
 
-    public void setPhases(List<Phase> phases) {
+    public void setPhases(Set<Phase> phases) {
         this.phases = phases;
     }
 
@@ -140,7 +139,6 @@ private List<Phase> phases = new ArrayList<>();
     public void deletePhase(Phase phase) {
         for (Enigma enigma : phase.getEnigmas()) {
             enigma.setPhase(null);
-            enigma.setGame(null);
         }
         phases.remove(phase.getIdFalse());
     }

@@ -1,6 +1,7 @@
 package com.code.paratour.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -69,7 +70,7 @@ public class EnigmaService {
         enigmaRepository.deleteById(idPhase);
     }
 
-    public void deleteAll(List<Enigma> enigmas) {
+    public void deleteAll(Set<Enigma> enigmas) {
         enigmaRepository.deleteAll(enigmas);
     }
 

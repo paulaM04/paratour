@@ -7,9 +7,15 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.code.paratour.model.Enigma;
+import com.code.paratour.model.Game;
+import com.code.paratour.model.Phase;
 import com.code.paratour.service.EnigmaService;
 import com.code.paratour.service.GameService;
 import com.code.paratour.service.PhaseService;
@@ -116,4 +122,42 @@ public class EnigmaController {
         model.addAttribute("manual", params.getOrDefault("manual", "false"));
     }
 
+    @PostMapping("/addEnigma/{phaseId}")
+    public String addEnigma(@PathVariable Long phaseId,
+            @ModelAttribute Enigma newEnigma,
+            RedirectAttributes redirectAttributes) {
+
+        Phase phase = phaseService.findPhaseById(phaseId);
+        if (phase == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
+            return "redirect:/error";
+        }
+        Game game = phase.getGame();
+
+        if (newEnigma.getStatement() != null && !newEnigma.getStatement().isBlank()) {
+            newEnigma.setPhase(phase);
+            if (newEnigma.getLiteralText() == null || newEnigma.getLiteralText().isBlank()) {
+                newEnigma.setLiteralText("Enigma " + newEnigma.getStatement());
+            }
+            if (newEnigma.getLatitude() == null || newEnigma.getLatitude().isBlank()) {
+                newEnigma.setLatitude("");
+            }
+            if (newEnigma.getLongitude() == null || newEnigma.getLongitude().isBlank()) {
+                newEnigma.setLongitude("");
+            }
+
+            phase.addEnigma(newEnigma);
+
+            enigmaService.save(newEnigma);
+            phaseService.save(phase);
+            gameService.saveGame(game);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "✅ Nueva fase añadida correctamente.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "❌ Debes introducir un nombre para la fase.");
+        }
+
+        return "redirect:/editGame/" + game.getId();
+    }
 }

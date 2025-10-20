@@ -1,7 +1,7 @@
 package com.code.paratour.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -24,10 +24,9 @@ public class Phase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY) // ← Hibernate gestiona la FK
-    @JoinColumn(name = "id_juego", nullable = true) // ← en tu DDL es NULLABLE; déjalo así si tienes fases “huérfanas”
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_juego", insertable = false, updatable = false)
     private Game game;
-
 
     @Column(name = "fase")
     private String phaseName;
@@ -58,13 +57,13 @@ public class Phase {
     @Column(name = "manual", nullable = false)
     private Boolean manual = Boolean.TRUE;
 
-    @OneToMany(mappedBy = "phase", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Enigma> enigmas = new ArrayList<>();
+    @OneToMany(mappedBy = "phase", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Enigma> enigmas = new HashSet<>();
 
     @Transient
     private int idFalse; // Para evitar que se muestre el ID en el formulario
 
- public Game getGame() {
+    public Game getGame() {
         return game;
     }
 
@@ -72,11 +71,11 @@ public class Phase {
         this.game = game;
     }
 
-    public void setEnigmas(List<Enigma> enigmas) {
+    public void setEnigmas(Set<Enigma> enigmas) {
         this.enigmas = enigmas;
     }
 
-    public List<Enigma> getEnigmas() {
+    public Set<Enigma> getEnigmas() {
         return enigmas;
     }
 
@@ -84,6 +83,7 @@ public class Phase {
     public int getIdFalse() {
         return idFalse;
     }
+
     public Long getId() {
         return id;
     }
@@ -180,5 +180,8 @@ public class Phase {
     public void addEnigma(Enigma enigma) {
         enigmas.add(enigma);
         enigma.setPhase(this);
+    }
+    public void setId(Long id) {
+        this.id = id;
     }
 }

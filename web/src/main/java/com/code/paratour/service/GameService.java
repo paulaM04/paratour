@@ -42,10 +42,10 @@ public class GameService {
      * 
      * @param idGame the ID of the game to retrieve
      * @return the corresponding {@link Game} entity, or {@code null} if not found
-     */
-    public Game findGameById(Long idGame) {
-        return gameRepository.findById(idGame).orElse(null);
-    }
+    //  */
+    // public Game findGameById(Long idGame) {
+    //     return gameRepository.findById(idGame).orElse(null);
+    // }
 
     /**
      * Saves or updates a game entity in the database.
@@ -68,4 +68,9 @@ public class GameService {
     public void deleteGame(Long idGame) {
         gameRepository.deleteById(idGame);
     }
+    public Game findGameById(Long id) {
+    return gameRepository.findGameWithPhasesAndEnigmas(id);
+}
+
+
 }

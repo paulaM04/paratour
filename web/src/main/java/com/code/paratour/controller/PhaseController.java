@@ -8,8 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.code.paratour.model.Enigma;
 import com.code.paratour.model.Game;
@@ -74,7 +77,8 @@ public class PhaseController {
     }
 
     /**
-     * Step 1 submission: receives game data and redirects to the phase configuration view.
+     * Step 1 submission: receives game data and redirects to the phase
+     * configuration view.
      * The parameters are forwarded via redirect attributes to preserve user input.
      */
     @PostMapping("/newGame_post1")
@@ -87,7 +91,8 @@ public class PhaseController {
             @RequestParam(value = "hasLeaderboard", required = false) String hasLeaderboard,
             @RequestParam(value = "manual", required = false) String manual,
             @RequestParam("numPhases") int numPhases,
-            org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+            org.springframework.web.servlet.mvc.support.RedirectAttributes ra,
+            Model model) {
 
         // Normalize checkbox values (default to true if unchecked)
         hasLeaderboard = (hasLeaderboard == null) ? "true" : hasLeaderboard;
@@ -102,7 +107,20 @@ public class PhaseController {
         ra.addAttribute("gameVideo", gameVideo);
         ra.addAttribute("hasLeaderboard", hasLeaderboard);
         ra.addAttribute("manual", manual);
-
+        if (numPhases < 1) {
+            Game game = new Game();
+            game.setName(gameName);
+            game.setDescription(gameDescription);
+            game.setGameType(gameType);
+            game.setImage(gameImage);
+            game.setVideo(gameVideo);
+            game.setHasLeaderboard(Boolean.parseBoolean(hasLeaderboard));
+            game.setManual(Boolean.parseBoolean(manual));
+            game.setNumberOfRiddles(0);
+            gameService.saveGame(game);
+            model.addAttribute("games", gameService.findAllGames());
+            return "home"; // Redirect to home if invalid number of phases
+        }
         // Redirect to the phase configuration step
         return "redirect:/newGame_get2";
     }
@@ -165,9 +183,6 @@ public class PhaseController {
             game.setHasLeaderboard(Boolean.parseBoolean(params.getOrDefault("hasLeaderboard", "true")));
             game.setManual(Boolean.parseBoolean(params.getOrDefault("manual", "true")));
             game.setNumberOfRiddles(0);
-
-            // Save the game first to assign a persistent ID
-            gameService.saveGame(game);
 
             List<Phase> savedPhases = new ArrayList<>();
 
@@ -270,4 +285,68 @@ public class PhaseController {
             return 0;
         }
     }
+
+        @PostMapping("/deletePhase/{phaseId}")
+    public String deletePhase(@PathVariable Long phaseId,
+            RedirectAttributes redirectAttributes) {
+
+        Long gameId = phaseService.findPhaseById(phaseId).getGame().getId();
+        Game game = gameService.findGameById(gameId);
+        if (game == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
+            return "redirect:/games";
+        }
+
+        Phase phaseToDelete = phaseService.findPhaseById(phaseId);
+        if (phaseToDelete == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
+            return "redirect:/editGame/" + gameId;
+        }
+        enigmaService.deleteAll(phaseToDelete.getEnigmas());
+
+        phaseService.delete(phaseToDelete.getId());
+
+        redirectAttributes.addFlashAttribute("successMessage", "✅ Fase eliminada correctamente.");
+        return "redirect:/editGame/" + gameId;
+    }
+
+        @PostMapping("/addPhase/{gameId}")
+    public String addPhase(@PathVariable Long gameId,
+            @ModelAttribute Phase newPhase,
+            RedirectAttributes redirectAttributes) {
+
+        Game game = gameService.findGameById(gameId);
+
+        if (newPhase.getPhaseName() != null && !newPhase.getPhaseName().isBlank()) {
+            newPhase.setGame(game);
+            if (newPhase.getLiteralText() == null || newPhase.getLiteralText().isBlank()) {
+                newPhase.setLiteralText("Phase " + newPhase.getPhaseName());
+            }
+            if (newPhase.getLatitude() == null || newPhase.getLatitude().isBlank()) {
+                newPhase.setLatitude("");
+            }
+            if (newPhase.getLongitude() == null || newPhase.getLongitude().isBlank()) {
+                newPhase.setLongitude("");
+            }
+            if (newPhase.getImage() == null || newPhase.getImage().isBlank()) {
+                newPhase.setImage(
+                        "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+
+            }
+            if (newPhase.getVideo() == null || newPhase.getVideo().isBlank()) {
+                newPhase.setVideo("");
+            }
+
+            game.addPhase(newPhase);
+            gameService.saveGame(game);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "✅ Nueva fase añadida correctamente.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "❌ Debes introducir un nombre para la fase.");
+        }
+
+        return "redirect:/editGame/" + gameId;
+    }
+
 }

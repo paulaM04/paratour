@@ -17,8 +17,9 @@ public class Enigma {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "fase", nullable = false)
-private Long phaseId;
+    
+    @Column(name = "fase", nullable = true)
+    private Long phaseId;
 
     @ManyToOne
     @JoinColumn(name = "fase", insertable = false, updatable = false)
@@ -313,9 +314,5 @@ private Long phaseId;
 
     public void setManual(Boolean manual) {
         this.manual = manual;
-    }
-
-    public void setGame(Game game) {
-        this.phase.setGame(game);
     }
 }
