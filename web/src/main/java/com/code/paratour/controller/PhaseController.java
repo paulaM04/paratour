@@ -1,6 +1,7 @@
 package com.code.paratour.controller;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,8 @@ import com.code.paratour.service.EnigmaService;
 import com.code.paratour.service.GameService;
 import com.code.paratour.service.PhaseService;
 import com.code.paratour.service.TypeGameService;
+
+import jakarta.transaction.Transactional;
 
 @Controller
 public class PhaseController {
@@ -292,34 +295,34 @@ public class PhaseController {
         }
     }
 
+    @Transactional
     @PostMapping("/deletePhase/{phaseId}")
     public String deletePhase(@PathVariable Long phaseId,
             RedirectAttributes redirectAttributes) {
 
-        Long gameId = phaseService.findPhaseById(phaseId).getGame().getId();
-        Game game = gameService.findGameById(gameId);
+        Phase phaseToDelete = phaseService.findPhaseById(phaseId);
+        Game game = (phaseToDelete != null) ? phaseToDelete.getGame() : null;
         if (game == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
             return "redirect:/games";
         }
 
-        Phase phaseToDelete = phaseService.findPhaseById(phaseId);
         if (phaseToDelete == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
-            return "redirect:/editGame/" + gameId;
+            return "redirect:/editGame/" + game.getId();
         }
-        enigmaService.deleteAll(phaseToDelete.getEnigmas());
 
+        enigmaService.deleteAll(phaseToDelete.getEnigmas());
         phaseService.delete(phaseToDelete.getId());
 
         redirectAttributes.addFlashAttribute("successMessage", "✅ Fase eliminada correctamente.");
-        return "redirect:/editGame/" + gameId;
+        return "redirect:/editGame/" + game.getId();
     }
 
     @PostMapping("/addPhase/{gameId}")
     public String addPhase(@PathVariable Long gameId,
             @ModelAttribute Phase newPhase,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes, Model model) {
 
         Game game = gameService.findGameById(gameId);
 
@@ -337,7 +340,6 @@ public class PhaseController {
             if (newPhase.getImage() == null || newPhase.getImage().isBlank()) {
                 newPhase.setImage(
                         "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
-
             }
             if (newPhase.getVideo() == null || newPhase.getVideo().isBlank()) {
                 newPhase.setVideo("");
@@ -351,8 +353,11 @@ public class PhaseController {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "❌ Debes introducir un nombre para la fase.");
         }
-
-        return "redirect:/editGame/" + gameId;
+        List<Phase> sortedPhases = new ArrayList<>(game.getPhases());
+        sortedPhases.sort(Comparator.comparing(Phase::getId));
+        model.addAttribute("phases", sortedPhases);
+        model.addAttribute("game", game);
+                return "redirect:/editGame/" + gameId;
     }
 
 }

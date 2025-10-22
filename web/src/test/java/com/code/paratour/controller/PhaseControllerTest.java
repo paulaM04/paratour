@@ -70,7 +70,7 @@ public class PhaseControllerTest {
         Phase newPhase = new Phase();
         newPhase.setPhaseName("Phase A");
 
-        String result = phaseController.addPhase(1L, newPhase, redirectAttributes);
+        String result = phaseController.addPhase(1L, newPhase, redirectAttributes, model);
 
         verify(gameService).saveGame(any(Game.class));
         verify(redirectAttributes).addFlashAttribute("successMessage", "✅ Nueva fase añadida correctamente.");
@@ -85,7 +85,7 @@ public class PhaseControllerTest {
         Phase newPhase = new Phase();
         newPhase.setPhaseName("");
 
-        String result = phaseController.addPhase(1L, newPhase, redirectAttributes);
+        String result = phaseController.addPhase(1L, newPhase, redirectAttributes, model);
 
         verify(redirectAttributes).addFlashAttribute("errorMessage", "❌ Debes introducir un nombre para la fase.");
         assertEquals("redirect:/editGame/1", result);

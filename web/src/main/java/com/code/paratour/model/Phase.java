@@ -25,7 +25,7 @@ public class Phase {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_juego", insertable = false, updatable = false)
+    @JoinColumn(name = "id_juego")
     private Game game;
 
     @Column(name = "fase")
@@ -181,6 +181,7 @@ public class Phase {
         enigmas.add(enigma);
         enigma.setPhase(this);
     }
+
     public void setId(Long id) {
         this.id = id;
     }

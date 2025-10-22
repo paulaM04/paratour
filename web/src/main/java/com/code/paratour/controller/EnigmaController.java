@@ -172,7 +172,6 @@ public class EnigmaController {
             return "redirect:/games";
         }
 
-        
         if (enigma == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "❌ Enigma no encontrada.");
             return "redirect:/editGame/" + enigma;
