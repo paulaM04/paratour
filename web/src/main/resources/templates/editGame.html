@@ -120,9 +120,9 @@
 
                       <form action="/addEnigma/{{id}}" method="post">
                         <div class="modal-body">
-                          <div class="mb-3">Enunciado Pregunta</label>
-                            <textarea name="statement" class="form-control" rows="2"
-                              placeholder="Introduce el texto del enigma" required></textarea>
+                          <div class="mb-3">Enunciado Enigma</label>
+                            <textarea name="literalText" class="form-control" rows="2"
+                              placeholder="Introduce el nombre del enigma" required></textarea>
                           </div>
                         </div>
 
@@ -157,12 +157,13 @@
                         <button class="accordion-button collapsed fw-semibold text-dark" type="button"
                           data-bs-toggle="collapse" data-bs-target="#collapseEnigma-{{id}}" aria-expanded="false"
                           aria-controls="collapseEnigma-{{id}}">
-                          Enigma #{{enigmaNumber}}
+                          {{literalText}}
                         </button>
                       </h2>
                       <div id="collapseEnigma-{{id}}" class="accordion-collapse collapse"
                         data-bs-parent="#enigmasAccordion-{{id}}">
                         <div class="accordion-body">
+                           <p><strong>ID Enigma:</strong> {{enigmaNumber}}</p>
                           <p><strong>❓ Pregunta:</strong> {{statement}}</p>
                           <p><strong>✅ Respuesta:</strong> {{answer}}</p>
                           {{#hint1}}<p><strong>💡 Pista 1:</strong> {{hint1}}</p>{{/hint1}}

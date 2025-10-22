@@ -210,6 +210,9 @@ public class GameController {
                         e.setStatement("");
                     if (e.getAnswerFormat() == null)
                         e.setAnswerFormat("");
+                    if (e.getLiteralText()==null || e.getLiteralText().isBlank())
+                        e.setLiteralText("Enigma: " + e.getEnigmaNumber());
+                    enigmaService.save(e);
                 }
             } else {
                 phase.setEnigmas(new HashSet<>());

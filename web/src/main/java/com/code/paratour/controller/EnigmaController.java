@@ -139,7 +139,7 @@ public class EnigmaController {
         }
         Game game = phase.getGame();
 
-        if (newEnigma.getStatement() != null && !newEnigma.getStatement().isBlank()) {
+        if (newEnigma.getLiteralText() != null && !newEnigma.getLiteralText().isBlank()) {
             newEnigma.setPhase(phase);
             newEnigma.fillEmptyFields();
             newEnigma.setEnigmaNumber(phase.getEnigmas().size());
@@ -150,7 +150,7 @@ public class EnigmaController {
             phaseService.save(phase);
             gameService.saveGame(game);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "✅ Nueva fase añadida correctamente.");
+                    "✅ Nuevo enigma añadido correctamente.");
         } else {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "❌ Debes introducir un nombre para la fase.");
