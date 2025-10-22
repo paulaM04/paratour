@@ -349,6 +349,8 @@ public class GameController {
         return "redirect:/editGame/" + id + "?success=1";
     }
 
+    
+
     /**
      * Utility methods for safely handling null values.
      */

@@ -41,7 +41,8 @@ public class EnigmaController {
      * dynamically prepares a new view ("newGame_3") to input riddles
      * (enigmas) for each phase.
      *
-     * The data for each phase (name, description, number of riddles, coordinates, etc.)
+     * The data for each phase (name, description, number of riddles, coordinates,
+     * etc.)
      * is received from the previous form and is restructured into a
      * hierarchical format (phases → riddles) for rendering in the next template.
      */
@@ -56,6 +57,10 @@ public class EnigmaController {
             @RequestParam Map<String, String> params,
             Model model) {
         try {
+            if (numRiddles.stream().anyMatch(n -> n < 0)) {
+                throw new IllegalArgumentException("El número de enigmas no puede ser negativo.");
+
+            } 
             // This list will hold all phase objects (each phase contains a list of riddles)
             List<Map<String, Object>> phasesForView = new ArrayList<>();
 
@@ -79,8 +84,8 @@ public class EnigmaController {
                 // Build placeholder objects for each riddle in the current phase
                 for (int r = 0; r < numRiddles.get(i); r++) {
                     Map<String, Object> rid = new java.util.HashMap<>();
-                    rid.put("phaseIndex", i);  // index of the parent phase
-                    rid.put("idx", r);         // index of the riddle within the phase
+                    rid.put("phaseIndex", i); // index of the parent phase
+                    rid.put("idx", r); // index of the riddle within the phase
                     rid.put("display", r + 1); // display index (1-based)
                     riddles.add(rid);
                 }
@@ -136,16 +141,9 @@ public class EnigmaController {
 
         if (newEnigma.getStatement() != null && !newEnigma.getStatement().isBlank()) {
             newEnigma.setPhase(phase);
-            if (newEnigma.getLiteralText() == null || newEnigma.getLiteralText().isBlank()) {
-                newEnigma.setLiteralText("Enigma " + newEnigma.getStatement());
-            }
-            if (newEnigma.getLatitude() == null || newEnigma.getLatitude().isBlank()) {
-                newEnigma.setLatitude("");
-            }
-            if (newEnigma.getLongitude() == null || newEnigma.getLongitude().isBlank()) {
-                newEnigma.setLongitude("");
-            }
-
+            newEnigma.fillEmptyFields();
+            newEnigma.setEnigmaNumber(phase.getEnigmas().size());
+            
             phase.addEnigma(newEnigma);
 
             enigmaService.save(newEnigma);
@@ -160,4 +158,30 @@ public class EnigmaController {
 
         return "redirect:/editGame/" + game.getId();
     }
+
+
+    @PostMapping("/deleteEnigma/{enigmaId}")
+    public String deletePhase(@PathVariable Long enigmaId,
+            RedirectAttributes redirectAttributes) {
+
+        Enigma enigma = enigmaService.findEnigmaById(enigmaId);
+        Phase phase = enigma.getPhase();
+        Game game = phase.getGame();    
+        if (game == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
+            return "redirect:/games";
+        }
+
+        
+        if (enigma == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Enigma no encontrada.");
+            return "redirect:/editGame/" + enigma;
+        }
+
+        phaseService.save(phase);
+        gameService.saveGame(game);
+        redirectAttributes.addFlashAttribute("successMessage", "✅ Enigma eliminado correctamente.");
+        return "redirect:/editGame/" + game.getId();
+    }
+    
 }

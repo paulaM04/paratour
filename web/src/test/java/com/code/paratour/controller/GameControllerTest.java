@@ -1,5 +1,8 @@
 package com.code.paratour.controller;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +32,10 @@ public class GameControllerTest {
 
     @InjectMocks
     private GameController gameController;
-
+    @InjectMocks
+    private EnigmaController enigmaController;
+    @InjectMocks
+    private PhaseController phaseController;
     @Mock
     private GameService gameService;
 
@@ -127,6 +133,23 @@ public class GameControllerTest {
     void testEditGameForm_WhenGameNotFound_ThrowsException() {
         when(gameService.findGameById(1L)).thenReturn(null);
         assertThrows(IllegalArgumentException.class, () -> gameController.editGameForm(1L, model));
+    }
+
+    @Test
+    void testNewGame_lastPost_GameWithoutPhases() {
+        when(typeGameService.findByCode("TYPE1")).thenReturn(new GameType());
+        when(gameService.findAllGames()).thenReturn(List.of());
+
+        String result = phaseController.newGame_lastPost(
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                Map.of("gameType", "TYPE1"),
+                model);
+
+        verify(gameService).saveGame(any(Game.class));
+        verify(model).addAttribute("games", List.of());
+        assertEquals("home", result);
     }
 
 }

@@ -85,7 +85,7 @@
                   <label class="form-label text-success">Video</label>
                   <textarea name="description" class="form-control" rows="3">{{video}}</textarea>
                 </div>
-              
+
                 <div class="mb-3">
                   <label class="form-label text-success">Latitud</label>
                   <textarea name="description" class="form-control" rows="3">{{latitude}}</textarea>
@@ -126,15 +126,9 @@
 
                       <form action="/addEnigma/{{id}}" method="post">
                         <div class="modal-body">
-                          <div class="mb-3">
-                            <label class="form-label">Texto del enigma</label>
-                            <textarea name="enigmaText" class="form-control" rows="2"
+                          <div class="mb-3">Enunciado Pregunta</label>
+                            <textarea name="statement" class="form-control" rows="2"
                               placeholder="Introduce el texto del enigma" required></textarea>
-                          </div>
-                          <div class="mb-3">
-                            <label class="form-label">Formato de respuesta</label>
-                            <input type="text" name="answerFormat" class="form-control"
-                              placeholder="Ej. texto, número, opción..." required>
                           </div>
                         </div>
 
@@ -189,8 +183,16 @@
                           </div>
                           {{/video}}
                         </div>
+                        <form action="/deleteEnigma/{{id}}" method="post">
+                          <input type="hidden" name="enigmaNumber" value="{{enigmaNumber}}">
+                          <button type="submit" class="btn btn-danger mt-2 w-100">
+                            Eliminar enigma
+                          </button>
+                        </form>
                       </div>
+
                     </div>
+
                     {{/enigmas}}
                   </div>
                 </div>
@@ -199,11 +201,11 @@
             {{/phases}}
           </div>
         </div>
-       
+
 
         <!-- GUARDAR -->
         <button type="submit" class="btn btn-primary w-100 py-2">💾 Guardar todo</button>
-        
+
       </div>
     </form>
   </div>

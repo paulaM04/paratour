@@ -315,4 +315,31 @@ public class Enigma {
     public void setManual(Boolean manual) {
         this.manual = manual;
     }
+    public void fillEmptyFields() {
+    if (literalText == null) literalText = "";
+    if (image == null) image = "";
+    if (location == null) location = "";
+    if (introduction == null) introduction = "";
+    if (introAvatarVideo == null) introAvatarVideo = "";
+    if (enigmaVideo == null) enigmaVideo = "";
+    if (answerFormat == null) answerFormat = "";
+    if (hint1 == null) hint1 = "";
+    if (hint2 == null) hint2 = "";
+    if (answer == null) answer = "";
+    if (explanationSpot == null) explanationSpot = "";
+    if (explanationSpotVideo == null) explanationSpotVideo = "";
+    if (locationResolutionPhoto == null) locationResolutionPhoto = "";
+    if (latitude == null) latitude = "";
+    if (longitude == null) longitude = "";
+    if (additionalInstructions == null) additionalInstructions = "";
+
+    if (pointsCorrect == null) pointsCorrect = 0;
+    if (pointsFail == null) pointsFail = 0;
+    if (pointsHint1 == null) pointsHint1 = 0;
+    if (pointsHint2 == null) pointsHint2 = 0;
+    if (maxTime == null) maxTime = 0;
+
+    if (manual == null) manual = false;
+}
+
 }

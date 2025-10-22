@@ -158,23 +158,23 @@ public class PhaseController {
      */
     @PostMapping("/newGame_lastPost")
     public String newGame_lastPost(
-            @RequestParam("phaseName") List<String> phaseNames,
-            @RequestParam("description") List<String> descriptions,
-            @RequestParam("numRiddles") List<Integer> numRiddles,
+            @RequestParam(value = "phaseName", required = false) List<String> phaseNames,
+            @RequestParam(value = "description", required = false) List<String> descriptions,
+            @RequestParam(value = "numRiddles", required = false) List<Integer> numRiddles,
             @RequestParam Map<String, String> params,
             Model model) {
         try {
-            // Create a new Game entity
+            // Crear el juego
             Game game = new Game();
 
-            // Validate and retrieve the selected game type
+            // Validar tipo
             String selectedType = params.get("gameType");
             GameType type = typeGameService.findByCode(selectedType);
             if (type == null) {
                 throw new IllegalArgumentException("Invalid game type: " + selectedType);
             }
 
-            // Set base game attributes
+            // Atributos base
             game.setName(params.get("gameName"));
             game.setDescription(params.get("gameDescription"));
             game.setGameType(params.get("gameType"));
@@ -184,38 +184,44 @@ public class PhaseController {
             game.setManual(Boolean.parseBoolean(params.getOrDefault("manual", "true")));
             game.setNumberOfRiddles(0);
 
+            // Guardamos el juego primero (evita TransientObjectException)
+            gameService.saveGame(game);
+
+            // Si no hay fases, simplemente guardamos el juego y terminamos
+            if (phaseNames == null || phaseNames.isEmpty()) {
+                model.addAttribute("games", gameService.findAllGames());
+                return "home";
+            }
+
+            // Lista auxiliar
             List<Phase> savedPhases = new ArrayList<>();
 
-            // Iterate over phases submitted by the form
             for (int i = 0; i < phaseNames.size(); i++) {
                 Phase phase = new Phase();
                 phase.setPhaseName(phaseNames.get(i));
                 phase.setDescription(descriptions.get(i));
-
-                // Retrieve additional metadata for this phase from the request parameters
                 phase.setLiteralText(params.getOrDefault("literalText[" + i + "]", ""));
                 phase.setLatitude(params.getOrDefault("latitude[" + i + "]", "0.0"));
                 phase.setLongitude(params.getOrDefault("longitude[" + i + "]", "0.0"));
                 phase.setManual(Boolean.TRUE);
                 phase.setGame(game);
 
-                // Save phase before assigning enigmas
+                // Guardar fase
                 Phase savedPhase = phaseService.save(phase);
                 savedPhases.add(savedPhase);
 
-                // Number of riddles (enigmas) in this phase
-                int riddlesCount = numRiddles.get(i);
+                // Obtener número de enigmas (0 si no existe)
+                int riddlesCount = (numRiddles != null && numRiddles.size() > i) ? numRiddles.get(i) : 0;
 
-                // Iterate through each riddle and map request parameters dynamically
+                // Permitir 0 enigmas: si riddlesCount == 0, simplemente no entra al bucle
                 for (int r = 0; r < riddlesCount; r++) {
                     String prefix = "phases[" + i + "].riddles[" + r + "].";
-
                     Enigma enigma = new Enigma();
                     enigma.setPhase(savedPhase);
                     enigma.setPhaseId(savedPhase.getId());
                     enigma.setEnigmaNumber(r + 1);
 
-                    // Populate all possible fields for the enigma
+                    // Rellenar datos
                     enigma.setLiteralText(params.getOrDefault(prefix + "literalText", ""));
                     enigma.setStatement(params.getOrDefault(prefix + "enigma", ""));
                     enigma.setAnswer(params.getOrDefault(prefix + "answer", ""));
@@ -239,14 +245,14 @@ public class PhaseController {
                     enigma.setPointsHint2(parseIntSafe(params.get(prefix + "pointsHint2")));
                     enigma.setMaxTime(parseIntSafe(params.get(prefix + "maxTime")));
                     enigma.setManual(Boolean.parseBoolean(params.getOrDefault(prefix + "manual", "true")));
-
-                    // Save each enigma individually
                     enigmaService.save(enigma);
                 }
             }
 
-            // Compute total number of riddles and update the game
-            int totalRiddles = numRiddles.stream().mapToInt(Integer::intValue).sum();
+            // Recalcular total de enigmas
+            int totalRiddles = (numRiddles != null)
+                    ? numRiddles.stream().mapToInt(Integer::intValue).sum()
+                    : 0;
             game.setNumberOfRiddles(totalRiddles);
             gameService.saveGame(game);
 
@@ -286,7 +292,7 @@ public class PhaseController {
         }
     }
 
-        @PostMapping("/deletePhase/{phaseId}")
+    @PostMapping("/deletePhase/{phaseId}")
     public String deletePhase(@PathVariable Long phaseId,
             RedirectAttributes redirectAttributes) {
 
@@ -310,7 +316,7 @@ public class PhaseController {
         return "redirect:/editGame/" + gameId;
     }
 
-        @PostMapping("/addPhase/{gameId}")
+    @PostMapping("/addPhase/{gameId}")
     public String addPhase(@PathVariable Long gameId,
             @ModelAttribute Phase newPhase,
             RedirectAttributes redirectAttributes) {
