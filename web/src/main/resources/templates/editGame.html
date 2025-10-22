@@ -106,12 +106,6 @@
                   </button>
                 </form>
 
-                <!-- Botón para añadir enigma-->
-                <button type="button" class="btn btn-outline-success mt-3 w-100" data-bs-toggle="modal"
-                  data-bs-target="#addEnigmaModal{{id}}">
-                  ➕ Añadir enigma
-                </button>
-
                 <!-- Modal para añadir enigma -->
                 <div class="modal fade" id="addEnigmaModal{{id}}" tabindex="-1"
                   aria-labelledby="addEnigmaModalLabel{{id}}" aria-hidden="true">
@@ -141,7 +135,16 @@
                   </div>
                 </div>
                 <div class="mt-4 p-3 rounded-4 border border-warning-subtle" style="background-color:#fff9e6;">
-                  <h5 class="text-warning fw-semibold mb-3">💡 Enigmas de la fase</h5>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="text-warning fw-semibold mb-3">💡 Enigmas de la fase</h5>
+                    <!-- Botón que abre el modal -->
+                    <button type="button" class="btn btn-warning btn-sm custom-enigma" data-bs-toggle="modal"
+                      data-bs-target="#addEnigmaModal{{id}}">
+                      ➕ Añadir enigma
+                    </button>
+
+                  </div>
+                  <!-- Botón para añadir enigma -->
 
                   {{^enigmas}}
                   <div class="alert alert-secondary mt-2">No hay enigmas en esta fase.</div>

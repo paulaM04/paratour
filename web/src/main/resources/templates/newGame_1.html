@@ -1,43 +1,48 @@
 {{>header}}
 
 <div class="container my-5">
-  <h2 class="mb-4 text-center">Crear un juego y configura sus fases</h2>
+  <h2 class="mb-4 text-center">Crear un juego y configurar sus fases</h2>
 
-  <form action="/newGame_post1" method="post" novalidate>
+  <!-- Ponle un id por claridad -->
+  <form id="newGameForm" action="/newGame_post1" method="post">
 
     <!-- GAME -->
     <div class="card mb-4">
       <div class="card-header"><strong>Datos del juego</strong></div>
       <div class="card-body">
+
         <div class="row">
           <div class="col-md-6 mb-3">
             <label for="gameName" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="gameName" name="gameName" required>
+            <input type="text" class="form-control" id="gameName" name="gameName" required
+              placeholder="Introduce el nombre del juego">
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Tipo de juego</label>
-            <select name="gameType" class="form-select" required>
+          <div class="col-md-6 mb-3">
+            <label for="gameType" class="form-label">Tipo de juego</label>
+            <select name="gameType" id="gameType" class="form-select" required>
               <option value="">Selecciona un tipo de juego</option>
               {{#typesGame}}
-            <option value="{{code}}">{{name}}</option>
+              <option value="{{code}}">{{name}}</option>
               {{/typesGame}}
             </select>
           </div>
         </div>
+
         <div class="mb-3">
           <label for="gameDescription" class="form-label">Descripción</label>
-          <textarea class="form-control" id="gameDescription" name="gameDescription" rows="2" required></textarea>
+          <textarea class="form-control" id="gameDescription" name="gameDescription" rows="2" required
+            placeholder="Describe brevemente el juego"></textarea>
         </div>
 
         <div class="row">
           <div class="col-md-6 mb-3">
             <label for="gameImage" class="form-label">Imagen (URL)</label>
-            <input type="url" class="form-control" id="gameImage" name="gameImage">
+            <input type="url" class="form-control" id="gameImage" name="gameImage" required placeholder="https://...">
           </div>
           <div class="col-md-6 mb-3">
             <label for="gameVideo" class="form-label">Vídeo (URL)</label>
-            <input type="url" class="form-control" id="gameVideo" name="gameVideo">
+            <input type="url" class="form-control" id="gameVideo" name="gameVideo" required placeholder="https://...">
           </div>
         </div>
 
@@ -45,27 +50,22 @@
           <div class="col-md-6 mb-2">
             <input type="hidden" name="hasLeaderboard" value="false">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="hasLeaderboard" name="hasLeaderboard" value="true" checked>
-              <label class="form-check-label" for="hasLeaderboard">
-                Mostrar leaderboard
-                <span class="help-tip" tabindex="0"
-                      data-tip="Si está activado, el juego mostrará una tabla de clasificación con las puntuaciones de los jugadores.">i</span>
-              </label>
+              <input class="form-check-input" type="checkbox" id="hasLeaderboard" name="hasLeaderboard" value="true"
+                checked>
+              <label class="form-check-label" for="hasLeaderboard">Mostrar leaderboard</label>
             </div>
           </div>
 
           <div class="col-md-6 mb-2">
             <input type="hidden" name="manual" value="false">
             <div class="form-check">
+              <!-- ⚠️ Quita 'required' aquí: si no lo marcas, bloqueará el envío -->
               <input class="form-check-input" type="checkbox" id="manual" name="manual" value="true">
-              <label class="form-check-label" for="manual">
-                Juego manual
-                <span class="help-tip" tabindex="0"
-                      data-tip="Indica que el juego se configuró o gestiona manualmente desde el panel de administración.">i</span>
-              </label>
+              <label class="form-check-label" for="manual">Juego manual</label>
             </div>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -74,14 +74,43 @@
       <div class="card-header"><strong>Fases</strong></div>
       <div class="card-body">
         <label for="numPhases" class="form-label">Número de fases</label>
-        <input type="number" class="form-control" id="numPhases" name="numPhases" min="1" required>
+        <input type="number" class="form-control" id="numPhases" name="numPhases" min="0" required
+          placeholder="Ejemplo: 3">
       </div>
     </div>
 
     <div class="text-center">
-      <button type="submit" class="btn btn-primary btn-lg">Continuar</button>
+      <!-- Abre el modal -->
+      <button type="button" class="btn btn-primary btn-lg"
+        onclick="if(document.getElementById('numPhases').value==0){var myModal = new bootstrap.Modal(document.getElementById('confirmModal')); myModal.show();} else {this.form.submit();}">
+        Continuar
+      </button>
+
       <a href="/" class="btn btn-secondary ms-2">Cancelar</a>
     </div>
+
+    <!-- ✅ MODAL dentro del FORM -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-primary">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="confirmModalLabel">Confirmar datos</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+              aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <p>¿Has comprobado que todos los campos están completos y correctos?</p>
+            <p class="mb-0">Podrás editar los campos en cualquier momento.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Volver</button>
+            <!-- Enviará ESTE formulario al estar dentro -->
+            <button type="submit" class="btn btn-primary">Confirmar y continuar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </form>
 </div>
 

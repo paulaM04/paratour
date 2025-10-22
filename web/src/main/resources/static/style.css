@@ -383,3 +383,9 @@ nav {
 
 /* por si algún contenedor corta el tooltip */
 .row, .container, .accordion-body { overflow: visible; }
+.btn-warning.btn-sm.custom-enigma {
+  width: auto !important;
+  min-width: auto !important;
+  padding: 6px 14px !important;
+  font-weight: 500 !important;
+}
