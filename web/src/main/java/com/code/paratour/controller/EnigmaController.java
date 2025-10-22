@@ -161,7 +161,7 @@ public class EnigmaController {
 
 
     @PostMapping("/deleteEnigma/{enigmaId}")
-    public String deletePhase(@PathVariable Long enigmaId,
+    public String deleteEnigma(@PathVariable Long enigmaId,
             RedirectAttributes redirectAttributes) {
 
         Enigma enigma = enigmaService.findEnigmaById(enigmaId);
@@ -178,6 +178,7 @@ public class EnigmaController {
             return "redirect:/editGame/" + enigma;
         }
 
+        phase.getEnigmas().remove(enigma);
         phaseService.save(phase);
         gameService.saveGame(game);
         redirectAttributes.addFlashAttribute("successMessage", "✅ Enigma eliminado correctamente.");
