@@ -26,17 +26,20 @@
           <label class="form-label text-primary">Descripción</label>
           <textarea name="description" class="form-control" rows="3">{{game.description}}</textarea>
         </div>
+
         <div class="mb-3">
           <label class="form-label text-primary">Tipo de Juego</label>
-          <textarea name="description" class="form-control" rows="3">{{game.gameType}}</textarea>
+          <input type="text" name="gameType" class="form-control" value="{{game.gameType}}">
         </div>
+
         <div class="mb-3">
           <label class="form-label text-primary">Imagen</label>
-          <textarea name="description" class="form-control" rows="3">{{game.image}}</textarea>
+          <input type="text" name="image" class="form-control" value="{{game.image}}">
         </div>
+
         <div class="mb-3">
           <label class="form-label text-primary">Video</label>
-          <textarea name="description" class="form-control" rows="3">{{game.video}}</textarea>
+          <input type="text" name="video" class="form-control" value="{{game.video}}">
         </div>
       </div>
 
@@ -44,114 +47,89 @@
       <div class="p-4 rounded-4 mb-4 shadow-sm border border-success-subtle" style="background-color:#e9fcef;">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h3 class="text-success fw-semibold mb-0">✅ Fases del juego</h3>
-          <!-- Botón que abre el modal -->
           <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addPhaseModal">
             ➕ Añadir fase
           </button>
         </div>
 
         <div class="accordion" id="phasesAccordion">
-          {{#phases}}
+          {{#phaseRows}}
           <div class="accordion-item">
-            <h2 class="accordion-header" id="phase-{{id}}">
+            <h2 class="accordion-header" id="phase-{{phase.id}}">
               <button class="accordion-button collapsed fw-semibold text-success" type="button"
-                data-bs-toggle="collapse" data-bs-target="#collapse-{{id}}" aria-expanded="false"
-                aria-controls="collapse-{{id}}">
-                {{phaseName}}
+                data-bs-toggle="collapse" data-bs-target="#collapse-{{phase.id}}" aria-expanded="false"
+                aria-controls="collapse-{{phase.id}}">
+                {{phase.phaseName}}
               </button>
             </h2>
 
-            <div id="collapse-{{id}}" class="accordion-collapse collapse" data-bs-parent="#phasesAccordion">
+            <div id="collapse-{{phase.id}}" class="accordion-collapse collapse" data-bs-parent="#phasesAccordion">
               <div class="accordion-body">
-                <input type="hidden" name="phases[{{idFalse}}].id" value="{{id}}">
+                <input type="hidden" name="phaseRows[{{idx}}].id" value="{{phase.id}}">
+
                 <div class="mb-3">
                   <label class="form-label text-success">Nombre de la fase</label>
-                  <input type="text" name="phases[{{idFalse}}].phaseName" class="form-control" value="{{phaseName}}">
+                  <input type="text" name="phaseRows[{{idx}}].phaseName" class="form-control"
+                    value="{{phase.phaseName}}">
                 </div>
 
                 <div class="mb-3">
                   <label class="form-label text-success">Descripción</label>
-                  <textarea name="phases[{{idFalse}}].description" class="form-control"
-                    rows="2">{{description}}</textarea>
+                  <textarea name="phaseRows[{{idx}}].description" class="form-control" rows="2">{{phase.description}}</textarea>
                 </div>
 
                 <div class="text-center mb-3">
-                  <strong class="text-primary">Imagen Enigma:</strong><br>
-                  <img src="{{image}}" class="img-fluid rounded shadow-sm" style="max-height:150px; object-fit:cover;"
-                    alt="Imagen de fase">
+                  <strong class="text-primary">Imagen Fase:</strong><br>
+                  <img src="{{phase.image}}" class="img-fluid rounded shadow-sm"
+                    style="max-height:150px; object-fit:cover;" alt="Imagen de fase">
                 </div>
 
                 <div class="mb-3">
                   <label class="form-label text-success">Video</label>
-                  <textarea name="description" class="form-control" rows="3">{{video}}</textarea>
+                  <input type="text" name="phaseRows[{{idx}}].video" class="form-control" value="{{phase.video}}">
                 </div>
 
                 <div class="mb-3">
                   <label class="form-label text-success">Latitud</label>
-                  <textarea name="description" class="form-control" rows="3">{{latitude}}</textarea>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label text-success">Longitud</label>
-                  <textarea name="description" class="form-control" rows="3">{{longitude}}</textarea>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label text-success">Dirección Mapa</label>
-                  <textarea name="description" class="form-control" rows="3">{{mapUrl}}</textarea>
+                  <input type="text" name="phaseRows[{{idx}}].latitude" class="form-control"
+                    value="{{phase.latitude}}">
                 </div>
 
-                <form action="/deletePhase/{{id}}" method="post">
-                  <input type="hidden" name="phaseName" value="{{phaseName}}">
+                <div class="mb-3">
+                  <label class="form-label text-success">Longitud</label>
+                  <input type="text" name="phaseRows[{{idx}}].longitude" class="form-control"
+                    value="{{phase.longitude}}">
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label text-success">Dirección Mapa</label>
+                  <textarea name="phaseRows[{{idx}}].mapUrl" class="form-control"
+                    rows="3">{{phase.mapUrl}}</textarea>
+                </div>
+
+                <form action="/deletePhase/{{phase.id}}" method="post">
+                  <input type="hidden" name="phaseName" value="{{phase.phaseName}}">
                   <button type="submit" class="btn btn-danger mt-2 w-100">
                     Eliminar fase
                   </button>
                 </form>
 
-                <!-- Modal para añadir enigma -->
-                <div class="modal fade" id="addEnigmaModal{{id}}" tabindex="-1"
-                  aria-labelledby="addEnigmaModalLabel{{id}}" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content border-success">
-                      <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title" id="addEnigmaModalLabel{{id}}">➕ Añadir nuevo enigma a {{id}}
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                          aria-label="Cerrar"></button>
-                      </div>
-
-                      <form action="/addEnigma/{{id}}" method="post">
-                        <div class="modal-body">
-                          <div class="mb-3">Enunciado Enigma</label>
-                            <textarea name="literalText" class="form-control" rows="2"
-                              placeholder="Introduce el nombre del enigma" required></textarea>
-                          </div>
-                        </div>
-
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                          <button type="submit" class="btn btn-success">Guardar enigma</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
+                <!-- Enigmas -->
                 <div class="mt-4 p-3 rounded-4 border border-warning-subtle" style="background-color:#fff9e6;">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="text-warning fw-semibold mb-3">💡 Enigmas de la fase</h5>
-                    <!-- Botón que abre el modal -->
                     <button type="button" class="btn btn-warning btn-sm custom-enigma" data-bs-toggle="modal"
-                      data-bs-target="#addEnigmaModal{{id}}">
+                      data-bs-target="#addEnigmaModal{{phase.id}}">
                       ➕ Añadir enigma
                     </button>
-
                   </div>
-                  <!-- Botón para añadir enigma -->
 
-                  {{^enigmas}}
+                  {{^phase.enigmas}}
                   <div class="alert alert-secondary mt-2">No hay enigmas en esta fase.</div>
-                  {{/enigmas}}
+                  {{/phase.enigmas}}
 
-                  <div class="accordion" id="enigmasAccordion-{{id}}">
-                    {{#enigmas}}
+                  <div class="accordion" id="enigmasAccordion-{{phase.id}}">
+                    {{#phase.enigmas}}
                     <div class="accordion-item mb-2 border-0 shadow-sm">
                       <h2 class="accordion-header" id="enigma-{{id}}">
                         <button class="accordion-button collapsed fw-semibold text-dark" type="button"
@@ -160,19 +138,20 @@
                           {{literalText}}
                         </button>
                       </h2>
+
                       <div id="collapseEnigma-{{id}}" class="accordion-collapse collapse"
-                        data-bs-parent="#enigmasAccordion-{{id}}">
+                        data-bs-parent="#enigmasAccordion-{{phase.id}}">
                         <div class="accordion-body">
-                           <p><strong>ID Enigma:</strong> {{enigmaNumber}}</p>
+                          <p><strong>ID Enigma:</strong> {{enigmaNumber}}</p>
                           <p><strong>❓ Pregunta:</strong> {{statement}}</p>
                           <p><strong>✅ Respuesta:</strong> {{answer}}</p>
                           {{#hint1}}<p><strong>💡 Pista 1:</strong> {{hint1}}</p>{{/hint1}}
                           {{#hint2}}<p><strong>💡 Pista 2:</strong> {{hint2}}</p>{{/hint2}}
                           <p class="text-muted small mb-0"><strong>Formato:</strong> {{answerFormat}}</p>
+
                           {{#image}}
                           <div class="text-center mb-3">
                             <strong class="text-primary">Imagen Enigma:</strong><br>
-
                             <img src="{{image}}" class="img-fluid rounded shadow-sm"
                               style="max-height:150px; object-fit:cover;" alt="Imagen de fase">
                           </div>
@@ -194,22 +173,18 @@
                           </button>
                         </form>
                       </div>
-
                     </div>
-
-                    {{/enigmas}}
+                    {{/phase.enigmas}}
                   </div>
                 </div>
               </div>
             </div>
-            {{/phases}}
           </div>
+          {{/phaseRows}}
         </div>
-
 
         <!-- GUARDAR -->
         <button type="submit" class="btn btn-primary w-100 py-2">💾 Guardar todo</button>
-
       </div>
     </form>
   </div>
@@ -229,12 +204,10 @@
               <label class="form-label">Nombre de la fase</label>
               <input type="text" name="phaseName" class="form-control" placeholder="Ej. Fase 1" required>
             </div>
-
             <div class="mb-3">
               <label class="form-label">Descripción</label>
               <textarea name="description" class="form-control" rows="2" placeholder="Descripción breve"></textarea>
             </div>
-            <label class="form-label text-primary">Completa estos campos básicos</label>
           </div>
 
           <div class="modal-footer">

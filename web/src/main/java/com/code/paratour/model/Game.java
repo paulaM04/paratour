@@ -39,12 +39,12 @@ public class Game {
     private Integer numberOfRiddles;
 
     @Column(name = "tiene_leaderboard")
-    private Boolean hasLeaderboard;
+    private Boolean hasLeaderboard = false;
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Phase> phases = new HashSet<>();
 
-    private Boolean manual;
+    private Boolean manual = false;
 
     public Long getId() {
         return id;
@@ -95,7 +95,11 @@ public class Game {
     }
 
     public int getNumberOfRiddles() {
-        return numberOfRiddles;
+        if (numberOfRiddles != null) {
+            return numberOfRiddles;
+        } else {
+            return getPhases().size();
+        }
     }
 
     public void setNumberOfRiddles(int numberOfRiddles) {
@@ -103,7 +107,11 @@ public class Game {
     }
 
     public boolean isHasLeaderboard() {
-        return hasLeaderboard;
+        if (hasLeaderboard != null) {
+            return hasLeaderboard;
+        } else {
+            return false;
+        }
     }
 
     public void setHasLeaderboard(boolean hasLeaderboard) {
@@ -142,7 +150,5 @@ public class Game {
         }
         phases.remove(phase.getIdFalse());
     }
-
-
 
 }

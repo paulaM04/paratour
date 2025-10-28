@@ -2,18 +2,23 @@ package com.code.paratour.controller;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,12 +26,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.code.paratour.model.Enigma;
 import com.code.paratour.model.Game;
-import com.code.paratour.model.GameType;
 import com.code.paratour.model.Phase;
 import com.code.paratour.service.EnigmaService;
 import com.code.paratour.service.GameService;
 import com.code.paratour.service.PhaseService;
 import com.code.paratour.service.TypeGameService;
+
+import jakarta.transaction.Transactional;
 
 @Controller
 public class GameController {
@@ -173,186 +179,110 @@ public class GameController {
      * first.
      */
     @GetMapping("/editGame/{id}")
-    public String editGameForm(@PathVariable Long id, Model model) {
-
-        // Carga optimizada: trae Game + Phases + Enigmas en UNA sola query
-        Game game = gameService.findGameById(id);
-
-        if (game == null) {
-            throw new IllegalArgumentException("Game not found with id: " + id);
+    public String editGame(@PathVariable Long id, Model model, RedirectAttributes ra) {
+        Game dbGame = gameService.findGameById(id);
+        if (dbGame == null) {
+            ra.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
+            return "redirect:/";
         }
 
-        // Asignar IDs falsos solo para el front
-        int i = 0;
-        for (Phase phase : game.getPhases()) {
-            phase.setIdFalse(i++);
-            int j = 0;
+        // Pasamos el juego tal cual para lecturas ({{game.*}})
+        model.addAttribute("game", dbGame);
 
-            // Evitar nulls (solo formateo visual)
-            if (phase.getDescription() == null)
-                phase.setDescription("");
-            if (phase.getLatitude() == null)
-                phase.setLatitude("");
-            if (phase.getLongitude() == null)
-                phase.setLongitude("");
-            if (phase.getMapUrl() == null)
-                phase.setMapUrl("");
-            if (phase.getVideo() == null)
-                phase.setVideo("");
-            if (phase.getImage() == null)
-                phase.setImage("");
+        // Construimos filas con índice estable
+        List<Phase> ordered = new ArrayList<>(dbGame.getPhases());
+        ordered.sort(Comparator.comparing(Phase::getId)); // orden determinista
 
-            // Enigmas ya están cargados (no se dispara ninguna query extra)
-            if (phase.getEnigmas() != null) {
-                for (Enigma e : phase.getEnigmas()) {
-                    e.setIdidTreak(j++);
-                    if (e.getStatement() == null)
-                        e.setStatement("");
-                    if (e.getAnswerFormat() == null)
-                        e.setAnswerFormat("");
-                    if (e.getLiteralText()==null || e.getLiteralText().isBlank())
-                        e.setLiteralText("Enigma: " + e.getEnigmaNumber());
-                    enigmaService.save(e);
-                }
-            } else {
-                phase.setEnigmas(new HashSet<>());
-            }
+        // phaseRows = List<Map<String,Object>> con { idx, phase }
+        List<Map<String, Object>> phaseRows = new ArrayList<>();
+        for (int i = 0; i < ordered.size(); i++) {
+            Map<String, Object> row = new HashMap<>();
+            row.put("idx", i);
+            row.put("phase", ordered.get(i));
+            phaseRows.add(row);
         }
-        List<Phase> sortedPhases = new ArrayList<>(game.getPhases());
-        sortedPhases.sort(Comparator.comparing(Phase::getId));
+        model.addAttribute("phaseRows", phaseRows);
 
-        for (Phase phase : sortedPhases) {
-            List<Enigma> sortedEnigmas = new ArrayList<>(phase.getEnigmas());
-            sortedEnigmas.sort(Comparator.comparing(Enigma::getId));
-            phase.setEnigmas(new LinkedHashSet<>(sortedEnigmas));
-        }
-        // Visuales por defecto
-        if (game.getImage() == null || game.getImage().isBlank()) {
-            game.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
-        }
-        if (game.getVideo() == null) {
-            game.setVideo("");
-        }
-
-        // Tipos de juego
-        List<GameType> allTypes = new ArrayList<>(typeGameService.findAll());
-        List<GameType> orderedTypes = new ArrayList<>();
-
-        String currentType = game.getGameType() == null ? "" : game.getGameType().trim().toLowerCase();
-
-        for (GameType type : allTypes) {
-            boolean isSelected = type.getCode().trim().equalsIgnoreCase(currentType)
-                    || type.getName().trim().equalsIgnoreCase(currentType);
-
-            type.setIsSelected(isSelected);
-            if (isSelected) {
-                orderedTypes.add(0, type);
-            } else {
-                orderedTypes.add(type);
-            }
-        }
-
-        model.addAttribute("phases", sortedPhases);
-        model.addAttribute("game", game);
-        model.addAttribute("typesGame", orderedTypes);
-
-        return "editGame";
+        return "editGame"; // tu plantilla
     }
 
-    /**
-     * Updates a game and its related phases and enigmas.
-     * Uses index-based iteration to match form data with existing entities.
-     */
     @PostMapping("/edit/game/{id}")
-    public String updateGame(@PathVariable Long id,
-            @ModelAttribute Game formGame,
+    public String updateGame(
+            @PathVariable Long id,
+            @ModelAttribute("game") Game formGame,
             RedirectAttributes redirectAttributes,
-            Model model,
-            @ModelAttribute("newPhase") Phase newPhase) {
-        // TO DO
+            Model model) {
+        
         Game dbGame = gameService.findGameById(id);
+        // aquí llamamos al servicio
+        this.saveGameController(formGame);
 
-        // Update main game attributes
-        dbGame.setName(formGame.getName());
-        dbGame.setGameType(formGame.getGameType());
-        dbGame.setDescription(formGame.getDescription());
-        dbGame.setImage(formGame.getImage());
-        dbGame.setVideo(formGame.getVideo());
-        dbGame.setNumberOfRiddles(formGame.getNumberOfRiddles());
-        dbGame.setHasLeaderboard(formGame.isHasLeaderboard());
-        dbGame.setManual(formGame.getManual());
-
-        int sizeFormPhases = formGame.getPhases() == null ? 0 : formGame.getPhases().size();
-        int sizeDbPhases = dbGame.getPhases() == null ? 0 : dbGame.getPhases().size();
-        List<Phase> formPhases = new ArrayList<>(formGame.getPhases());
-        List<Phase> dbPhases = new ArrayList<>(dbGame.getPhases());
-
-        // Synchronize each phase using its list index
-        for (int i = 0; i < dbGame.getPhases().size(); i++) {
-            Phase formPhase = formPhases.get(i);
-            Phase dbPhase = dbPhases.get(i); // existing phase with persistent ID
-
-            dbPhase.setPhaseName(formPhase.getPhaseName());
-            dbPhase.setDescription(formPhase.getDescription());
-            dbPhase.setLatitude(formPhase.getLatitude());
-            dbPhase.setLongitude(formPhase.getLongitude());
-            dbPhase.setMapUrl(formPhase.getMapUrl());
-            dbPhase.setGame(dbGame);
-
-            if (dbPhase.getLiteralText() == null || dbPhase.getLiteralText().isBlank()) {
-                dbPhase.setLiteralText("Phase " + dbPhase.getPhaseName());
-            }
-
-            // Synchronize enigmas (riddles) for each phase
-            if (formPhase.getEnigmas() != null) {
-                List<Enigma> formEnigmas = new ArrayList<>(formPhase.getEnigmas());
-                List<Enigma> dbEnigmas = new ArrayList<>(dbPhase.getEnigmas());
-                for (int j = 0; j < dbPhase.getEnigmas().size(); j++) {
-
-                    Enigma formEnigma = formEnigmas.get(j);
-                    Enigma dbEnigma = dbEnigmas.get(j); // existing enigma with persistent ID
-
-                    // Update all mutable fields safely
-                    dbEnigma.setStatement(safe(formEnigma.getStatement()));
-                    dbEnigma.setAnswer(safe(formEnigma.getAnswer()));
-                    dbEnigma.setHint1(safe(formEnigma.getHint1()));
-                    dbEnigma.setHint2(safe(formEnigma.getHint2()));
-                    dbEnigma.setAnswerFormat(safe(formEnigma.getAnswerFormat()));
-                    dbEnigma.setPointsCorrect(safeInt(formEnigma.getPointsCorrect()));
-                    dbEnigma.setPointsFail(safeInt(formEnigma.getPointsFail()));
-                    dbEnigma.setPointsHint1(safeInt(formEnigma.getPointsHint1()));
-                    dbEnigma.setPointsHint2(safeInt(formEnigma.getPointsHint2()));
-                    dbEnigma.setImage(safe(formEnigma.getImage()));
-                    dbEnigma.setLocation(safe(formEnigma.getLocation()));
-                    dbEnigma.setIntroduction(safe(formEnigma.getIntroduction()));
-                    dbEnigma.setIntroAvatarVideo(safe(formEnigma.getIntroAvatarVideo()));
-                    dbEnigma.setEnigmaVideo(safe(formEnigma.getEnigmaVideo()));
-                    dbEnigma.setExplanationSpot(safe(formEnigma.getExplanationSpot()));
-                    dbEnigma.setExplanationSpotVideo(safe(formEnigma.getExplanationSpotVideo()));
-                    dbEnigma.setLocationResolutionPhoto(safe(formEnigma.getLocationResolutionPhoto()));
-                    dbEnigma.setMaxTime(safeInt(formEnigma.getMaxTime()));
-                    dbEnigma.setLatitude(safe(formEnigma.getLatitude()));
-                    dbEnigma.setLongitude(safe(formEnigma.getLongitude()));
-                    dbEnigma.setAdditionalInstructions(safe(formEnigma.getAdditionalInstructions()));
-                    dbEnigma.setManual(safeBool(formEnigma.getManual()));
-
-                    dbEnigma.setPhase(dbPhase);
-                }
-            }
-        }
-        if (sizeFormPhases != sizeDbPhases) {
-            dbGame.addPhase(newPhase);
-        }
-
-        // Persist updates (phases and enigmas are cascaded automatically)
-        gameService.saveGame(dbGame);
         redirectAttributes.addFlashAttribute("successMessage", "✅ El juego se ha guardado correctamente.");
-        model.addAttribute("phases", dbGame.getPhases());
-
         return "redirect:/editGame/" + id + "?success=1";
     }
 
-    
+    @Transactional
+    public Game saveGameController(Game game) {
+        System.out.println("YAAAAAAAAA POR FAVPR AQUI LLEGA");      
+        // Si el juego ya existe, lo recuperamos de la BD
+        Game dbGame = gameService.findGameById(game.getId());
+        // === Actualizar datos principales ===
+        dbGame.setNumberOfRiddles(game.getPhases().size());
+        
+        dbGame.setName(game.getName());
+        dbGame.setDescription(game.getDescription());
+        dbGame.setImage(game.getImage());
+        dbGame.setVideo(game.getVideo());
+        dbGame.setGameType(game.getGameType());
+        dbGame.setHasLeaderboard(game.isHasLeaderboard());
+        dbGame.setManual(game.getManual());
+        dbGame.setNumberOfRiddles(game.getNumberOfRiddles());
+
+        // === Actualizar o añadir fases ===
+        if (game.getPhases() != null) {
+            // Guardamos las IDs existentes para evitar duplicados
+            Set<Long> existingIds = dbGame.getPhases().stream()
+                    .map(Phase::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            for (Phase formPhase : game.getPhases()) {
+                if (formPhase.getId() != null && existingIds.contains(formPhase.getId())) {
+                    // Fase existente -> actualizar campos
+                    Phase dbPhase = dbGame.getPhases().stream()
+                            .filter(p -> Objects.equals(p.getId(), formPhase.getId()))
+                            .findFirst()
+                            .orElseThrow();
+                    dbPhase.setPhaseName(formPhase.getPhaseName());
+                    dbPhase.setDescription(formPhase.getDescription());
+                    dbPhase.setLatitude(formPhase.getLatitude());
+                    dbPhase.setLongitude(formPhase.getLongitude());
+                    dbPhase.setMapUrl(formPhase.getMapUrl());
+                    dbPhase.setVideo(formPhase.getVideo());
+                    dbPhase.setImage(formPhase.getImage());
+                } else {
+                    // Fase nueva -> asociar y añadir
+                    formPhase.setId(null); // por si acaso
+                    formPhase.setGame(dbGame);
+                    dbGame.getPhases().add(formPhase);
+                }
+            }
+        }
+
+        // === Asegurar relaciones ===
+        for (Phase phase : dbGame.getPhases()) {
+            phase.setGame(dbGame);
+        }
+
+        // === Guardar todo ===
+        return gameService.saveGame(dbGame);
+    }
+
+    @InitBinder("game")
+    public void initBinder(WebDataBinder binder) {
+        // Excluye el binding automático del campo 'phases'
+        binder.setDisallowedFields("phases");
+    }
 
     /**
      * Utility methods for safely handling null values.
@@ -382,9 +312,5 @@ public class GameController {
             return "error";
         }
     }
-
-
-
-
 
 }

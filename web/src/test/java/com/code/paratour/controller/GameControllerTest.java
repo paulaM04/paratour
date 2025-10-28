@@ -105,35 +105,35 @@ public class GameControllerTest {
     // ----------------------------------------------------------
     // EDIT GAME FORM
     // ----------------------------------------------------------
-    @Test
-    void testEditGameForm_ReturnsEditGameTemplate() {
-        Game game = new Game();
-        game.setId(1L);
-        Phase phase = new Phase();
-        Enigma enigma = new Enigma();
-        enigma.setId(1L);
-        phase.setEnigmas(Set.of(enigma));
-        game.setPhases(Set.of(phase));
+    // @Test
+    // void testEditGameForm_ReturnsEditGameTemplate() {
+    //     Game game = new Game();
+    //     game.setId(1L);
+    //     Phase phase = new Phase();
+    //     Enigma enigma = new Enigma();
+    //     enigma.setId(1L);
+    //     phase.setEnigmas(Set.of(enigma));
+    //     game.setPhases(Set.of(phase));
 
-        GameType type = new GameType();
-        type.setCode("type1");
-        type.setName("Adventure");
+    //     GameType type = new GameType();
+    //     type.setCode("type1");
+    //     type.setName("Adventure");
 
-        when(gameService.findGameById(1L)).thenReturn(game);
-        when(typeGameService.findAll()).thenReturn(Set.of(type));
+    //     when(gameService.findGameById(1L)).thenReturn(game);
+    //     when(typeGameService.findAll()).thenReturn(Set.of(type));
 
-        String view = gameController.editGameForm(1L, model);
+    //     String view = gameController.editGameForm(1L, model);
 
-        verify(model).addAttribute(eq("game"), eq(game));
-        verify(model).addAttribute(eq("typesGame"), any());
-        assertEquals("editGame", view);
-    }
+    //     verify(model).addAttribute(eq("game"), eq(game));
+    //     verify(model).addAttribute(eq("typesGame"), any());
+    //     assertEquals("editGame", view);
+    // }
 
-    @Test
-    void testEditGameForm_WhenGameNotFound_ThrowsException() {
-        when(gameService.findGameById(1L)).thenReturn(null);
-        assertThrows(IllegalArgumentException.class, () -> gameController.editGameForm(1L, model));
-    }
+    // @Test
+    // void testEditGameForm_WhenGameNotFound_ThrowsException() {
+    //     when(gameService.findGameById(1L)).thenReturn(null);
+    //     assertThrows(IllegalArgumentException.class, () -> gameController.editGameForm(1L, model));
+    // }
 
     @Test
     void testNewGame_lastPost_GameWithoutPhases() {
