@@ -205,7 +205,7 @@ public class GameController {
         }
         model.addAttribute("phaseRows", phaseRows);
 
-        return "editGame"; // tu plantilla
+        return "editGame";
     }
 
     @PostMapping("/edit/game/{id}")

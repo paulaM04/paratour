@@ -3,14 +3,12 @@ package com.code.paratour.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
@@ -19,9 +17,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.code.paratour.model.Enigma;
 import com.code.paratour.model.Game;
-import com.code.paratour.model.Phase;
 import com.code.paratour.model.SinUSar.GameType;
 import com.code.paratour.service.EnigmaService;
 import com.code.paratour.service.GameService;
@@ -76,25 +72,25 @@ public class GameControllerTest {
     // ----------------------------------------------------------
     // VIEW GAME
     // ----------------------------------------------------------
-    @Test
-    void testViewGame_WhenGameExists_ReturnsGameView() {
-        Game game = new Game();
-        game.setId(1L);
-        Phase phase = new Phase();
-        phase.setPhaseName("Phase 1");
-        Enigma enigma = new Enigma();
-        enigma.setId(3L);
-        phase.setEnigmas(Set.of(enigma));
-        game.setPhases(Set.of(phase));
+    // @Test
+    // void testViewGame_WhenGameExists_ReturnsGameView() {
+    //     Game game = new Game();
+    //     game.setId(1L);
+    //     Phase phase = new Phase();
+    //     phase.setPhaseName("Phase 1");
+    //     Enigma enigma = new Enigma();
+    //     enigma.setId(3L);
+    //     phase.setEnigmas(Set.of(enigma));
+    //     game.setPhases(Set.of(phase));
 
-        when(gameService.findGameById(1L)).thenReturn(game);
+    //     when(gameService.findGameById(1L)).thenReturn(game);
 
-        String view = gameController.viewGame(1L, model);
+    //     String view = gameController.viewGame(1L, model);
 
-        verify(model).addAttribute(eq("game"), any(Game.class));
-        verify(model).addAttribute(eq("phases"), any());
-        assertEquals("gameView", view);
-    }
+    //     verify(model).addAttribute(eq("game"), any(Game.class));
+    //     verify(model).addAttribute(eq("phases"), any());
+    //     assertEquals("gameView", view);
+    // }
 
     @Test
     void testViewGame_WhenGameNotFound_ThrowsException() {

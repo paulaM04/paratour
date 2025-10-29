@@ -31,12 +31,19 @@
           <label class="form-label text-primary">Tipo de Juego</label>
           <input type="text" name="gameType" class="form-control" value="{{game.gameType}}">
         </div>
-
+        {{#game.image}}
         <div class="mb-3">
           <label class="form-label text-primary">Imagen</label>
           <input type="text" name="image" class="form-control" value="{{game.image}}">
         </div>
-
+        {{/game.image}}
+        {{^game.image}}
+        <div class="mb-3">
+          <label class="form-label text-primary">Video</label>
+          <textarea name="video" class="form-control" rows="2" placeholder="Añadir URL del video..."></textarea>
+        </div>
+        {{/game.image}}
+        
         {{#game.video}}
         <div class="mb-3">
           <label class="form-label text-primary">Video</label>
