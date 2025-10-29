@@ -1,11 +1,15 @@
-package com.code.paratour.model;
+package com.code.paratour.model.SinUSar;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name = "progreso")
-public class Progress {
+@Table(name = "leaderboard")
+public class Leaderboard {
 
     @Id
     private Long id;
@@ -28,21 +32,10 @@ public class Progress {
     @Column(name = "id_instancia")
     private Long instanceId;
 
-    @Column(name = "id_fase")
-    private Long phaseId;
+    @Column(name = "puntuacion_total")
+    private Integer totalScore;
 
-    @Column(name = "id_enigma")
-    private Long enigmaId;
-
-    private Integer points;
-
-    private Long time;
-
-    @Column(name = "fecha_inicio")
-    private LocalDate startDate;
-
-    @Column(name = "fecha_completado")
-    private LocalDate completedDate;
+    private LocalDate date;
 
     // getters and setters
 }

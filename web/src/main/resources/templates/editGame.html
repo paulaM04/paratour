@@ -37,10 +37,18 @@
           <input type="text" name="image" class="form-control" value="{{game.image}}">
         </div>
 
+        {{#game.video}}
         <div class="mb-3">
           <label class="form-label text-primary">Video</label>
           <input type="text" name="video" class="form-control" value="{{game.video}}">
         </div>
+        {{/game.video}}
+        {{^game.video}}
+        <div class="mb-3">
+          <label class="form-label text-primary">Video</label>
+          <textarea name="video" class="form-control" rows="2" placeholder="Añadir URL del video..."></textarea>
+        </div>
+        {{/game.video}}
       </div>
 
       <!-- FASES -->
@@ -53,13 +61,15 @@
         </div>
 
         <div class="accordion" id="phasesAccordion">
+          {{^phaseRows}}
+          <div class="alert alert-secondary mt-2">No hay fases en este juego.</div>
+          {{/phaseRows}}
           {{#phaseRows}}
           <div class="accordion-item">
             <h2 class="accordion-header" id="phase-{{phase.id}}">
               <button class="accordion-button collapsed fw-semibold text-success" type="button"
                 data-bs-toggle="collapse" data-bs-target="#collapse-{{phase.id}}" aria-expanded="false"
-                aria-controls="collapse-{{phase.id}}">
-                {{phase.phaseName}}
+                aria-controls="collapse-{{phase.id}}">{{phase.phaseName}}
               </button>
             </h2>
 
@@ -75,24 +85,42 @@
 
                 <div class="mb-3">
                   <label class="form-label text-success">Descripción</label>
-                  <textarea name="phaseRows[{{idx}}].description" class="form-control" rows="2">{{phase.description}}</textarea>
+                  <textarea name="phaseRows[{{idx}}].description" class="form-control"
+                    rows="2">{{phase.description}}</textarea>
                 </div>
 
-                <div class="text-center mb-3">
-                  <strong class="text-primary">Imagen Fase:</strong><br>
-                  <img src="{{phase.image}}" class="img-fluid rounded shadow-sm"
-                    style="max-height:150px; object-fit:cover;" alt="Imagen de fase">
+                {{#phase.image}}
+                <div class="mb-3">
+                  <label class="form-label text-success">Imagen Fase (URL)</label>
+                  <textarea name="phaseRows[{{idx}}].image" class="form-control" rows="2"
+                    placeholder="Añadir o editar URL de la imagen...">{{phase.image}}</textarea>
                 </div>
+                {{/phase.image}}
+                {{^phase.image}}
+                <div class="mb-3">
+                  <label class="form-label text-success">Imagen Fase (URL o subir)</label>
+                  <textarea name="phaseRows[{{idx}}].image" class="form-control" rows="2"
+                    placeholder="Añadir URL de imagen..."></textarea>
+                </div>
+                {{/phase.image}}
 
+                {{#phase.video}}
                 <div class="mb-3">
                   <label class="form-label text-success">Video</label>
                   <input type="text" name="phaseRows[{{idx}}].video" class="form-control" value="{{phase.video}}">
                 </div>
+                {{/phase.video}}
+                {{^phase.video}}
+                <div class="mb-3">
+                  <label class="form-label text-success">Video</label>
+                  <textarea name="phaseRows[{{idx}}].video" class="form-control" rows="2"
+                    placeholder="Añadir URL del video..."></textarea>
+                </div>
+                {{/phase.video}}
 
                 <div class="mb-3">
                   <label class="form-label text-success">Latitud</label>
-                  <input type="text" name="phaseRows[{{idx}}].latitude" class="form-control"
-                    value="{{phase.latitude}}">
+                  <input type="text" name="phaseRows[{{idx}}].latitude" class="form-control" value="{{phase.latitude}}">
                 </div>
 
                 <div class="mb-3">
@@ -101,11 +129,19 @@
                     value="{{phase.longitude}}">
                 </div>
 
+                {{#phase.mapUrl}}
                 <div class="mb-3">
                   <label class="form-label text-success">Dirección Mapa</label>
-                  <textarea name="phaseRows[{{idx}}].mapUrl" class="form-control"
-                    rows="3">{{phase.mapUrl}}</textarea>
+                  <textarea name="phaseRows[{{idx}}].mapUrl" class="form-control" rows="3">{{phase.mapUrl}}</textarea>
                 </div>
+                {{/phase.mapUrl}}
+                {{^phase.mapUrl}}
+                <div class="mb-3">
+                  <label class="form-label text-success">Dirección Mapa</label>
+                  <textarea name="phaseRows[{{idx}}].mapUrl" class="form-control" rows="3"
+                    placeholder="Pegue aquí la URL del mapa..."></textarea>
+                </div>
+                {{/phase.mapUrl}}
 
                 <form action="/deletePhase/{{phase.id}}" method="post">
                   <input type="hidden" name="phaseName" value="{{phase.phaseName}}">
@@ -124,13 +160,16 @@
                     </button>
                   </div>
 
-                  {{^phase.enigmas}}
-                  <div class="alert alert-secondary mt-2">No hay enigmas en esta fase.</div>
-                  {{/phase.enigmas}}
+
 
                   <div class="accordion" id="enigmasAccordion-{{phase.id}}">
-                    {{#phase.enigmas}}
+                    {{^enigmas}}
+                    <div class="alert alert-secondary mt-2">No hay enigmas en esta fase.</div>
+                    {{/enigmas}}
+                    {{#enigmas}}
+
                     <div class="accordion-item mb-2 border-0 shadow-sm">
+
                       <h2 class="accordion-header" id="enigma-{{id}}">
                         <button class="accordion-button collapsed fw-semibold text-dark" type="button"
                           data-bs-toggle="collapse" data-bs-target="#collapseEnigma-{{id}}" aria-expanded="false"
@@ -142,18 +181,50 @@
                       <div id="collapseEnigma-{{id}}" class="accordion-collapse collapse"
                         data-bs-parent="#enigmasAccordion-{{phase.id}}">
                         <div class="accordion-body">
-                          <p><strong>ID Enigma:</strong> {{enigmaNumber}}</p>
-                          <p><strong>❓ Pregunta:</strong> {{statement}}</p>
-                          <p><strong>✅ Respuesta:</strong> {{answer}}</p>
-                          {{#hint1}}<p><strong>💡 Pista 1:</strong> {{hint1}}</p>{{/hint1}}
-                          {{#hint2}}<p><strong>💡 Pista 2:</strong> {{hint2}}</p>{{/hint2}}
-                          <p class="text-muted small mb-0"><strong>Formato:</strong> {{answerFormat}}</p>
+                          <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">📝 Texto literal</label>
+                            <textarea name="enigmas[{{id}}].literalText" class="form-control"
+                              rows="2">{{literalText}}</textarea>
+                          </div>
+
+                          <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">❓ Pregunta</label>
+                            <textarea name="enigmas[{{id}}].statement" class="form-control"
+                              rows="2">{{statement}}</textarea>
+                          </div>
+
+                          <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">✅ Respuesta</label>
+                            <textarea name="enigmas[{{id}}].answer" class="form-control" rows="2">{{answer}}</textarea>
+                          </div>
+
+                          <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">💡 Pista 1</label>
+                            <textarea name="enigmas[{{id}}].hint1" class="form-control" rows="2">{{hint1}}</textarea>
+                          </div>
+
+                          <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">💡 Pista 2</label>
+                            <textarea name="enigmas[{{id}}].hint2" class="form-control" rows="2">{{hint2}}</textarea>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">📄 Formato de respuesta</label>
+                            <textarea name="enigmas[{{id}}].answerFormat" class="form-control"
+                              rows="2">{{answerFormat}}</textarea>
+                          </div>
 
                           {{#image}}
                           <div class="text-center mb-3">
                             <strong class="text-primary">Imagen Enigma:</strong><br>
                             <img src="{{image}}" class="img-fluid rounded shadow-sm"
-                              style="max-height:150px; object-fit:cover;" alt="Imagen de fase">
+                              style="max-height:150px; object-fit:cover;" alt="Imagen del enigma">
+                          </div>
+                          {{/image}}
+                          {{^image}}
+                          <div class="mb-3">
+                            <label class="form-label text-primary">Imagen Enigma (URL)</label>
+                            <textarea name="enigmas[{{id}}].image" class="form-control" rows="2"
+                              placeholder="Añadir URL de imagen..."></textarea>
                           </div>
                           {{/image}}
 
@@ -165,6 +236,13 @@
                             </video>
                           </div>
                           {{/video}}
+                          {{^video}}
+                          <div class="mb-3">
+                            <label class="form-label text-primary">Video Enigma (URL)</label>
+                            <textarea name="enigmas[{{id}}].video" class="form-control" rows="2"
+                              placeholder="Añadir URL de video..."></textarea>
+                          </div>
+                          {{/video}}
                         </div>
                         <form action="/deleteEnigma/{{id}}" method="post">
                           <input type="hidden" name="enigmaNumber" value="{{enigmaNumber}}">
@@ -174,7 +252,7 @@
                         </form>
                       </div>
                     </div>
-                    {{/phase.enigmas}}
+                    {{/enigmas}}
                   </div>
                 </div>
               </div>
@@ -220,3 +298,4 @@
   </div>
 
   {{>footer}}
+</body>

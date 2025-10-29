@@ -1,7 +1,11 @@
-package com.code.paratour.model;
+package com.code.paratour.model.SinUSar;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "auditoria_panel_admin")

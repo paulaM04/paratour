@@ -1,4 +1,4 @@
-package com.code.paratour.model;
+package com.code.paratour.model.SinUSar;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

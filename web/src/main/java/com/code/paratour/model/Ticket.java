@@ -39,8 +39,10 @@ public class Ticket {
     @Column(name = "num_jugadores_registrados")
     private Integer registeredPlayers;
 
+    @Column(name = "importe")
     private Float amount;
 
+    @Column(name = "activo")
     private Boolean active;
 
     @Column(name = "fecha_alta")

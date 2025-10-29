@@ -1,4 +1,4 @@
-package com.code.paratour.model;
+package com.code.paratour.model.SinUSar;
 
 import java.time.LocalDateTime;
 

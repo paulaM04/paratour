@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.code.paratour.model.Client;
+import com.code.paratour.model.SinUSar.Client;
 import com.code.paratour.repositories.ClientRepository;
 
 /**

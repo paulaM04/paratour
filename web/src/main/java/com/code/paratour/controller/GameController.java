@@ -76,8 +76,9 @@ public class GameController {
      * Deletes a game by ID, including all related phases and enigmas (cascade
      * delete).
      */
+    @Transactional
     @GetMapping("/deleteGame/{id}")
-    public String deleteGame(@PathVariable Long id, Model model) {
+    public String deleteGame(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
 
         try {
             Game game = gameService.findGameById(id);
@@ -106,8 +107,9 @@ public class GameController {
 
             model.addAttribute("games", gameService.findAllGames());
             model.addAttribute("successMessage", "Game deleted successfully.");
+            redirectAttributes.addFlashAttribute("successMessage", "✅ El juego se ha borrado correctamente.");
 
-            return "home";
+            return "redirect:/";
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -213,7 +215,6 @@ public class GameController {
             RedirectAttributes redirectAttributes,
             Model model) {
         
-        Game dbGame = gameService.findGameById(id);
         // aquí llamamos al servicio
         this.saveGameController(formGame);
 
@@ -223,7 +224,6 @@ public class GameController {
 
     @Transactional
     public Game saveGameController(Game game) {
-        System.out.println("YAAAAAAAAA POR FAVPR AQUI LLEGA");      
         // Si el juego ya existe, lo recuperamos de la BD
         Game dbGame = gameService.findGameById(game.getId());
         // === Actualizar datos principales ===
