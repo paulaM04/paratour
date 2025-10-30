@@ -27,10 +27,16 @@
           <textarea name="description" class="form-control" rows="3">{{game.description}}</textarea>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label text-primary">Tipo de Juego</label>
-          <input type="text" name="gameType" class="form-control" value="{{game.gameType}}">
+        <div class="col-md-6 mb-3">
+          <label for="gameType" class="form-label">Tipo de juego</label>
+          <select name="gameType" id="gameType" class="form-select" required>
+            <option value="">Selecciona un tipo de juego</option>
+            {{#typesGame}}
+            <option value="{{code}}" {{#selected}}selected{{/selected}}>{{code}} - {{name}}</option>
+            {{/typesGame}}
+          </select>
         </div>
+
         {{#game.image}}
         <div class="mb-3">
           <label class="form-label text-primary">Imagen</label>
@@ -43,7 +49,7 @@
           <textarea name="video" class="form-control" rows="2" placeholder="Añadir URL del video..."></textarea>
         </div>
         {{/game.image}}
-        
+
         {{#game.video}}
         <div class="mb-3">
           <label class="form-label text-primary">Video</label>

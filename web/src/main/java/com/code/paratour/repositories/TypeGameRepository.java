@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.code.paratour.model.SinUSar.GameType;
+import com.code.paratour.model.GameType;
 
 /**
  * Repository interface for managing {@link GameType} entities.

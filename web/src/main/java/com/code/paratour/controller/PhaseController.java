@@ -17,8 +17,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.code.paratour.model.Enigma;
 import com.code.paratour.model.Game;
+import com.code.paratour.model.GameType;
 import com.code.paratour.model.Phase;
-import com.code.paratour.model.SinUSar.GameType;
 import com.code.paratour.service.EnigmaService;
 import com.code.paratour.service.GameService;
 import com.code.paratour.service.PhaseService;

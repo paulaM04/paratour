@@ -26,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.code.paratour.model.Enigma;
 import com.code.paratour.model.Game;
+import com.code.paratour.model.GameType;
 import com.code.paratour.model.Phase;
 import com.code.paratour.service.EnigmaService;
 import com.code.paratour.service.GameService;
@@ -48,6 +49,7 @@ public class GameController {
 
     @Autowired
     private TypeGameService typeGameService;
+    
 
     /**
      * Displays the home page with the list of all games.
@@ -187,7 +189,10 @@ public class GameController {
             ra.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
             return "redirect:/";
         }
-
+        for (GameType type : typeGameService.findAll()) {
+            type.setSelected(type.getCode().equals(dbGame.getGameType()));
+        }
+        model.addAttribute("typesGame", typeGameService.findAll());
         // Pasamos el juego tal cual para lecturas ({{game.*}})
         model.addAttribute("game", dbGame);
 

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.code.paratour.model.SinUSar.GameType;
+import com.code.paratour.model.GameType;
 import com.code.paratour.repositories.TypeGameRepository;
 
 /**
