@@ -16,4 +16,6 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 @Query("SELECT g FROM Game g WHERE g.id = :id")
 Game findGameWithPhasesAndEnigmas(@Param("id") Long id);
 
+
+
 }

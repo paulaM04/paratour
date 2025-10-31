@@ -11,6 +11,12 @@
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {{/successMessage}}
+    {{#errorMessage}}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{errorMessage}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {{/errorMessage}}
 
     <form id="editGameForm" action="/edit/game/{{game.id}}" method="post">
       <!-- DATOS DEL JUEGO -->
@@ -62,6 +68,25 @@
           <textarea name="video" class="form-control" rows="2" placeholder="Añadir URL del video..."></textarea>
         </div>
         {{/game.video}}
+        <div class="col-md-3 mb-2 mb-md-0">
+          <label for="hasLeaderboard" class="form-label text-success">Leaderboard:</label>
+          <select name="hasLeaderboard" id="hasLeaderboard" class="form-select">
+            <option value="true" {{#game.hasLeaderboard}}selected{{/game.hasLeaderboard}}>Sí</option>
+            <option value="false" {{^game.hasLeaderboard}}selected{{/game.hasLeaderboard}}>No</option>
+          </select>
+          <span class="help-tip" tabindex="0"
+            data-tip="Si está activado, el juego muestra una tabla de clasificación con las puntuaciones de los jugadores.">i</span>
+        </div>
+
+        <div class="col-md-3">
+          <label for="manual" class="form-label text-success">Manual:</label>
+          <select name="manual" id="manual" class="form-select">
+            <option value="true" {{#game.manual}}selected{{/game.manual}}>Sí</option>
+            <option value="false" {{^game.manual}}selected{{/game.manual}}>No</option>
+          </select>
+          <span class="help-tip" tabindex="0"
+            data-tip="Indica que este registro fue creado o configurado manualmente desde el panel de administración.">i</span>
+        </div>
       </div>
 
       <!-- FASES -->
@@ -173,13 +198,11 @@
                     </button>
                   </div>
 
-
-
                   <div class="accordion" id="enigmasAccordion-{{phase.id}}">
-                    {{^enigmas}}
+                    {{^phase.enigmas}}
                     <div class="alert alert-secondary mt-2">No hay enigmas en esta fase.</div>
-                    {{/enigmas}}
-                    {{#enigmas}}
+                    {{/phase.enigmas}}
+                    {{#phase.enigmas}}
 
                     <div class="accordion-item mb-2 border-0 shadow-sm">
 
@@ -265,7 +288,7 @@
                         </form>
                       </div>
                     </div>
-                    {{/enigmas}}
+                    {{/phase.enigmas}}
                   </div>
                 </div>
               </div>

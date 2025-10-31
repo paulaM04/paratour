@@ -23,6 +23,7 @@ public class Phase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_juego")
     private Game game;
@@ -62,126 +63,50 @@ public class Phase {
     @Transient
     private int idFalse; // Para evitar que se muestre el ID en el formulario
 
-    public Game getGame() {
-        return game;
-    }
+   
+    public Long getId() { return id; }  
+    public void setId(Long id) { this.id = id; } 
 
-    public void setGame(Game game) {
-        this.game = game;
-    }
+    public Game getGame() { return game; }  
+    public void setGame(Game game) { this.game = game; }  
 
-    public void setEnigmas(Set<Enigma> enigmas) {
-        this.enigmas = enigmas;
-    }
+    public String getPhaseName() { return phaseName; }  
+    public void setPhaseName(String phaseName) { this.phaseName = phaseName; }  
 
-    public Set<Enigma> getEnigmas() {
-        return enigmas;
-    }
+    public String getLiteralText() { return literalText; }  
+    public void setLiteralText(String literalText) { this.literalText = literalText; } 
 
-    // getters and setters
-    public int getIdFalse() {
-        return idFalse;
-    }
+    public String getDescription() { return description; }  
+    public void setDescription(String description) { this.description = description; }  
 
-    public Long getId() {
-        return id;
-    }
+    public String getImage() { return image; }  
+    public void setImage(String image) { this.image = image; }  
 
-    public void setIdFalse(int idFalse) {
-        this.idFalse = idFalse;
-    }
+    public String getVideo() { return video; }  
+    public void setVideo(String video) { this.video = video; } 
 
-    public String getPhaseName() {
-        return phaseName;
-    }
+    public String getLatitude() { return latitude; }  
+    public void setLatitude(String latitude) { this.latitude = latitude; }  
 
-    public void setPhaseName(String phaseName) {
-        this.phaseName = phaseName;
-    }
+    public String getLongitude() { return longitude; }  
+    public void setLongitude(String longitude) { this.longitude = longitude; }  
 
-    public String getLiteralText() {
-        return literalText;
-    }
+    public Integer getNextPhase() { return nextPhase; }  
+    public void setNextPhase(Integer nextPhase) { this.nextPhase = nextPhase; } 
 
-    public void setLiteralText(String literalText) {
-        this.literalText = literalText;
-    }
+    public String getMapUrl() { return mapUrl; }  
+    public void setMapUrl(String mapUrl) { this.mapUrl = mapUrl; } 
 
-    public String getDescription() {
-        return description;
-    }
+    public Boolean getManual() { return manual; }  
+    public void setManual(Boolean manual) { this.manual = manual; }  
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public Set<Enigma> getEnigmas() { return enigmas; }  
+    public void setEnigmas(Set<Enigma> enigmas) { this.enigmas = enigmas; }  
 
-    public String getImage() {
-        return image;
-    }
+    public int getIdFalse() { return idFalse; }  
+    public void setIdFalse(int idFalse) { this.idFalse = idFalse; }
 
-    public void setImage(String image) {
-        this.image = image;
-    }
+    public void addEnigma(Enigma enigma) { enigmas.add(enigma); enigma.setPhase(this); }  
+    public void deleteEnigma(Enigma enigma) { enigmas.remove(enigma); enigma.setPhase(null); }
 
-    public String getVideo() {
-        return video;
-    }
-
-    public void setVideo(String video) {
-        this.video = video;
-    }
-
-    public String getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
-    }
-
-    public String getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
-    }
-
-    public Integer getNextPhase() {
-        return nextPhase;
-    }
-
-    public void setNextPhase(Integer nextPhase) {
-        this.nextPhase = nextPhase;
-    }
-
-    public String getMapUrl() {
-        return mapUrl;
-    }
-
-    public void setMapUrl(String mapUrl) {
-        this.mapUrl = mapUrl;
-    }
-
-    public Boolean getManual() {
-        return manual;
-    }
-
-    public void setManual(Boolean manual) {
-        this.manual = manual;
-    }
-
-    public void deleteEnigma(Enigma enigma) {
-        enigmas.remove(enigma);
-        enigma.setPhase(null);
-    }
-
-    public void addEnigma(Enigma enigma) {
-        enigmas.add(enigma);
-        enigma.setPhase(this);
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

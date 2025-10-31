@@ -49,7 +49,6 @@ public class GameController {
 
     @Autowired
     private TypeGameService typeGameService;
-    
 
     /**
      * Displays the home page with the list of all games.
@@ -152,7 +151,6 @@ public class GameController {
             if (phase.getLiteralText() == null || phase.getLiteralText().isBlank()) {
                 phase.setLiteralText("Phase " + phase.getPhaseName());
             }
-            System.out.println("El id de la FASE es: " + phase.getId());
             Set<Enigma> enigmas = phase.getEnigmas();
             for (Enigma e : enigmas) {
                 if (e.getStatement() == null || e.getStatement().isBlank()) {
@@ -189,6 +187,7 @@ public class GameController {
             ra.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
             return "redirect:/";
         }
+
         for (GameType type : typeGameService.findAll()) {
             type.setSelected(type.getCode().equals(dbGame.getGameType()));
         }
@@ -202,14 +201,15 @@ public class GameController {
 
         // phaseRows = List<Map<String,Object>> con { idx, phase }
         List<Map<String, Object>> phaseRows = new ArrayList<>();
-        for (int i = 0; i < ordered.size(); i++) {
+        int i=0;
+        for (Phase phase: ordered) {
             Map<String, Object> row = new HashMap<>();
             row.put("idx", i);
-            row.put("phase", ordered.get(i));
+            row.put("phase", phase);
             phaseRows.add(row);
+            i++;
         }
         model.addAttribute("phaseRows", phaseRows);
-
         return "editGame";
     }
 
@@ -219,9 +219,48 @@ public class GameController {
             @ModelAttribute("game") Game formGame,
             RedirectAttributes redirectAttributes,
             Model model) {
-        
+        Game game = gameService.findGameById(id);
+
+        if (game == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "El juego no existe.");
+            return "redirect:/";
+        }
         // aquí llamamos al servicio
         this.saveGameController(formGame);
+
+        // Método GET o dentro del POST antes de guardar
+        if (isNullOrEmpty(game.getName()) ||
+                isNullOrEmpty(game.getDescription()) ||
+                isNullOrEmpty(game.getGameType()) ||
+                (game.getImage() == null && game.getVideo() == null)) {
+
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Por favor, completa todos los campos del juego antes de continuar.");
+            return "redirect:/edit/game/" + id + "?incomplete=true";
+        }
+        for (Phase phase : game.getPhases()) {
+            if (isNullOrEmpty(phase.getPhaseName()) ||
+                    isNullOrEmpty(phase.getDescription())) {
+
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Todas las fases deben tener nombre y descripción.");
+                return "redirect:/edit/game/" + id + "?incomplete=true";
+            }
+            // Recorremos los enigmas dentro de cada fase
+            for (Enigma enigma : phase.getEnigmas()) {
+                if (isNullOrEmpty(enigma.getAnswer()) ||
+                        isNullOrEmpty(enigma.getAnswerFormat()) ||
+                        isNullOrEmpty(enigma.getHint1()) ||
+                        isNullOrEmpty(enigma.getHint2())
+                ){
+                    System.out.println("AQUIIIII 2......."+ enigma.getId());
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Todos los enigmas deben tener pregunta, respuesta y pista.");
+                    return "redirect:/editGame/" + id + "?incomplete=true";
+                }
+            }
+        }            
+        System.out.println("AQUIIIII 3");
 
         redirectAttributes.addFlashAttribute("successMessage", "✅ El juego se ha guardado correctamente.");
         return "redirect:/editGame/" + id + "?success=1";
@@ -233,7 +272,7 @@ public class GameController {
         Game dbGame = gameService.findGameById(game.getId());
         // === Actualizar datos principales ===
         dbGame.setNumberOfRiddles(game.getPhases().size());
-        
+
         dbGame.setName(game.getName());
         dbGame.setDescription(game.getDescription());
         dbGame.setImage(game.getImage());
@@ -302,6 +341,10 @@ public class GameController {
 
     public Boolean safeBool(Boolean value) {
         return (value == null) ? true : value;
+    }
+
+    private boolean isNullOrEmpty(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     /**
