@@ -14,11 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -205,7 +203,12 @@ public class GameController {
         for (Phase phase : ordered) {
             Map<String, Object> row = new HashMap<>();
             row.put("idx", i);
+            List<Enigma> sortedEnigmas = new ArrayList<>(phase.getEnigmas());
+            sortedEnigmas.sort(Comparator.comparing(Enigma::getId));
+            phase.setEnigmas(new LinkedHashSet<>(sortedEnigmas));
+
             row.put("phase", phase);
+
             phaseRows.add(row);
             i++;
         }
@@ -253,14 +256,14 @@ public class GameController {
                             isNullOrEmpty(enigma.getAnswerFormat()) ||
                             isNullOrEmpty(enigma.getHint1()) ||
                             isNullOrEmpty(enigma.getHint2())) {
-                        //System.out.println("AQUIIIII 2......." + enigma.getId());
+                        // System.out.println("AQUIIIII 2......." + enigma.getId());
                         redirectAttributes.addFlashAttribute("errorMessage",
                                 "Todos los enigmas deben tener pregunta, respuesta y pista.");
                         return "redirect:/editGame/" + id + "?incomplete=true";
                     }
                 }
             }
-            //System.out.println("AQUIIIII 3");
+            // System.out.println("AQUIIIII 3");
 
             redirectAttributes.addFlashAttribute("successMessage", "✅ El juego se ha guardado correctamente.");
             return "redirect:/editGame/" + id + "?success=1";
@@ -326,11 +329,11 @@ public class GameController {
         return gameService.saveGame(dbGame);
     }
 
-    @InitBinder("game")
-    public void initBinder(WebDataBinder binder) {
-        // Excluye el binding automático del campo 'phases'
-        binder.setDisallowedFields("phases");
-    }
+    // @InitBinder("game")
+    // public void initBinder(WebDataBinder binder) {
+    // // Excluye el binding automático del campo 'phases'
+    // binder.setDisallowedFields("phases");
+    // }
 
     /**
      * Utility methods for safely handling null values.

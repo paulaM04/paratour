@@ -323,41 +323,46 @@ public class PhaseController {
     public String addPhase(@PathVariable Long gameId,
             @ModelAttribute Phase newPhase,
             RedirectAttributes redirectAttributes, Model model) {
+        try {
+            Game game = gameService.findGameById(gameId);
 
-        Game game = gameService.findGameById(gameId);
+            if (newPhase.getPhaseName() != null && !newPhase.getPhaseName().isBlank()) {
+                newPhase.setGame(game);
+                if (newPhase.getLiteralText() == null || newPhase.getLiteralText().isBlank()) {
+                    newPhase.setLiteralText("Phase " + newPhase.getPhaseName());
+                }
+                if (newPhase.getLatitude() == null || newPhase.getLatitude().isBlank()) {
+                    newPhase.setLatitude("");
+                }
+                if (newPhase.getLongitude() == null || newPhase.getLongitude().isBlank()) {
+                    newPhase.setLongitude("");
+                }
+                if (newPhase.getImage() == null || newPhase.getImage().isBlank()) {
+                    newPhase.setImage(
+                            "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+                }
+                if (newPhase.getVideo() == null || newPhase.getVideo().isBlank()) {
+                    newPhase.setVideo("");
+                }
 
-        if (newPhase.getPhaseName() != null && !newPhase.getPhaseName().isBlank()) {
-            newPhase.setGame(game);
-            if (newPhase.getLiteralText() == null || newPhase.getLiteralText().isBlank()) {
-                newPhase.setLiteralText("Phase " + newPhase.getPhaseName());
+                game.addPhase(newPhase);
+                gameService.saveGame(game);
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "✅ Nueva fase añadida correctamente.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "❌ Debes introducir un nombre para la fase.");
             }
-            if (newPhase.getLatitude() == null || newPhase.getLatitude().isBlank()) {
-                newPhase.setLatitude("");
-            }
-            if (newPhase.getLongitude() == null || newPhase.getLongitude().isBlank()) {
-                newPhase.setLongitude("");
-            }
-            if (newPhase.getImage() == null || newPhase.getImage().isBlank()) {
-                newPhase.setImage(
-                        "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
-            }
-            if (newPhase.getVideo() == null || newPhase.getVideo().isBlank()) {
-                newPhase.setVideo("");
-            }
-
-            game.addPhase(newPhase);
-            gameService.saveGame(game);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "✅ Nueva fase añadida correctamente.");
-        } else {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "❌ Debes introducir un nombre para la fase.");
+            List<Phase> sortedPhases = new ArrayList<>(game.getPhases());
+            sortedPhases.sort(Comparator.comparing(Phase::getId));
+            model.addAttribute("phases", sortedPhases);
+            model.addAttribute("game", game);
+            return "redirect:/editGame/" + gameId;
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("message", e.getMessage() != null ? e.getMessage() : "Unknown error");
+            return "error";
         }
-        List<Phase> sortedPhases = new ArrayList<>(game.getPhases());
-        sortedPhases.sort(Comparator.comparing(Phase::getId));
-        model.addAttribute("phases", sortedPhases);
-        model.addAttribute("game", game);
-        return "redirect:/editGame/" + gameId;
     }
 
 }
