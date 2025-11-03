@@ -201,8 +201,8 @@ public class GameController {
 
         // phaseRows = List<Map<String,Object>> con { idx, phase }
         List<Map<String, Object>> phaseRows = new ArrayList<>();
-        int i=0;
-        for (Phase phase: ordered) {
+        int i = 0;
+        for (Phase phase : ordered) {
             Map<String, Object> row = new HashMap<>();
             row.put("idx", i);
             row.put("phase", phase);
@@ -219,51 +219,55 @@ public class GameController {
             @ModelAttribute("game") Game formGame,
             RedirectAttributes redirectAttributes,
             Model model) {
-        Game game = gameService.findGameById(id);
+        try {
+            Game game = gameService.findGameById(id);
 
-        if (game == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "El juego no existe.");
-            return "redirect:/";
-        }
-        // aquí llamamos al servicio
-        this.saveGameController(formGame);
+            if (game == null) {
+                redirectAttributes.addFlashAttribute("message", "El juego no existe.");
+                return "redirect:/";
+            }
+            // aquí llamamos al servicio
+            this.saveGameController(formGame);
 
-        // Método GET o dentro del POST antes de guardar
-        if (isNullOrEmpty(game.getName()) ||
-                isNullOrEmpty(game.getDescription()) ||
-                isNullOrEmpty(game.getGameType()) ||
-                (game.getImage() == null && game.getVideo() == null)) {
-
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Por favor, completa todos los campos del juego antes de continuar.");
-            return "redirect:/edit/game/" + id + "?incomplete=true";
-        }
-        for (Phase phase : game.getPhases()) {
-            if (isNullOrEmpty(phase.getPhaseName()) ||
-                    isNullOrEmpty(phase.getDescription())) {
+            // Método GET o dentro del POST antes de guardar
+            if (isNullOrEmpty(game.getName()) ||
+                    isNullOrEmpty(game.getDescription()) ||
+                    isNullOrEmpty(game.getGameType()) ||
+                    (game.getImage() == null && game.getVideo() == null)) {
 
                 redirectAttributes.addFlashAttribute("errorMessage",
-                        "Todas las fases deben tener nombre y descripción.");
+                        "Por favor, completa todos los campos del juego antes de continuar.");
                 return "redirect:/edit/game/" + id + "?incomplete=true";
             }
-            // Recorremos los enigmas dentro de cada fase
-            for (Enigma enigma : phase.getEnigmas()) {
-                if (isNullOrEmpty(enigma.getAnswer()) ||
-                        isNullOrEmpty(enigma.getAnswerFormat()) ||
-                        isNullOrEmpty(enigma.getHint1()) ||
-                        isNullOrEmpty(enigma.getHint2())
-                ){
-                    System.out.println("AQUIIIII 2......."+ enigma.getId());
+            for (Phase phase : game.getPhases()) {
+                if (isNullOrEmpty(phase.getPhaseName()) ||
+                        isNullOrEmpty(phase.getDescription())) {
+
                     redirectAttributes.addFlashAttribute("errorMessage",
-                            "Todos los enigmas deben tener pregunta, respuesta y pista.");
-                    return "redirect:/editGame/" + id + "?incomplete=true";
+                            "Todas las fases deben tener nombre y descripción.");
+                    return "redirect:/edit/game/" + id + "?incomplete=true";
+                }
+                // Recorremos los enigmas dentro de cada fase
+                for (Enigma enigma : phase.getEnigmas()) {
+                    if (isNullOrEmpty(enigma.getAnswer()) ||
+                            isNullOrEmpty(enigma.getAnswerFormat()) ||
+                            isNullOrEmpty(enigma.getHint1()) ||
+                            isNullOrEmpty(enigma.getHint2())) {
+                        //System.out.println("AQUIIIII 2......." + enigma.getId());
+                        redirectAttributes.addFlashAttribute("errorMessage",
+                                "Todos los enigmas deben tener pregunta, respuesta y pista.");
+                        return "redirect:/editGame/" + id + "?incomplete=true";
+                    }
                 }
             }
-        }            
-        System.out.println("AQUIIIII 3");
+            //System.out.println("AQUIIIII 3");
 
-        redirectAttributes.addFlashAttribute("successMessage", "✅ El juego se ha guardado correctamente.");
-        return "redirect:/editGame/" + id + "?success=1";
+            redirectAttributes.addFlashAttribute("successMessage", "✅ El juego se ha guardado correctamente.");
+            return "redirect:/editGame/" + id + "?success=1";
+        } catch (Exception e) {
+            model.addAttribute("message", e.getMessage());
+            return "error";
+        }
     }
 
     @Transactional

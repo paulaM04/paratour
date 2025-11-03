@@ -357,7 +357,7 @@ public class PhaseController {
         sortedPhases.sort(Comparator.comparing(Phase::getId));
         model.addAttribute("phases", sortedPhases);
         model.addAttribute("game", game);
-                return "redirect:/editGame/" + gameId;
+        return "redirect:/editGame/" + gameId;
     }
 
 }
