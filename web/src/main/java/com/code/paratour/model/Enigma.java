@@ -17,12 +17,12 @@ public class Enigma {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(name = "fase", nullable = true)
-    private Long phaseId;
+
+    // @Column(name = "fase", nullable = true)
+    // private Long phaseId;
 
     @ManyToOne
-    @JoinColumn(name = "fase", insertable = false, updatable = false)
+    @JoinColumn(name = "fase", insertable = true)
     private Phase phase;
 
     @Column(name = "literal_txt", length = 100)
@@ -47,7 +47,7 @@ public class Enigma {
     private String enigmaVideo;
 
     @Column(name = "enigma", columnDefinition = "TEXT")
-    private String statement;
+    private String question;
 
     @Column(name = "formato_respuesta", columnDefinition = "TEXT")
     private String answerFormat;
@@ -93,29 +93,23 @@ public class Enigma {
 
     @Column(name = "instrucciones_adicionales", columnDefinition = "TEXT")
     private String additionalInstructions;
-    
+
     @Transient
     private int idTreak; // Para evitar que se muestre el ID en el formulario
     private Boolean manual;
 
-
-    // getters and setters
-    public void setPhaseId(Long phaseId) {
-        this.phaseId = phaseId;
-    }
-
-    public Long getIdPhase(){
-        return this.phaseId;
-    }
     public Phase getPhase() {
         return phase;
     }
+
     public void setPhase(Phase phase) {
         this.phase = phase;
     }
-    public void setIdidTreak(int idFalse) {
+
+    public void setIdTreak(int idFalse) {
         this.idTreak = idFalse;
     }
+
     public Long getId() {
         return id;
     }
@@ -180,12 +174,12 @@ public class Enigma {
         this.enigmaVideo = enigmaVideo;
     }
 
-    public String getStatement() {
-        return statement;
+    public String getQuestion() {
+        return question;
     }
 
-    public void setStatement(String enigma) {
-        this.statement = enigma;
+    public void setQuestion(String enigma) {
+        this.question = enigma;
     }
 
     public String getAnswerFormat() {
@@ -315,31 +309,54 @@ public class Enigma {
     public void setManual(Boolean manual) {
         this.manual = manual;
     }
+
     public void fillEmptyFields() {
-    if (literalText == null) literalText = "";
-    if (image == null) image = "";
-    if (location == null) location = "";
-    if (introduction == null) introduction = "";
-    if (introAvatarVideo == null) introAvatarVideo = "";
-    if (enigmaVideo == null) enigmaVideo = "";
-    if (answerFormat == null) answerFormat = "";
-    if (hint1 == null) hint1 = "";
-    if (hint2 == null) hint2 = "";
-    if (answer == null) answer = "";
-    if (explanationSpot == null) explanationSpot = "";
-    if (explanationSpotVideo == null) explanationSpotVideo = "";
-    if (locationResolutionPhoto == null) locationResolutionPhoto = "";
-    if (latitude == null) latitude = "";
-    if (longitude == null) longitude = "";
-    if (additionalInstructions == null) additionalInstructions = "";
+        if (literalText == null)
+            literalText = "";
+        if (image == null)
+            image = "";
+        if (location == null)
+            location = "";
+        if (introduction == null)
+            introduction = "";
+        if (introAvatarVideo == null)
+            introAvatarVideo = "";
+        if (enigmaVideo == null)
+            enigmaVideo = "";
+        if (answerFormat == null)
+            answerFormat = "";
+        if (hint1 == null)
+            hint1 = "";
+        if (hint2 == null)
+            hint2 = "";
+        if (answer == null)
+            answer = "";
+        if (explanationSpot == null)
+            explanationSpot = "";
+        if (explanationSpotVideo == null)
+            explanationSpotVideo = "";
+        if (locationResolutionPhoto == null)
+            locationResolutionPhoto = "";
+        if (latitude == null)
+            latitude = "";
+        if (longitude == null)
+            longitude = "";
+        if (additionalInstructions == null)
+            additionalInstructions = "";
 
-    if (pointsCorrect == null) pointsCorrect = 0;
-    if (pointsFail == null) pointsFail = 0;
-    if (pointsHint1 == null) pointsHint1 = 0;
-    if (pointsHint2 == null) pointsHint2 = 0;
-    if (maxTime == null) maxTime = 0;
+        if (pointsCorrect == null)
+            pointsCorrect = 0;
+        if (pointsFail == null)
+            pointsFail = 0;
+        if (pointsHint1 == null)
+            pointsHint1 = 0;
+        if (pointsHint2 == null)
+            pointsHint2 = 0;
+        if (maxTime == null)
+            maxTime = 0;
 
-    if (manual == null) manual = false;
-}
+        if (manual == null)
+            manual = false;
+    }
 
 }

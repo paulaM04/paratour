@@ -1,4 +1,6 @@
 package com.code.paratour.repositories;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +18,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 @Query("SELECT g FROM Game g WHERE g.id = :id")
 Game findGameWithPhasesAndEnigmas(@Param("id") Long id);
 
+@Query("SELECT g FROM Game g LEFT JOIN FETCH g.phases WHERE g.id = :id")
+Optional<Game> findByIdWithPhases(@Param("id") Long id);
 
 
 }

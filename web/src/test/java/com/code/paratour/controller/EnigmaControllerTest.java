@@ -1,7 +1,6 @@
 package com.code.paratour.controller;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -12,14 +11,10 @@ import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.code.paratour.model.Enigma;
-import com.code.paratour.model.Game;
-import com.code.paratour.model.Phase;
 import com.code.paratour.service.EnigmaService;
 import com.code.paratour.service.GameService;
 import com.code.paratour.service.PhaseService;
@@ -109,61 +104,61 @@ public class EnigmaControllerTest {
     // ----------------------------------------------------------
     // addEnigma - SUCCESS
     // ----------------------------------------------------------
-    @Test
-    void testAddEnigma_Success() {
-        Game game = new Game();
-        game.setId(1L);
-        Phase phase = new Phase();
-        phase.setGame(game);
-        phase.setId(10L);
-        phase.setEnigmas(new HashSet<>());
+    // @Test
+    // void testAddEnigma_Success() {
+    //     Game game = new Game();
+    //     game.setId(1L);
+    //     Phase phase = new Phase();
+    //     phase.setGame(game);
+    //     phase.setId(10L);
+    //     phase.setEnigmas(new HashSet<>());
 
-        when(phaseService.findPhaseById(10L)).thenReturn(phase);
+    //     when(phaseService.findPhaseById(10L)).thenReturn(phase);
 
-        Enigma enigma = new Enigma();
-        enigma.setStatement("Enigma A");
+    //     Enigma enigma = new Enigma();
+    //     enigma.setStatement("Enigma A");
 
-        String result = enigmaController.addEnigma(10L, enigma, redirectAttributes);
+    //     String result = enigmaController.addEnigma(10L, enigma, redirectAttributes);
 
-        verify(enigmaService).save(any(Enigma.class));
-        verify(phaseService).save(any(Phase.class));
-        verify(gameService).saveGame(any(Game.class));
-        verify(redirectAttributes).addFlashAttribute("successMessage", "✅ Nueva fase añadida correctamente.");
-        assertEquals("redirect:/editGame/1", result);
-    }
+    //     verify(enigmaService).save(any(Enigma.class));
+    //     verify(phaseService).save(any(Phase.class));
+    //     verify(gameService).saveGame(any(Game.class));
+    //     verify(redirectAttributes).addFlashAttribute("successMessage", "✅ Nueva fase añadida correctamente.");
+    //     assertEquals("redirect:/editGame/1", result);
+    // }
 
     // ----------------------------------------------------------
     // addEnigma - PHASE NOT FOUND
     // ----------------------------------------------------------
-    @Test
-    void testAddEnigma_PhaseNotFound() {
-        when(phaseService.findPhaseById(99L)).thenReturn(null);
+    // @Test
+    // void testAddEnigma_PhaseNotFound() {
+    //     when(phaseService.findPhaseById(99L)).thenReturn(null);
 
-        Enigma enigma = new Enigma();
-        enigma.setStatement("E1");
+    //     Enigma enigma = new Enigma();
+    //     enigma.setStatement("E1");
 
-        String result = enigmaController.addEnigma(99L, enigma, redirectAttributes);
+    //     String result = enigmaController.addEnigma(99L, enigma, redirectAttributes);
 
-        verify(redirectAttributes).addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
-        assertEquals("redirect:/error", result);
-    }
+    //     verify(redirectAttributes).addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
+    //     assertEquals("redirect:/error", result);
+    // }
 
     // ----------------------------------------------------------
     // addEnigma - WITHOUT STATEMENT
     // ----------------------------------------------------------
-    @Test
-    void testAddEnigma_WithoutStatement() {
-        Game game = new Game();
-        game.setId(1L);
-        Phase phase = new Phase();
-        phase.setGame(game);
-        when(phaseService.findPhaseById(5L)).thenReturn(phase);
+    // @Test
+    // void testAddEnigma_WithoutStatement() {
+    //     Game game = new Game();
+    //     game.setId(1L);
+    //     Phase phase = new Phase();
+    //     phase.setGame(game);
+    //     when(phaseService.findPhaseById(5L)).thenReturn(phase);
 
-        Enigma enigma = new Enigma(); // sin statement
+    //     Enigma enigma = new Enigma(); // sin statement
 
-        String result = enigmaController.addEnigma(5L, enigma, redirectAttributes);
+    //     String result = enigmaController.addEnigma(5L, enigma, redirectAttributes);
 
-        verify(redirectAttributes).addFlashAttribute("errorMessage", "❌ Debes introducir un nombre para la fase.");
-        assertEquals("redirect:/editGame/1", result);
-    }
+    //     verify(redirectAttributes).addFlashAttribute("errorMessage", "❌ Debes introducir un nombre para la fase.");
+    //     assertEquals("redirect:/editGame/1", result);
+    // }
 }

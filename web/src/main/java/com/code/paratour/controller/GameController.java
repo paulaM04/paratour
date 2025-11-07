@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.code.paratour.model.Enigma;
@@ -90,7 +89,9 @@ public class GameController {
             // First, delete all enigmas linked to each phase
             for (Phase phase : game.getPhases()) {
                 if (phase.getEnigmas() != null) {
-                    for (Enigma enigma : phase.getEnigmas()) {
+                    Set<Enigma> enigmas = phase.getEnigmas();
+                    for (Enigma enigma : enigmas) {
+                        phase.getEnigmas().remove(enigma);
                         enigmaService.delete(enigma.getId());
                     }
                 }
@@ -151,11 +152,11 @@ public class GameController {
             }
             Set<Enigma> enigmas = phase.getEnigmas();
             for (Enigma e : enigmas) {
-                if (e.getStatement() == null || e.getStatement().isBlank()) {
-                    e.setStatement("No riddle defined yet");
+                if (e.getQuestion() == null || e.getQuestion().isBlank()) {
+                    e.setQuestion("No hay enunciado definido todavía");
                 }
                 if (e.getAnswerFormat() == null || e.getAnswerFormat().isBlank()) {
-                    e.setAnswerFormat("No format defined");
+                    e.setAnswerFormat("Sin formato definido");
                 }
             }
         }
@@ -181,6 +182,7 @@ public class GameController {
     @GetMapping("/editGame/{id}")
     public String editGame(@PathVariable Long id, Model model, RedirectAttributes ra) {
         Game dbGame = gameService.findGameById(id);
+
         if (dbGame == null) {
             ra.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
             return "redirect:/";
@@ -190,28 +192,38 @@ public class GameController {
             type.setSelected(type.getCode().equals(dbGame.getGameType()));
         }
         model.addAttribute("typesGame", typeGameService.findAll());
-        // Pasamos el juego tal cual para lecturas ({{game.*}})
         model.addAttribute("game", dbGame);
 
-        // Construimos filas con índice estable
+        // Construimos filas con índices
         List<Phase> ordered = new ArrayList<>(dbGame.getPhases());
-        ordered.sort(Comparator.comparing(Phase::getId)); // orden determinista
+        ordered.sort(Comparator.comparing(Phase::getId));
 
-        // phaseRows = List<Map<String,Object>> con { idx, phase }
         List<Map<String, Object>> phaseRows = new ArrayList<>();
         int i = 0;
         for (Phase phase : ordered) {
             Map<String, Object> row = new HashMap<>();
             row.put("idx", i);
+
             List<Enigma> sortedEnigmas = new ArrayList<>(phase.getEnigmas());
             sortedEnigmas.sort(Comparator.comparing(Enigma::getId));
-            phase.setEnigmas(new LinkedHashSet<>(sortedEnigmas));
+
+            List<Map<String, Object>> enigmaRows = new ArrayList<>();
+            int j = 0;
+            for (Enigma enigma : sortedEnigmas) {
+
+                Map<String, Object> erow = new HashMap<>();
+                erow.put("eidx", j);
+                erow.put("enigma", enigma);
+                enigmaRows.add(erow);
+                j++;
+            }
 
             row.put("phase", phase);
-
+            row.put("enigmaRows", enigmaRows);
             phaseRows.add(row);
             i++;
         }
+
         model.addAttribute("phaseRows", phaseRows);
         return "editGame";
     }
@@ -220,120 +232,152 @@ public class GameController {
     public String updateGame(
             @PathVariable Long id,
             @ModelAttribute("game") Game formGame,
-            RedirectAttributes redirectAttributes,
-            Model model) {
-        try {
-            Game game = gameService.findGameById(id);
+            @RequestParam Map<String, String> params,
+            RedirectAttributes ra) {
 
-            if (game == null) {
-                redirectAttributes.addFlashAttribute("message", "El juego no existe.");
+        try {
+            Game dbGame = gameService.findGameById(id);
+            if (dbGame == null) {
+                ra.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
                 return "redirect:/";
             }
-            // aquí llamamos al servicio
-            this.saveGameController(formGame);
 
-            // Método GET o dentro del POST antes de guardar
-            if (isNullOrEmpty(game.getName()) ||
-                    isNullOrEmpty(game.getDescription()) ||
-                    isNullOrEmpty(game.getGameType()) ||
-                    (game.getImage() == null && game.getVideo() == null)) {
+            // ---------- DATOS BÁSICOS DEL JUEGO ----------
+            dbGame.setName(formGame.getName());
+            dbGame.setDescription(formGame.getDescription());
+            dbGame.setGameType(formGame.getGameType());
+            dbGame.setImage(formGame.getImage());
+            dbGame.setVideo(formGame.getVideo());
+            dbGame.setHasLeaderboard(formGame.isHasLeaderboard());
+            dbGame.setManual(formGame.getManual());
 
-                redirectAttributes.addFlashAttribute("errorMessage",
-                        "Por favor, completa todos los campos del juego antes de continuar.");
-                return "redirect:/edit/game/" + id + "?incomplete=true";
-            }
-            for (Phase phase : game.getPhases()) {
-                if (isNullOrEmpty(phase.getPhaseName()) ||
-                        isNullOrEmpty(phase.getDescription())) {
+            // ---------- FASES ----------
+            List<Phase> updatedPhases = new ArrayList<>();
+            int idx = 0;
 
-                    redirectAttributes.addFlashAttribute("errorMessage",
-                            "Todas las fases deben tener nombre y descripción.");
-                    return "redirect:/edit/game/" + id + "?incomplete=true";
+            // Recorremos mientras existan filas phaseRows[X]
+            while (params.containsKey("phaseRows[" + idx + "].id")) {
+
+                Long phaseId = Long.parseLong(params.get("phaseRows[" + idx + "].id"));
+                Phase phase = phaseService.findPhaseById(phaseId);
+                if (phase == null) {
+                    phase = new Phase();
+                    phase.setId(phaseId);
                 }
-                // Recorremos los enigmas dentro de cada fase
-                for (Enigma enigma : phase.getEnigmas()) {
-                    if (isNullOrEmpty(enigma.getAnswer()) ||
-                            isNullOrEmpty(enigma.getAnswerFormat()) ||
-                            isNullOrEmpty(enigma.getHint1()) ||
-                            isNullOrEmpty(enigma.getHint2())) {
-                        // System.out.println("AQUIIIII 2......." + enigma.getId());
-                        redirectAttributes.addFlashAttribute("errorMessage",
-                                "Todos los enigmas deben tener pregunta, respuesta y pista.");
-                        return "redirect:/editGame/" + id + "?incomplete=true";
+
+                phase.setPhaseName(params.get("phaseRows[" + idx + "].phaseName"));
+                phase.setDescription(params.get("phaseRows[" + idx + "].description"));
+                phase.setImage(params.get("phaseRows[" + idx + "].image"));
+                phase.setVideo(params.get("phaseRows[" + idx + "].video"));
+                phase.setLatitude(params.get("phaseRows[" + idx + "].latitude"));
+                phase.setLongitude(params.get("phaseRows[" + idx + "].longitude"));
+                phase.setMapUrl(params.get("phaseRows[" + idx + "].mapUrl"));
+                phase.setGame(dbGame);
+
+                // ---------- ENIGMAS ----------
+                List<Enigma> enigmas = new ArrayList<>();
+                for (String key : params.keySet()) {
+                    if (key.startsWith("enigmas[")) {
+                        try {
+                            Long enigmaId = Long.parseLong(key.substring(8, key.indexOf("]")));
+                            Enigma enigma = enigmaService.findEnigmaById(enigmaId);
+                            if (enigma == null)
+                                continue;
+
+                            // Solo los que pertenecen a esta fase
+                            if (enigma.getPhase() != null && enigma.getPhase().getId().equals(phaseId)) {
+
+                                if (params.get("enigmas[" + enigmaId + "].literalText") == null ||
+                                        params.get("enigmas[" + enigmaId + "].literalText").isBlank()) {
+                                    enigma.setLiteralText("Enigma sin nombre");
+                                }else{
+                                    enigma.setLiteralText(params.get("enigmas[" + enigmaId + "].literalText"));
+                                }
+                                
+                                if (params.get("enigmas[" + enigmaId + "].statement") == null ||
+                                        params.get("enigmas[" + enigmaId + "].statement").isBlank()) {
+                                    enigma.setQuestion("No hay enunciado definido todavía");
+                                }else{
+                                    enigma.setQuestion(params.get("enigmas[" + enigmaId + "].statement"));
+                                }
+                                
+                                if (params.get("enigmas[" + enigmaId + "].answer")==null||
+                                        params.get("enigmas[" + enigmaId + "].answer").isBlank()) {
+                                    enigma.setAnswer("Sin respuesta");
+                                }else{
+                                    enigma.setAnswer(params.get("enigmas[" + enigmaId + "].answer"));
+                                }
+
+                                if (params.get("enigmas[" + enigmaId + "].hint1")==null||
+                                        params.get("enigmas[" + enigmaId + "].hint1").isBlank()) {
+                                    enigma.setHint1("Sin pista 1");
+                                }else{
+                                    enigma.setHint1(params.get("enigmas[" + enigmaId + "].hint1"));
+                                }
+
+                                if (params.get("enigmas[" + enigmaId + "].hint2")==null||
+                                        params.get("enigmas[" + enigmaId + "].hint2").isBlank()) {
+                                    enigma.setHint2("Sin pista 2");
+                                }else{
+                                    enigma.setHint2(params.get("enigmas[" + enigmaId + "].hint2"));
+                                }
+
+                                if (params.get("enigmas[" + enigmaId + "].answerFormat")==null||
+                                        params.get("enigmas[" + enigmaId + "].answerFormat").isBlank()) {
+                                    enigma.setAnswerFormat("Sin formato de respuesta");
+                                }else{
+                                    enigma.setHint1(params.get("enigmas[" + enigmaId + "].answerFormat"));
+                                }
+
+                                if (params.get("enigmas[" + enigmaId + "].image")==null||
+                                        params.get("enigmas[" + enigmaId + "].image").isBlank()) {
+                                    enigma.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+                                }else{
+                                    enigma.setImage(params.get("enigmas[" + enigmaId + "].image"));
+                                }
+
+                                if (params.get("enigmas[" + enigmaId + "].video")==null||
+                                        params.get("enigmas[" + enigmaId + "].video").isBlank()) {
+                                    enigma.setEnigmaVideo("Sin vídeo");
+                                }else{
+                                    enigma.setEnigmaVideo(params.get("enigmas[" + enigmaId + "].video"));
+                                }
+                                enigma.setPhase(phase);
+                                enigmas.add(enigma);
+                            }
+                        } catch (Exception ignored) {
+                        }
                     }
                 }
-            }
-            // System.out.println("AQUIIIII 3");
 
-            redirectAttributes.addFlashAttribute("successMessage", "✅ El juego se ha guardado correctamente.");
-            return "redirect:/editGame/" + id + "?success=1";
-        } catch (Exception e) {
-            model.addAttribute("message", e.getMessage());
-            return "error";
-        }
-    }
-
-    @Transactional
-    public Game saveGameController(Game game) {
-        // Si el juego ya existe, lo recuperamos de la BD
-        Game dbGame = gameService.findGameById(game.getId());
-        // === Actualizar datos principales ===
-        dbGame.setNumberOfRiddles(game.getPhases().size());
-
-        dbGame.setName(game.getName());
-        dbGame.setDescription(game.getDescription());
-        dbGame.setImage(game.getImage());
-        dbGame.setVideo(game.getVideo());
-        dbGame.setGameType(game.getGameType());
-        dbGame.setHasLeaderboard(game.isHasLeaderboard());
-        dbGame.setManual(game.getManual());
-        dbGame.setNumberOfRiddles(game.getNumberOfRiddles());
-
-        // === Actualizar o añadir fases ===
-        if (game.getPhases() != null) {
-            // Guardamos las IDs existentes para evitar duplicados
-            Set<Long> existingIds = dbGame.getPhases().stream()
-                    .map(Phase::getId)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-
-            for (Phase formPhase : game.getPhases()) {
-                if (formPhase.getId() != null && existingIds.contains(formPhase.getId())) {
-                    // Fase existente -> actualizar campos
-                    Phase dbPhase = dbGame.getPhases().stream()
-                            .filter(p -> Objects.equals(p.getId(), formPhase.getId()))
-                            .findFirst()
-                            .orElseThrow();
-                    dbPhase.setPhaseName(formPhase.getPhaseName());
-                    dbPhase.setDescription(formPhase.getDescription());
-                    dbPhase.setLatitude(formPhase.getLatitude());
-                    dbPhase.setLongitude(formPhase.getLongitude());
-                    dbPhase.setMapUrl(formPhase.getMapUrl());
-                    dbPhase.setVideo(formPhase.getVideo());
-                    dbPhase.setImage(formPhase.getImage());
-                } else {
-                    // Fase nueva -> asociar y añadir
-                    formPhase.setId(null); // por si acaso
-                    formPhase.setGame(dbGame);
-                    dbGame.getPhases().add(formPhase);
+                if (!enigmas.isEmpty()) {
+                    phase.setEnigmas(new LinkedHashSet<>(enigmas));
                 }
+
+                updatedPhases.add(phase);
+                idx++;
             }
-        }
 
-        // === Asegurar relaciones ===
-        for (Phase phase : dbGame.getPhases()) {
-            phase.setGame(dbGame);
-        }
+            // Reemplazamos las fases anteriores por las nuevas
+            dbGame.getPhases().clear();
+            for (Phase phase : updatedPhases) {
+                phase.setGame(dbGame);
+                dbGame.getPhases().add(phase);
+            }
 
-        // === Guardar todo ===
-        return gameService.saveGame(dbGame);
+            // ---------- GUARDAR Y REDIRIGIR ----------
+            gameService.saveGame(dbGame);
+            ra.addFlashAttribute("successMessage", "💾 Cambios guardados correctamente.");
+
+            // Esto hará un redirect y ejecutará el GET
+            return "redirect:/editGame/" + id;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            ra.addFlashAttribute("errorMessage", "❌ Error al guardar: " + e.getMessage());
+            return "redirect:/editGame/" + id;
+        }
     }
-
-    // @InitBinder("game")
-    // public void initBinder(WebDataBinder binder) {
-    // // Excluye el binding automático del campo 'phases'
-    // binder.setDisallowedFields("phases");
-    // }
 
     /**
      * Utility methods for safely handling null values.

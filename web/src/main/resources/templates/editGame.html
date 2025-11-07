@@ -192,7 +192,7 @@
                 <div class="mt-4 p-3 rounded-4 border border-warning-subtle" style="background-color:#fff9e6;">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="text-warning fw-semibold mb-3">💡 Enigmas de la fase</h5>
-                    <button type="button" class="btn btn-warning btn-sm custom-enigma" data-bs-toggle="modal"
+                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
                       data-bs-target="#addEnigmaModal{{phase.id}}">
                       ➕ Añadir enigma
                     </button>
@@ -222,11 +222,9 @@
                             <textarea name="enigmas[{{id}}].literalText" class="form-control"
                               rows="2">{{literalText}}</textarea>
                           </div>
-
                           <div class="mb-3">
                             <label class="form-label fw-semibold text-dark">❓ Pregunta</label>
-                            <textarea name="enigmas[{{id}}].statement" class="form-control"
-                              rows="2">{{statement}}</textarea>
+                            <textarea name="enigmas[{{id}}].question" class="form-control" rows="2">{{question}}</textarea>
                           </div>
 
                           <div class="mb-3">
@@ -243,6 +241,7 @@
                             <label class="form-label fw-semibold text-dark">💡 Pista 2</label>
                             <textarea name="enigmas[{{id}}].hint2" class="form-control" rows="2">{{hint2}}</textarea>
                           </div>
+                          
                           <div class="mb-3">
                             <label class="form-label fw-semibold text-dark">📄 Formato de respuesta</label>
                             <textarea name="enigmas[{{id}}].answerFormat" class="form-control"
@@ -279,6 +278,7 @@
                               placeholder="Añadir URL de video..."></textarea>
                           </div>
                           {{/video}}
+
                         </div>
                         <form action="/deleteEnigma/{{id}}" method="post">
                           <input type="hidden" name="enigmaNumber" value="{{enigmaNumber}}">
@@ -294,6 +294,39 @@
               </div>
             </div>
           </div>
+
+          <!-- MODAL PARA AÑADIR NUEVO ENIGMA -->
+          <div class="modal fade" id="addEnigmaModal{{phase.id}}" tabindex="-1" aria-labelledby="addEnigmaModalLabel{{phase.id}}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content border-warning">
+                <div class="modal-header bg-warning text-white">
+                  <h5 class="modal-title" id="addEnigmaModalLabel{{phase.id}}">➕ Añadir nuevo enigma a {{phase.literalText}}</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form action="/addEnigma/{{phase.id}}" method="post">
+
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label class="form-label">Nombre del enigma</label>
+                      <input type="text" name="literalText" class="form-control" placeholder="Ej. Fase 1" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Descripción</label>
+                      <textarea name="introduction" class="form-control" rows="2"
+                        placeholder="Introducción breve"></textarea>
+                    </div>
+
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar enigma</button>
+                  </div>
+
+                </form>
+              </div>
+            </div>
+          </div>
           {{/phaseRows}}
         </div>
 
@@ -302,7 +335,6 @@
       </div>
     </form>
   </div>
-
   <!-- MODAL PARA AÑADIR NUEVA FASE -->
   <div class="modal fade" id="addPhaseModal" tabindex="-1" aria-labelledby="addPhaseModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -314,6 +346,7 @@
 
         <form action="/addPhase/{{game.id}}" method="post">
           <div class="modal-body">
+            
             <div class="mb-3">
               <label class="form-label">Nombre de la fase</label>
               <input type="text" name="phaseName" class="form-control" placeholder="Ej. Fase 1" required>
@@ -329,6 +362,7 @@
             <button type="submit" class="btn btn-success">Guardar fase</button>
           </div>
         </form>
+
       </div>
     </div>
   </div>

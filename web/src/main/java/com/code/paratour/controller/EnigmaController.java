@@ -60,7 +60,7 @@ public class EnigmaController {
             if (numRiddles.stream().anyMatch(n -> n < 0)) {
                 throw new IllegalArgumentException("El número de enigmas no puede ser negativo.");
 
-            } 
+            }
             // This list will hold all phase objects (each phase contains a list of riddles)
             List<Map<String, Object>> phasesForView = new ArrayList<>();
 
@@ -128,37 +128,81 @@ public class EnigmaController {
     }
 
     @PostMapping("/addEnigma/{phaseId}")
-    public String addEnigma(@PathVariable Long phaseId,
+    public String addEnigma(
+            @PathVariable Long phaseId,
             @ModelAttribute Enigma newEnigma,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        try {
+            System.out.println("AÑADIENDO NUEVO ENIGMA A LA FASE " + phaseId);
 
-        Phase phase = phaseService.findPhaseById(phaseId);
-        if (phase == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
-            return "redirect:/error";
+            Phase phase = phaseService.findPhaseById(phaseId);
+            if (phase == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
+                return "redirect:/error";
+            }
+
+            Game game = phase.getGame();
+            if (game == null) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "❌ El enigma no puede asociarse a un juego inexistente.");
+                return "redirect:/error";
+            }
+
+            // Validación: el enigma debe tener al menos un nombre o texto literal
+            if (newEnigma.getLiteralText() != null && !newEnigma.getLiteralText().isBlank()) {
+
+                // Asociar fase
+                newEnigma.setPhase(phase);
+
+                // Rellenar campos vacíos
+                newEnigma.fillEmptyFields();
+
+                // Número de enigma automático
+                newEnigma.setEnigmaNumber(phase.getEnigmas().size() + 1);
+
+                // Valores por defecto si están vacíos
+                if (newEnigma.getQuestion() == null || newEnigma.getQuestion().isBlank()) {
+                    newEnigma.setQuestion("Pregunta pendiente para " + newEnigma.getLiteralText());
+                }
+                if (newEnigma.getImage() == null || newEnigma.getImage().isBlank()) {
+                    newEnigma.setImage(
+                            "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+                }
+                if (newEnigma.getEnigmaVideo() == null || newEnigma.getEnigmaVideo().isBlank()) {
+                    newEnigma.setEnigmaVideo("");
+                }
+                if (newEnigma.getLatitude() == null || newEnigma.getLatitude().isBlank()) {
+                    newEnigma.setLatitude("");
+                }
+                if (newEnigma.getLongitude() == null || newEnigma.getLongitude().isBlank()) {
+                    newEnigma.setLongitude("");
+                }
+
+                // Guardar relación
+                phase.addEnigma(newEnigma);
+                enigmaService.save(newEnigma);
+                phaseService.save(phase);
+                gameService.saveGame(game);
+
+                redirectAttributes.addFlashAttribute("successMessage", "✅ Nuevo enigma añadido correctamente.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "❌ Debes introducir un nombre para el enigma.");
+            }
+
+            // List<Phase> sortedPhases = new ArrayList<>(game.getPhases());
+            // sortedPhases.sort(Comparator.comparing(Phase::getId));
+            // model.addAttribute("phases", sortedPhases);
+            //model.addAttribute("game", game);
+            return "redirect:/editGame/" + game.getId();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("message",
+                    e.getMessage() != null ? e.getMessage() : "Error desconocido al añadir el enigma.");
+            return "error";
         }
-        Game game = phase.getGame();
-
-        if (newEnigma.getLiteralText() != null && !newEnigma.getLiteralText().isBlank()) {
-            newEnigma.setPhase(phase);
-            newEnigma.fillEmptyFields();
-            newEnigma.setEnigmaNumber(phase.getEnigmas().size());
-            
-            phase.addEnigma(newEnigma);
-
-            enigmaService.save(newEnigma);
-            phaseService.save(phase);
-            gameService.saveGame(game);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "✅ Nuevo enigma añadido correctamente.");
-        } else {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "❌ Debes introducir un nombre para la fase.");
-        }
-
-        return "redirect:/editGame/" + game.getId();
     }
-
 
     @PostMapping("/deleteEnigma/{enigmaId}")
     public String deleteEnigma(@PathVariable Long enigmaId,
@@ -166,15 +210,10 @@ public class EnigmaController {
 
         Enigma enigma = enigmaService.findEnigmaById(enigmaId);
         Phase phase = enigma.getPhase();
-        Game game = phase.getGame();    
+        Game game = phase.getGame();
         if (game == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
             return "redirect:/games";
-        }
-
-        if (enigma == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "❌ Enigma no encontrada.");
-            return "redirect:/editGame/" + enigma;
         }
 
         phase.getEnigmas().remove(enigma);
@@ -183,5 +222,5 @@ public class EnigmaController {
         redirectAttributes.addFlashAttribute("successMessage", "✅ Enigma eliminado correctamente.");
         return "redirect:/editGame/" + game.getId();
     }
-    
+
 }

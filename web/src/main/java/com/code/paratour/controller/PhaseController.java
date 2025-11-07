@@ -221,12 +221,12 @@ public class PhaseController {
                     String prefix = "phases[" + i + "].riddles[" + r + "].";
                     Enigma enigma = new Enigma();
                     enigma.setPhase(savedPhase);
-                    enigma.setPhaseId(savedPhase.getId());
+                    // enigma.setPhaseId(savedPhase.getId());
                     enigma.setEnigmaNumber(r + 1);
 
                     // Rellenar datos
                     enigma.setLiteralText(params.getOrDefault(prefix + "literalText", ""));
-                    enigma.setStatement(params.getOrDefault(prefix + "enigma", ""));
+                    enigma.setQuestion(params.getOrDefault(prefix + "enigma", ""));
                     enigma.setAnswer(params.getOrDefault(prefix + "answer", ""));
                     enigma.setAnswerFormat(params.getOrDefault(prefix + "answerFormat", ""));
                     enigma.setHint1(params.getOrDefault(prefix + "hint1", ""));

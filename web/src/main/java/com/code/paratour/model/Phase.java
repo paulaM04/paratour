@@ -57,7 +57,7 @@ public class Phase {
     @Column(name = "manual", nullable = false)
     private Boolean manual = Boolean.TRUE;
 
-    @OneToMany(mappedBy = "phase", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "phase", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Enigma> enigmas = new HashSet<>();
 
     @Transient

@@ -88,6 +88,10 @@ public class GameService {
     public Game findGameById(Long id) {
         return gameRepository.findGameWithPhasesAndEnigmas(id);
     }
+public Game findGameByIdWithPhases(Long id) {
+    return gameRepository.findByIdWithPhases(id)
+        .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+}
 
     
 
