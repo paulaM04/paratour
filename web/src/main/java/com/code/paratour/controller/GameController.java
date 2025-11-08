@@ -54,13 +54,7 @@ public class GameController {
     @GetMapping("/")
     public String home(Model model) {
         try {
-            // Ensure that each game has a valid preview image
-            // for (Game game : gameService.findAllGames()) {
-            // if (game.getImage() == null || game.getImage().isBlank()) {
-            // game.setImage(
-            // "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
-            // }
-            // }
+            
             model.addAttribute("games", gameService.findAllGames());
             return "home";
 
@@ -133,14 +127,20 @@ public class GameController {
         // Apply default placeholders for empty or null fields
         if (game.getImage() == null || game.getImage().isBlank()) {
             game.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+            // First, delete all enigmas linked to each phase (avoid
+            // ConcurrentModificationException)
+            for (Phase phase : game.getPhases()) {
+                if (phase.getEnigmas() != null) {
+                    List<Long> enigmaIds = new ArrayList<>();
+                    for (Enigma enigma : phase.getEnigmas()) {
+                        enigmaIds.add(enigma.getId());
+                    }
+                    for (Long enigmaId : enigmaIds) {
+                        enigmaService.delete(enigmaId);
+                    }
+                }
+            }
         }
-        if (game.getVideo() == null || game.getVideo().isBlank()) {
-            game.setVideo("");
-        }
-        if (game.getDescription() == null || game.getDescription().isBlank()) {
-            game.setDescription("No description available");
-        }
-
         // Load and prepare associated phases and enigmas
         Set<Phase> phases = game.getPhases();
         for (Phase phase : phases) {
@@ -289,57 +289,58 @@ public class GameController {
 
                                 if (params.get("enigmas[" + enigmaId + "].literalText") == null ||
                                         params.get("enigmas[" + enigmaId + "].literalText").isBlank()) {
-                                    enigma.setLiteralText("Enigma sin nombre");
-                                }else{
+                                    enigma.setLiteralText("");
+                                } else {
                                     enigma.setLiteralText(params.get("enigmas[" + enigmaId + "].literalText"));
                                 }
-                                
+
                                 if (params.get("enigmas[" + enigmaId + "].statement") == null ||
                                         params.get("enigmas[" + enigmaId + "].statement").isBlank()) {
-                                    enigma.setQuestion("No hay enunciado definido todavía");
-                                }else{
+                                    enigma.setQuestion("");
+                                } else {
                                     enigma.setQuestion(params.get("enigmas[" + enigmaId + "].statement"));
                                 }
-                                
-                                if (params.get("enigmas[" + enigmaId + "].answer")==null||
+
+                                if (params.get("enigmas[" + enigmaId + "].answer") == null ||
                                         params.get("enigmas[" + enigmaId + "].answer").isBlank()) {
-                                    enigma.setAnswer("Sin respuesta");
-                                }else{
+                                    enigma.setAnswer("");
+                                } else {
                                     enigma.setAnswer(params.get("enigmas[" + enigmaId + "].answer"));
                                 }
 
-                                if (params.get("enigmas[" + enigmaId + "].hint1")==null||
+                                if (params.get("enigmas[" + enigmaId + "].hint1") == null ||
                                         params.get("enigmas[" + enigmaId + "].hint1").isBlank()) {
-                                    enigma.setHint1("Sin pista 1");
-                                }else{
+                                    enigma.setHint1("");
+                                } else {
                                     enigma.setHint1(params.get("enigmas[" + enigmaId + "].hint1"));
                                 }
 
-                                if (params.get("enigmas[" + enigmaId + "].hint2")==null||
+                                if (params.get("enigmas[" + enigmaId + "].hint2") == null ||
                                         params.get("enigmas[" + enigmaId + "].hint2").isBlank()) {
-                                    enigma.setHint2("Sin pista 2");
-                                }else{
+                                    enigma.setHint2("");
+                                } else {
                                     enigma.setHint2(params.get("enigmas[" + enigmaId + "].hint2"));
                                 }
 
-                                if (params.get("enigmas[" + enigmaId + "].answerFormat")==null||
+                                if (params.get("enigmas[" + enigmaId + "].answerFormat") == null ||
                                         params.get("enigmas[" + enigmaId + "].answerFormat").isBlank()) {
-                                    enigma.setAnswerFormat("Sin formato de respuesta");
-                                }else{
+                                    enigma.setAnswerFormat("");
+                                } else {
                                     enigma.setHint1(params.get("enigmas[" + enigmaId + "].answerFormat"));
                                 }
 
-                                if (params.get("enigmas[" + enigmaId + "].image")==null||
+                                if (params.get("enigmas[" + enigmaId + "].image") == null ||
                                         params.get("enigmas[" + enigmaId + "].image").isBlank()) {
-                                    enigma.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
-                                }else{
+                                    enigma.setImage(
+                                            "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+                                } else {
                                     enigma.setImage(params.get("enigmas[" + enigmaId + "].image"));
                                 }
 
-                                if (params.get("enigmas[" + enigmaId + "].video")==null||
+                                if (params.get("enigmas[" + enigmaId + "].video") == null ||
                                         params.get("enigmas[" + enigmaId + "].video").isBlank()) {
-                                    enigma.setEnigmaVideo("Sin vídeo");
-                                }else{
+                                    enigma.setEnigmaVideo("");
+                                } else {
                                     enigma.setEnigmaVideo(params.get("enigmas[" + enigmaId + "].video"));
                                 }
                                 enigma.setPhase(phase);
@@ -351,7 +352,8 @@ public class GameController {
                 }
 
                 if (!enigmas.isEmpty()) {
-                    phase.setEnigmas(new LinkedHashSet<>(enigmas));
+                    phase.getEnigmas().clear();
+                    phase.getEnigmas().addAll(enigmas);
                 }
 
                 updatedPhases.add(phase);
@@ -367,9 +369,38 @@ public class GameController {
 
             // ---------- GUARDAR Y REDIRIGIR ----------
             gameService.saveGame(dbGame);
-            ra.addFlashAttribute("successMessage", "💾 Cambios guardados correctamente.");
+            boolean empty = false;
 
-            // Esto hará un redirect y ejecutará el GET
+            if (empty = isEmptyGame(dbGame)) {
+                empty = true;
+                ra.addFlashAttribute("successMessage",
+                        "⚠️ El juego está incompleto. Por favor, revisa las fases y enigmas.");
+            }
+            for (Phase phase : dbGame.getPhases()) {
+                if (empty)
+                    break;
+                System.out.println("ITERANDO FASES");
+                if (isEmptyPhase(phase)) {
+                    empty = true;
+                    ra.addFlashAttribute("successMessage", "⚠️ La fase '" + phase.getPhaseName()
+                            + "' está incompleta. Por favor, revisa sus campos.");
+                    break;
+                }
+                for (Enigma enigma : phase.getEnigmas()) {
+                    if (empty)
+                        break;
+                    System.out.println("ITERANDO ENIGMAS");
+                    if (isEmptyEnigma(enigma)) {
+                        empty = true;
+                        ra.addFlashAttribute("successMessage", "⚠️ El enigma '" + enigma.getLiteralText()
+                                + "' de la fase '" + phase.getPhaseName() + "' está incompleto.");
+                        break;
+                    }
+                }
+            }
+            if (!empty)
+                ra.addFlashAttribute("successMessage", "💾 Cambios guardados correctamente.");
+
             return "redirect:/editGame/" + id;
 
         } catch (Exception e) {
@@ -394,8 +425,67 @@ public class GameController {
         return (value == null) ? true : value;
     }
 
-    private boolean isNullOrEmpty(String value) {
-        return value == null || value.trim().isEmpty();
+    public boolean isEmptyGame(Game game) {
+        if (game == null)
+            return true;
+
+        boolean emptyStrings = game.getName().isEmpty()
+                || game.getGameType().isEmpty()
+                || game.getDescription().isEmpty()
+                || game.getImage().isEmpty()
+                || game.getVideo().isEmpty();
+
+        // Si algo está vacío o nulo, retorna true
+        return emptyStrings;
+    }
+
+    public boolean isEmptyPhase(Phase phase) {
+        if (phase == null)
+            return true;
+
+        boolean emptyStrings = phase.getPhaseName().isEmpty()
+                || phase.getLiteralText().isEmpty()
+                || phase.getDescription().isEmpty()
+                || phase.getImage().isEmpty()
+                || phase.getVideo().isEmpty()
+                || phase.getLatitude().isEmpty()
+                || phase.getLongitude().isEmpty()
+                || phase.getMapUrl().isEmpty();
+
+        // Si algo está vacío o nulo, retorna true
+        return emptyStrings;
+    }
+
+    public boolean isEmptyEnigma(Enigma enigma) {
+        if (enigma == null)
+            return true;
+
+        boolean emptyStrings = enigma.getLiteralText().isEmpty()
+                || enigma.getImage().isEmpty()
+                || enigma.getLocation().isEmpty()
+                || enigma.getIntroduction().isEmpty()
+                || enigma.getIntroAvatarVideo().isEmpty()
+                || enigma.getEnigmaVideo().isEmpty()
+                || enigma.getQuestion().isEmpty()
+                || enigma.getAnswerFormat().isEmpty()
+                || enigma.getHint1().isEmpty()
+                || enigma.getHint2().isEmpty()
+                || enigma.getAnswer().isEmpty()
+                || enigma.getExplanationSpot().isEmpty()
+                || enigma.getExplanationSpotVideo().isEmpty()
+                || enigma.getLocationResolutionPhoto().isEmpty()
+                || enigma.getLatitude().isEmpty()
+                || enigma.getLongitude().isEmpty()
+                || enigma.getAdditionalInstructions().isEmpty();
+
+        boolean emptyNumbers = (enigma.getEnigmaNumber() == null)
+                || (enigma.getPointsCorrect() == null)
+                || (enigma.getPointsFail() == null)
+                || (enigma.getPointsHint1() == null)
+                || (enigma.getPointsHint2() == null)
+                || (enigma.getMaxTime() == null);
+        // Si algo está vacío o nulo, retorna true
+        return emptyStrings && emptyNumbers;
     }
 
     /**

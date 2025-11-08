@@ -311,10 +311,10 @@ public class PhaseController {
             redirectAttributes.addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
             return "redirect:/editGame/" + game.getId();
         }
-
+        System.out.println("ENTRA EN BORRAR FASE");
         enigmaService.deleteAll(phaseToDelete.getEnigmas());
         phaseService.delete(phaseToDelete.getId());
-
+        gameService.saveGame(game);
         redirectAttributes.addFlashAttribute("successMessage", "✅ Fase eliminada correctamente.");
         return "redirect:/editGame/" + game.getId();
     }

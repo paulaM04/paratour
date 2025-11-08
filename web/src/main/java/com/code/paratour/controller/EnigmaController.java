@@ -134,7 +134,6 @@ public class EnigmaController {
             RedirectAttributes redirectAttributes,
             Model model) {
         try {
-            System.out.println("AÑADIENDO NUEVO ENIGMA A LA FASE " + phaseId);
 
             Phase phase = phaseService.findPhaseById(phaseId);
             if (phase == null) {
