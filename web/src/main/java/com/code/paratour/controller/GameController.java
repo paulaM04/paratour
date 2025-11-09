@@ -179,7 +179,7 @@ public class GameController {
      * It also reorders the list of game types so that the current type appears
      * first.
      */
-    @GetMapping("/editGame/{id}")
+    @GetMapping("/editGame2/{id}")
     public String editGame(@PathVariable Long id, Model model, RedirectAttributes ra) {
         Game dbGame = gameService.findGameById(id);
 
@@ -225,7 +225,7 @@ public class GameController {
         }
 
         model.addAttribute("phaseRows", phaseRows);
-        return "editGame";
+        return "editGame2";
     }
 
     @PostMapping("/edit/game/{id}")
@@ -379,7 +379,6 @@ public class GameController {
             for (Phase phase : dbGame.getPhases()) {
                 if (empty)
                     break;
-                System.out.println("ITERANDO FASES");
                 if (isEmptyPhase(phase)) {
                     empty = true;
                     ra.addFlashAttribute("successMessage", "⚠️ La fase '" + phase.getPhaseName()
@@ -389,7 +388,6 @@ public class GameController {
                 for (Enigma enigma : phase.getEnigmas()) {
                     if (empty)
                         break;
-                    System.out.println("ITERANDO ENIGMAS");
                     if (isEmptyEnigma(enigma)) {
                         empty = true;
                         ra.addFlashAttribute("successMessage", "⚠️ El enigma '" + enigma.getLiteralText()
@@ -401,12 +399,12 @@ public class GameController {
             if (!empty)
                 ra.addFlashAttribute("successMessage", "💾 Cambios guardados correctamente.");
 
-            return "redirect:/editGame/" + id;
+            return "redirect:/editGame2/" + id;
 
         } catch (Exception e) {
             e.printStackTrace();
             ra.addFlashAttribute("errorMessage", "❌ Error al guardar: " + e.getMessage());
-            return "redirect:/editGame/" + id;
+            return "redirect:/editGame2/" + id;
         }
     }
 
@@ -500,6 +498,68 @@ public class GameController {
             model.addAttribute("message", "Missing required parameter: " + ex.getParameterName());
             return "error";
         }
+    }
+
+        /**
+     * Displays a specific game with all its phases and enigmas.
+     * Default placeholders are applied for missing data.
+     */
+    @GetMapping("/editGames1/{id}")
+    public String editGame1(@PathVariable("id") Long id, Model model) {
+
+        Game game = gameService.findGameById(id);
+        if (game == null) {
+            throw new IllegalArgumentException("Game not found with id: " + id);
+        }
+
+        // Apply default placeholders for empty or null fields
+        if (game.getImage() == null || game.getImage().isBlank()) {
+            game.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+            // First, delete all enigmas linked to each phase (avoid
+            // ConcurrentModificationException)
+            for (Phase phase : game.getPhases()) {
+                if (phase.getEnigmas() != null) {
+                    List<Long> enigmaIds = new ArrayList<>();
+                    for (Enigma enigma : phase.getEnigmas()) {
+                        enigmaIds.add(enigma.getId());
+                    }
+                    for (Long enigmaId : enigmaIds) {
+                        enigmaService.delete(enigmaId);
+                    }
+                }
+            }
+        }
+        // Load and prepare associated phases and enigmas
+        Set<Phase> phases = game.getPhases();
+        for (Phase phase : phases) {
+            if (phase.getDescription() == null || phase.getDescription().isBlank()) {
+                phase.setDescription("No description available");
+            }
+            if (phase.getLiteralText() == null || phase.getLiteralText().isBlank()) {
+                phase.setLiteralText("Phase " + phase.getPhaseName());
+            }
+            Set<Enigma> enigmas = phase.getEnigmas();
+            for (Enigma e : enigmas) {
+                if (e.getQuestion() == null || e.getQuestion().isBlank()) {
+                    e.setQuestion("No hay enunciado definido todavía");
+                }
+                if (e.getAnswerFormat() == null || e.getAnswerFormat().isBlank()) {
+                    e.setAnswerFormat("Sin formato definido");
+                }
+            }
+        }
+        List<Phase> sortedPhases = new ArrayList<>(game.getPhases());
+        sortedPhases.sort(Comparator.comparing(Phase::getId));
+
+        for (Phase phase : sortedPhases) {
+            List<Enigma> sortedEnigmas = new ArrayList<>(phase.getEnigmas());
+            sortedEnigmas.sort(Comparator.comparing(Enigma::getId));
+            phase.setEnigmas(new LinkedHashSet<>(sortedEnigmas));
+        }
+
+        model.addAttribute("phases", sortedPhases);
+        model.addAttribute("game", game);
+        return "editGame1";
     }
 
 }

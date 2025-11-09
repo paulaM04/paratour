@@ -3,7 +3,7 @@
 <body style="background-color: #f8f9fa;">
   <div class="container py-5">
     <h1 class="mb-4 text-center fw-semibold">Editar juego: {{game.name}}</h1>
-    <a href="/" class="btn btn-outline-secondary mb-4">⬅ Volver</a>
+    <a href="/editGames1/{{id}}" class="btn btn-outline-secondary mb-4">⬅ Volver</a>
 
     {{#successMessage}}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -93,9 +93,7 @@
       <div class="p-4 rounded-4 mb-4 shadow-sm border border-success-subtle" style="background-color:#e9fcef;">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h3 class="text-success fw-semibold mb-0">✅ Fases del juego</h3>
-          <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addPhaseModal">
-            ➕ Añadir fase
-          </button>
+          
         </div>
 
         <div class="accordion" id="phasesAccordion">
@@ -182,20 +180,11 @@
                 </div>
                 {{/phase.mapUrl}}
 
-                <button type="submit" class="btn btn-danger mt-2 w-100" formaction="/deletePhase/{{phase.id}}"
-                  formmethod="post" formnovalidate>
-                  Eliminar fase
-                </button>
-
 
                 <!-- Enigmas -->
                 <div class="mt-4 p-3 rounded-4 border border-warning-subtle" style="background-color:#fff9e6;">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="text-warning fw-semibold mb-3">💡 Enigmas de la fase</h5>
-                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                      data-bs-target="#addEnigmaModal{{phase.id}}">
-                      ➕ Añadir enigma
-                    </button>
                   </div>
 
                   <div class="accordion" id="enigmasAccordion-{{phase.id}}">
@@ -281,52 +270,12 @@
                           {{/video}}
 
                         </div>
-                        <form action="/deleteEnigma/{{id}}" method="post">
-                          <button type="submit" class="btn btn-danger mt-2 w-100">
-                            Eliminar enigma
-                          </button>
-                        </form>
+                        
                       </div>
                     </div>
                     {{/phase.enigmas}}
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- MODAL PARA AÑADIR NUEVO ENIGMA -->
-          <div class="modal fade" id="addEnigmaModal{{phase.id}}" tabindex="-1"
-            aria-labelledby="addEnigmaModalLabel{{phase.id}}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content border-warning">
-                <div class="modal-header bg-warning text-white">
-                  <h5 class="modal-title" id="addEnigmaModalLabel{{phase.id}}">➕ Añadir nuevo enigma a
-                    {{phase.literalText}}</h5>
-                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Cerrar"></button>
-                </div>
-                <form action="/addEnigma/{{phase.id}}" method="post">
-
-                  <div class="modal-body">
-                    <div class="mb-3">
-                      <label class="form-label">Nombre del enigma</label>
-                      <input type="text" name="literalText" class="form-control" placeholder="Ej. Fase 1" required>
-                    </div>
-
-                    <div class="mb-3">
-                      <label class="form-label">Descripción</label>
-                      <textarea name="introduction" class="form-control" rows="2"
-                        placeholder="Introducción breve"></textarea>
-                    </div>
-
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar enigma</button>
-                  </div>
-
-                </form>
               </div>
             </div>
           </div>
@@ -338,37 +287,5 @@
       </div>
     </form>
   </div>
-  <!-- MODAL PARA AÑADIR NUEVA FASE -->
-  <div class="modal fade" id="addPhaseModal" tabindex="-1" aria-labelledby="addPhaseModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-success">
-        <div class="modal-header bg-success text-white">
-          <h5 class="modal-title" id="addPhaseModalLabel">➕ Añadir nueva fase</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-
-        <form action="/addPhase/{{game.id}}" method="post">
-          <div class="modal-body">
-
-            <div class="mb-3">
-              <label class="form-label">Nombre de la fase</label>
-              <input type="text" name="phaseName" class="form-control" placeholder="Ej. Fase 1" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Descripción</label>
-              <textarea name="description" class="form-control" rows="2" placeholder="Descripción breve"></textarea>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar fase</button>
-          </div>
-        </form>
-
-      </div>
-    </div>
-  </div>
-
   {{>footer}}
 </body>

@@ -1,0 +1,302 @@
+{{>header}}
+
+<body style="background-color: #f8f9fa;">
+    <div class="container py-4">
+        <!-- DATOS DEL JUEGO -->
+        <div class="text-center mb-4">
+            <strong class="text-primary">Editar Juego:</strong><br>
+            <h1 class="fw-bold text-primary">{{game.name}}</h1>
+            <a href="/" class="btn btn-outline-secondary mb-4">⬅ Volver</a>
+            <form action="/editGame2/{{id}}" method="get">
+                <button type="submit" class="btn btn-primary mt-2 w-100">
+                    🖌️ Editar Campos
+                </button>
+            </form>
+        </div>
+
+        {{#successMessage}}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{successMessage}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {{/successMessage}}
+        {{#errorMessage}}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{errorMessage}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {{/errorMessage}}
+
+
+        {{#game.image}}
+        <div class="mb-4">
+            <strong class="text-primary">Imagen Juego:</strong><br>
+            <p class="text-muted">{{game.image}}</p>
+        </div>
+        {{/game.image}}
+        {{^game.image}}
+        <p class="text-muted text-center">⚠️ No hay imagen para este juego.</p>
+        {{/game.image}}
+
+        {{#game.video}}
+        <div class="mb-4">
+            <strong class="text-primary">Video del Juego:</strong><br>
+            <p class="text-muted">{{game.video}}</p>
+
+        </div>
+        {{/game.video}}
+        {{^game.video}}
+        <p class="text-muted text-center">⚠️ No hay video disponible para este juego.</p>
+        {{/game.video}}
+
+        <!-- BLOQUE DE ATRIBUTOS -->
+
+        <strong class="text-primary">Descripción:</strong><br>
+        {{#game.description}}<p class="text-muted">{{game.description}}</p>{{/game.description}}
+        {{^game.description}}<p class="text-muted fst-italic">No hay descripción disponible.</p>
+        {{/game.description}}
+
+        <div class="col-md-3 mb-2 mb-md-0">
+            <strong class="text-primary">Tipo:</strong><br>
+            {{#game.gameType}}{{game.gameType}}{{/game.gameType}}
+            {{^game.gameType}}<span class="text-muted fst-italic">No hay este campo</span>{{/game.gameType}}
+        </div>
+        <div class="col-md-3 mb-2 mb-md-0">
+            <strong class="text-primary">Enigmas:</strong><br>
+            {{#game.numberOfRiddles}}{{game.numberOfRiddles}}{{/game.numberOfRiddles}}
+            {{^game.numberOfRiddles}}<span class="text-muted fst-italic">No hay este
+                campo</span>{{/game.numberOfRiddles}}
+        </div>
+        <div class="col-md-3 mb-2 mb-md-0">
+            <strong class="text-primary">Leaderboard:</strong><br>
+            {{#game.hasLeaderboard}}Sí{{/game.hasLeaderboard}}{{^game.hasLeaderboard}}No{{/game.hasLeaderboard}}
+            <span class="help-tip" tabindex="0"
+                data-tip="Si está activado, el juego muestra una tabla de clasificación con las puntuaciones de los jugadores.">i</span>
+        </div>
+        <div class="col-md-3">
+            <strong class="text-primary">Manual:</strong><br>
+            {{#game.manual}}Sí{{/game.manual}}{{^game.manual}}No{{/game.manual}}
+            <span class="help-tip" tabindex="0"
+                data-tip="Indica que este registro fue creado o configurado manualmente desde el panel de administración.">i</span>
+        </div>
+
+        <!-- FASES -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="text-success fw-semibold mb-0">✅ Fases del juego</h2>
+            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addPhaseModal">
+                ➕ Añadir fase
+            </button>
+        </div>
+        {{^phases}}
+        <div class="alert alert-warning">⚠️ Este juego aún no tiene fases.</div>
+        {{/phases}}
+
+        <div class="accordion" id="phasesAccordion">
+            {{#phases}}
+            <div class="accordion-item shadow-sm border border-success-subtle mb-3" style="background-color:#e9fcef;">
+                <h2 class="accordion-header" id="phase-{{id}}">
+                    <button class="accordion-button collapsed fw-semibold text-success" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapse-{{id}}" aria-expanded="false"
+                        aria-controls="collapse-{{id}}">
+                        ✅ {{phaseName}}
+                    </button>
+                </h2>
+                <div id="collapse-{{id}}" class="accordion-collapse collapse" data-bs-parent="#phasesAccordion">
+                    <div class="accordion-body">
+
+                        {{#description}}
+                        <p>{{description}}</p>
+                        {{/description}}
+                        {{^description}}<p class="text-muted fst-italic">No hay descripción para esta fase.</p>
+                        {{/description}}
+
+                        {{#image}}
+
+                        <div class="mb-4">
+                            <strong class="text-primary">Imagen Fase:</strong><br>
+                            <p class="text-muted">{{image}}</p>
+                        </div>
+                        {{/image}}
+                        {{^image}}<p class="text-muted fst-italic">No hay imagen para esta fase.</p>{{/image}}
+
+                        {{#video}}
+                        <div class="mb-4">
+                            <strong class="text-primary">Video Fase:</strong><br>
+                            <p class="text-muted">{{video}}</p>
+                        </div>
+                        {{/video}}
+                        {{^video}}<p class="text-muted fst-italic">No hay video para esta fase.</p>{{/video}}
+
+                        {{#latitude}}
+                        <p><strong>📍 Ubicación:</strong> {{latitude}}, {{longitude}}</p>
+                        {{/latitude}}
+                        {{^latitude}}<p class="text-muted fst-italic">No hay coordenadas registradas.</p>{{/latitude}}
+
+                        {{#mapUrl}}
+                        <p><a href="{{mapUrl}}" target="_blank" class="btn btn-sm btn-outline-success">🌍 Ver en
+                                mapa</a></p>
+                        {{/mapUrl}}
+                        {{^mapUrl}}<p class="text-muted fst-italic">No hay enlace de mapa disponible.</p>{{/mapUrl}}
+                        <form action="/deletePhase/{{id}}" method="post">
+                            <button type="submit" class="btn btn-danger mt-2 w-100">
+                                Eliminar fase
+                            </button>
+                        </form>
+
+
+                        <!-- ENIGMAS -->
+                        <div class="mt-4 p-3 rounded-4 border border-warning-subtle" style="background-color:#fff9e6;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="text-warning fw-semibold mb-3">💡 Enigmas de la fase</h5>
+
+                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#addEnigmaModal{{id}}">
+                                    ➕ Añadir enigma
+                                </button>
+                            </div>
+                            {{^enigmas}}
+                            <div class="alert alert-secondary mt-2">⚠️ No hay enigmas en esta fase.</div>
+                            {{/enigmas}}
+
+                            <div class="accordion" id="enigmasAccordion-{{id}}">
+                                {{#enigmas}}
+                                <div class="accordion-item mb-2 border-0 shadow-sm">
+                                    <h2 class="accordion-header" id="enigma-{{id}}">
+                                        <button class="accordion-button collapsed fw-semibold text-dark" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseEnigma-{{id}}"
+                                            aria-expanded="false" aria-controls="collapseEnigma-{{id}}">
+                                            Enigma: #{{literalText}}
+                                        </button>
+                                    </h2>
+                                    <div id="collapseEnigma-{{id}}" class="accordion-collapse collapse"
+                                        data-bs-parent="#enigmasAccordion-{{id}}">
+                                        <div class="accordion-body">
+                                            {{#statement}}<p><strong>❓ Pregunta:</strong> {{statement}}</p>
+                                            {{/statement}}
+                                            {{^statement}}<p class="text-muted fst-italic">No hay pregunta para este
+                                                enigma.</p>{{/statement}}
+
+                                            {{#answer}}<p><strong>✅ Respuesta:</strong> {{answer}}</p>{{/answer}}
+                                            {{^answer}}<p class="text-muted fst-italic">No hay respuesta disponible.</p>
+                                            {{/answer}}
+
+                                            {{#hint1}}<p><strong>💡 Pista 1:</strong> {{hint1}}</p>{{/hint1}}
+                                            {{^hint1}}<p class="text-muted fst-italic">No hay pista 1.</p>{{/hint1}}
+
+                                            {{#hint2}}<p><strong>💡 Pista 2:</strong> {{hint2}}</p>{{/hint2}}
+                                            {{^hint2}}<p class="text-muted fst-italic">No hay pista 2.</p>{{/hint2}}
+
+                                            {{#answerFormat}}<p class="text-muted small mb-0"><strong>Formato:</strong>
+                                                {{answerFormat}}</p>{{/answerFormat}}
+                                            {{^answerFormat}}<p class="text-muted small mb-0 fst-italic">No hay formato
+                                                definido.</p>{{/answerFormat}}
+
+                                            {{#image}}
+                                            <div class="text-center mb-3">
+                                                <strong class="text-primary">Imagen Enigma:</strong><br>
+                                                <img src="{{image}}" class="img-fluid rounded shadow-sm"
+                                                    style="max-height:150px; object-fit:cover;" alt="Imagen de fase">
+                                            </div>
+                                            {{/image}}
+                                            {{^image}}<p class="text-muted fst-italic">No hay imagen para este enigma.
+                                            </p>{{/image}}
+
+                                            {{#video}}
+                                            <div class="mb-3">
+                                                <strong class="text-primary">Video Enigma:</strong><br>
+                                                <video class="w-100 rounded shadow-sm" controls>
+                                                    <source src="{{video}}" type="video/mp4">
+                                                </video>
+                                            </div>
+                                            {{/video}}
+                                            {{^video}}<p class="text-muted fst-italic">No hay video para este enigma.
+                                            </p>{{/video}}
+                                        </div>
+                                        <form action="/deleteEnigma/{{id}}" method="post">
+                                            <button type="submit" class="btn btn-danger mt-2 w-100">
+                                                Eliminar enigma
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {{/enigmas}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- MODAL PARA AÑADIR NUEVO ENIGMA -->
+            <div class="modal fade" id="addEnigmaModal{{id}}" tabindex="-1" aria-labelledby="addEnigmaModalLabel{{id}}"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-warning">
+                        <div class="modal-header bg-warning text-white">
+                            <h5 class="modal-title" id="addEnigmaModalLabel{{id}}">➕ Añadir nuevo enigma a
+                                {{literalText}}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Cerrar"></button>
+                        </div>
+                        <form action="/addEnigma/{{id}}" method="post">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre del enigma</label>
+                                    <input type="text" name="literalText" class="form-control"
+                                        placeholder="Ej. Enigma 1" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Descripción</label>
+                                    <textarea name="introduction" class="form-control" rows="2"
+                                        placeholder="Introducción breve"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-success">Guardar enigma</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {{/phases}}
+        </div>
+
+    </div>
+    <!-- MODAL PARA AÑADIR NUEVA FASE -->
+    <div class="modal fade" id="addPhaseModal" tabindex="-1" aria-labelledby="addPhaseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-success">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addPhaseModalLabel">➕ Añadir nueva fase</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+                </div>
+
+                <form action="/addPhase/{{game.id}}" method="post">
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <label class="form-label">Nombre de la fase</label>
+                            <input type="text" name="phaseName" class="form-control" placeholder="Ej. Fase 1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea name="description" class="form-control" rows="2"
+                                placeholder="Descripción breve"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar fase</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+{{>footer}}

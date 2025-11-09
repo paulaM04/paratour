@@ -192,8 +192,8 @@ public class EnigmaController {
             // List<Phase> sortedPhases = new ArrayList<>(game.getPhases());
             // sortedPhases.sort(Comparator.comparing(Phase::getId));
             // model.addAttribute("phases", sortedPhases);
-            //model.addAttribute("game", game);
-            return "redirect:/editGame/" + game.getId();
+            // model.addAttribute("game", game);
+return "redirect:/editGames1/" + game.getId();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -206,20 +206,24 @@ public class EnigmaController {
     @PostMapping("/deleteEnigma/{enigmaId}")
     public String deleteEnigma(@PathVariable Long enigmaId,
             RedirectAttributes redirectAttributes) {
+        System.out.println("DELETE ENIGMA ID: " + enigmaId);
+        try {
+            Enigma enigma = enigmaService.findEnigmaById(enigmaId);
+            Phase phase = enigma.getPhase();
+            Game game = phase.getGame();
+            if (game == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
+                return "redirect:/error";
+            }
+            phase.getEnigmas().remove(enigma);
+            phaseService.save(phase);
+            gameService.saveGame(game);
+            redirectAttributes.addFlashAttribute("successMessage", "✅ Enigma eliminado correctamente.");
+return "redirect:/editGames1/" + game.getId();
 
-        Enigma enigma = enigmaService.findEnigmaById(enigmaId);
-        Phase phase = enigma.getPhase();
-        Game game = phase.getGame();
-        if (game == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
-            return "redirect:/games";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", e.getMessage());
+            return "error";
         }
-
-        phase.getEnigmas().remove(enigma);
-        phaseService.save(phase);
-        gameService.saveGame(game);
-        redirectAttributes.addFlashAttribute("successMessage", "✅ Enigma eliminado correctamente.");
-        return "redirect:/editGame/" + game.getId();
     }
-
 }
