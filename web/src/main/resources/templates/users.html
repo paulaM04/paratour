@@ -1,0 +1,152 @@
+{{>header}}
+<body style="background-color: #f8f9fa;">
+  <div class="container py-5">
+
+    <h1 class="mb-5 text-center fw-semibold">Usuarios del sistema</h1>
+
+    <!-- NAV TABS -->
+    <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="admins-tab" data-bs-toggle="tab" data-bs-target="#admins" type="button" role="tab">Administradores</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="clients-tab" data-bs-toggle="tab" data-bs-target="#clients" type="button" role="tab">Clientes</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">Usuarios App</button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="userTabsContent">
+
+      <!-- ADMIN USERS -->
+      <div class="tab-pane fade show active" id="admins" role="tabpanel" aria-labelledby="admins-tab">
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-body">
+            <h4 class="card-title mb-3 text-primary">👩‍💻 Panel de administración</h4>
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>ID</th>
+                  <th>Foto</th>
+                  <th>Nombre</th>
+                  <th>Usuario</th>
+                  <th>Perfil</th>
+                  <th>Estado</th>
+                  <th>Último acceso</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#adminUsers}}
+                <tr>
+                  <td>{{id}}</td>
+                  <td>
+                    {{#photo}}
+                      <img src="{{photo}}" alt="{{name}}" class="rounded-circle" width="45" height="45" style="object-fit: cover;">
+                    {{/photo}}
+                    {{^photo}}<span class="text-muted">—</span>{{/photo}}
+                  </td>
+                  <td>{{name}}</td>
+                  <td>@{{username}}</td>
+                  <td><span class="badge bg-primary">{{role}}</span></td>
+                  <td>
+                    {{#status}}<span class="badge bg-success">Activo</span>{{/status}}
+                    {{^status}}<span class="badge bg-danger">Inactivo</span>{{/status}}
+                  </td>
+                  <td>{{lastLogin}}</td>
+                </tr>
+                {{/adminUsers}}
+                {{^adminUsers}}
+                <tr><td colspan="7" class="text-center text-muted py-4">Sin administradores registrados.</td></tr>
+                {{/adminUsers}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLIENT USERS -->
+      <div class="tab-pane fade" id="clients" role="tabpanel" aria-labelledby="clients-tab">
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-body">
+            <h4 class="card-title mb-3 text-success">🏢 Clientes</h4>
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Código</th>
+                  <th>Razón social</th>
+                  <th>NIF / CIF</th>
+                  <th>Contacto</th>
+                  <th>Email empresa</th>
+                  <th>Ciudad</th>
+                  <th>Activo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#clients}}
+                <tr>
+                  <td>{{codeClient}}</td>
+                  <td>{{businessName}}</td>
+                  <td>{{nifCif}}</td>
+                  <td>{{contactPerson}}</td>
+                  <td>{{companyEmail}}</td>
+                  <td>{{city}}, {{province}}</td>
+                  <td>
+                    {{#active}}<span class="badge bg-success">Sí</span>{{/active}}
+                    {{^active}}<span class="badge bg-danger">No</span>{{/active}}
+                  </td>
+                </tr>
+                {{/clients}}
+                {{^clients}}
+                <tr><td colspan="7" class="text-center text-muted py-4">Sin clientes registrados.</td></tr>
+                {{/clients}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- APP USERS -->
+      <div class="tab-pane fade" id="users" role="tabpanel" aria-labelledby="users-tab">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h4 class="card-title mb-3 text-info">👥 Usuarios de la aplicación</h4>
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Email</th>
+                  <th>Nombre</th>
+                  <th>Apellidos</th>
+                  <th>Nick</th>
+                  <th>Lead ID</th>
+                  <th>Activo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#users}}
+                <tr>
+                  <td>{{email}}</td>
+                  <td>{{firstName}}</td>
+                  <td>{{lastName}}</td>
+                  <td>{{nick}}</td>
+                  <td>{{upViralLeadId}}</td>
+                  <td>
+                    {{#active}}<span class="badge bg-success">Sí</span>{{/active}}
+                    {{^active}}<span class="badge bg-danger">No</span>{{/active}}
+                  </td>
+                </tr>
+                {{/users}}
+                {{^users}}
+                <tr><td colspan="6" class="text-center text-muted py-4">Sin usuarios registrados.</td></tr>
+                {{/users}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
