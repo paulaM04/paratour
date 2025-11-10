@@ -41,4 +41,5 @@ public interface TypeGameRepository extends JpaRepository<GameType, String> {
      * @return the {@link GameType} entity with the matching name, or {@code null} if not found
      */
     GameType findByName(String name);
+    boolean existsByCode(String code);
 }

@@ -58,4 +58,19 @@ public class TypeGameService {
     public GameType findByName(String name) {
         return typeGameRepository.findByName(name);
     }
+
+    public void deleteByCode(String name) {
+        typeGameRepository.deleteById(name);
+    }
+
+    public void save(GameType gameType) {
+        typeGameRepository.save(gameType);
+    }
+    public boolean existsByCode(String code) {
+        return typeGameRepository.existsById(code);
+    }
+
+    public boolean isExistingEntity(GameType gameType) {
+        return typeGameRepository.findById(gameType.getCode()).isPresent();
+    }
 }

@@ -1,0 +1,31 @@
+{{>header}}
+
+<body style="background-color: #f8f9fa;">
+  <div class="container py-5">
+    <h1 class="mb-4 text-center fw-semibold">Editar tipo de juego</h1>
+    <a href="/gameTypes" class="btn btn-outline-secondary mb-4">⬅ Volver</a>
+
+    <form action="/gameTypes/save" method="post" class="card p-4 shadow-sm">
+
+<div class="mb-3">
+  <label class="form-label fw-semibold">Código</label>
+  <div class="form-control bg-light text-dark">
+    {{gameType.code}}
+  </div>
+  <input type="hidden" name="code" value="{{gameType.code}}">
+  <div class="form-text text-muted">El código no se puede modificar.</div>
+</div>
+
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Nombre</label>
+        <input type="text" name="name" class="form-control" value="{{gameType.name}}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Descripción</label>
+        <textarea name="description" class="form-control" rows="3">{{gameType.description}}</textarea>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">💾 Guardar cambios</button>
+    </form>
+  </div>
+</body>
