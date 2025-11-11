@@ -41,6 +41,7 @@ public class PhaseController {
     @Autowired
     private TypeGameService typeGameService;
 
+    public static String typeGeneric="FREE";
     /**
      * Displays the first step of the new game creation process.
      * Loads all available game types into the model.
@@ -105,6 +106,9 @@ public class PhaseController {
         ra.addAttribute("numPhases", numPhases);
         ra.addAttribute("gameName", gameName);
         ra.addAttribute("gameDescription", gameDescription);
+        if (gameType==null || gameType.isBlank()) {
+            gameType = typeGeneric; // Default type if none selected
+        }
         ra.addAttribute("gameType", gameType);
         ra.addAttribute("gameImage", gameImage);
         ra.addAttribute("gameVideo", gameVideo);
