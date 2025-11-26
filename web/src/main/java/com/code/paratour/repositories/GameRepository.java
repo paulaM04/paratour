@@ -21,5 +21,7 @@ Game findGameWithPhasesAndEnigmas(@Param("id") Long id);
 @Query("SELECT g FROM Game g LEFT JOIN FETCH g.phases WHERE g.id = :id")
 Optional<Game> findByIdWithPhases(@Param("id") Long id);
 
+@Query("SELECT COUNT(g) FROM Game g WHERE g.gameType = :code")
+int countByGameType(@Param("code") String code);
 
 }

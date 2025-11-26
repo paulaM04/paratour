@@ -70,6 +70,16 @@ public class GameTypeController {
     @PostMapping("/delete/{code}")
     public String deleteGameType(@PathVariable String code,
             RedirectAttributes redirectAttributes) {
+
+        int numGames = typeGameService.countGamesByType(code);
+        System.out.println("Número real de juegos asociados al tipo " + code + ": " + numGames);
+
+        if (numGames > 0) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "⚠️ No se puede eliminar un tipo de juego que tiene " + numGames + " juegos asociados.");
+            return "redirect:/gameTypes";
+        }
+
         typeGameService.deleteByCode(code);
         redirectAttributes.addFlashAttribute("successMessage", "Tipo de juego eliminado correctamente.");
         return "redirect:/gameTypes";

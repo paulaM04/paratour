@@ -19,8 +19,12 @@ public class GameType {
 
     @Column(name = "descripcion", length = 350)
     private String description;
+
     @Transient
     private boolean isSelected;
+
+    @Transient
+    private int numGames=0;
 
     public boolean isSelected() {return isSelected;}
 
@@ -36,4 +40,6 @@ public class GameType {
     public String getDescription() {return description;}
     public void setDescription(String description) {this.description = description;}
 
+    public int getNumGames() {return numGames;}
+    public void setNumGames(int numGames) {this.numGames = numGames;}
 }

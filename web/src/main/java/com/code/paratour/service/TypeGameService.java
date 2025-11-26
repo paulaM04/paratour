@@ -3,9 +3,11 @@ package com.code.paratour.service;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.code.paratour.model.GameType;
+import com.code.paratour.repositories.GameRepository;
 import com.code.paratour.repositories.TypeGameRepository;
 
 /**
@@ -19,7 +21,12 @@ import com.code.paratour.repositories.TypeGameRepository;
 public class TypeGameService {
 
     private final TypeGameRepository typeGameRepository;
+    @Autowired
+private GameRepository gameRepository;
 
+public int countGamesByType(String code) {
+    return gameRepository.countByGameType(code);
+}
     /**
      * Constructs the service and injects the {@link TypeGameRepository}.
      * 
@@ -58,6 +65,8 @@ public class TypeGameService {
     public GameType findByName(String name) {
         return typeGameRepository.findByName(name);
     }
+
+
 
     public void deleteByCode(String name) {
         typeGameRepository.deleteById(name);

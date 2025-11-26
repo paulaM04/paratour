@@ -54,7 +54,6 @@ public class GameController {
     @GetMapping("/")
     public String home(Model model) {
         try {
-            
             model.addAttribute("games", gameService.findAllGames());
             return "home";
 
@@ -79,6 +78,8 @@ public class GameController {
                 model.addAttribute("message", "Game with ID " + id + " does not exist.");
                 return "error";
             }
+            GameType type = typeGameService.findByCode(game.getGameType());
+            type.setNumGames(type.getNumGames()-1);
 
             // First, delete all enigmas linked to each phase
             for (Phase phase : game.getPhases()) {
@@ -132,7 +133,7 @@ public class GameController {
             for (Phase phase : game.getPhases()) {
                 if (phase.getEnigmas() != null) {
                     List<Long> enigmaIds = new ArrayList<>();
-                    for (Enigma enigma : phase.getEnigmas()) {
+                    for (Enigma enigma : phase.getEnigmas()) {                        
                         enigmaIds.add(enigma.getId());
                     }
                     for (Long enigmaId : enigmaIds) {
