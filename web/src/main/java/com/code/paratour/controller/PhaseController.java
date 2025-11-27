@@ -361,7 +361,7 @@ public class PhaseController {
             sortedPhases.sort(Comparator.comparing(Phase::getId));
             model.addAttribute("phases", sortedPhases);
             model.addAttribute("game", game);
-            return "redirect:/editGame/" + gameId;
+            return "redirect:/editGames1/" + gameId;
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("message", e.getMessage() != null ? e.getMessage() : "Unknown error");
