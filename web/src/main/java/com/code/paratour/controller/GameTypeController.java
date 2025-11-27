@@ -15,6 +15,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.code.paratour.model.GameType;
 import com.code.paratour.service.TypeGameService;
 
+/**
+ * Controller responsible for managing CRUD operations for GameType entities.
+ *
+ * This includes:
+ * - Listing all game types
+ * - Creating new game types
+ * - Editing existing game types
+ * - Deleting game types (with safety checks)
+ *
+ * GameType entries are used to categorize games and must remain unique,
+ * validated by their unique code attribute.
+ */
 @Controller
 @RequestMapping("/gameTypes")
 public class GameTypeController {
@@ -22,6 +34,10 @@ public class GameTypeController {
     @Autowired
     private TypeGameService typeGameService;
 
+    /**
+     * Displays the list of all game types.
+     * Also initializes an empty GameType object to support the creation form.
+     */
     @GetMapping
     public String listGameTypes(Model model) {
         Set<GameType> gameTypes = typeGameService.findAll();
@@ -30,75 +46,100 @@ public class GameTypeController {
         return "gameTypes";
     }
 
+    /**
+     * Saves a new GameType or updates an existing one.
+     * Performs validation to ensure that:
+     *  - The code field is not empty
+     *  - The code is unique when creating new entries
+     *
+     * Redirects back to the list view with corresponding success/error messages.
+     */
     @PostMapping("/save")
     public String saveGameType(@ModelAttribute GameType gameType,
-            RedirectAttributes redirectAttributes) {
+                               RedirectAttributes redirectAttributes) {
 
+        // Basic validation
         if (gameType.getCode() == null || gameType.getCode().isBlank()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "El código no puede estar vacío.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Code cannot be empty.");
             return "redirect:/gameTypes";
         }
 
+        // Prevent creation of duplicated game type codes
         GameType existing = typeGameService.findByCode(gameType.getCode());
-
-        // Si ya existe un tipo con ese código y no es el mismo objeto (es inserción, no
-        // edición)
         if (existing != null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Ya existe un tipo de juego con ese código.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "A game type with this code already exists.");
             return "redirect:/gameTypes";
         }
 
-        // Si ya existe y estás editando, simplemente guarda (actualiza)
-        // Si no existe, guarda (crea)
+        // Save or update
         typeGameService.save(gameType);
-
-        redirectAttributes.addFlashAttribute("successMessage", "Tipo de juego guardado correctamente.");
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Game type saved successfully.");
         return "redirect:/gameTypes";
     }
 
+    /**
+     * Opens the edit page for the game type identified by its unique code.
+     * If the code does not exist, returns to the listing with an error message.
+     */
     @GetMapping("/edit/{code}")
     public String editGameType(@PathVariable String code, Model model) {
         GameType gameType = typeGameService.findByCode(code);
         if (gameType == null) {
-            model.addAttribute("errorMessage", "Tipo de juego no encontrado.");
+            model.addAttribute("errorMessage", "Game type not found.");
             return "redirect:/gameTypes";
         }
+
         model.addAttribute("gameType", gameType);
         return "editGameType";
     }
 
+    /**
+     * Deletes a GameType if and only if it has no games associated with it.
+     * Safety check prevents deletion of types currently in use.
+     *
+     * Redirects to the list view with an appropriate warning or success message.
+     */
     @PostMapping("/delete/{code}")
     public String deleteGameType(@PathVariable String code,
-            RedirectAttributes redirectAttributes) {
+                                 RedirectAttributes redirectAttributes) {
 
         int numGames = typeGameService.countGamesByType(code);
-        System.out.println("Número real de juegos asociados al tipo " + code + ": " + numGames);
+        System.out.println("Number of associated games for type " + code + ": " + numGames);
 
+        // Prevent deletion of types in active use
         if (numGames > 0) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "⚠️ No se puede eliminar un tipo de juego que tiene " + numGames + " juegos asociados.");
+                    "⚠️ This game type cannot be deleted because it has "
+                    + numGames + " associated games.");
             return "redirect:/gameTypes";
         }
 
         typeGameService.deleteByCode(code);
-        redirectAttributes.addFlashAttribute("successMessage", "Tipo de juego eliminado correctamente.");
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Game type deleted successfully.");
+
         return "redirect:/gameTypes";
     }
 
+    /**
+     * Handles the POST request for editing an existing GameType.
+     * Updates the record and redirects back to the listing page.
+     */
     @PostMapping("/edit/{code}")
     public String editGameType(@ModelAttribute GameType gameType,
-            RedirectAttributes redirectAttributes) {
+                               RedirectAttributes redirectAttributes) {
 
         if (gameType.getCode() == null || gameType.getCode().isBlank()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "El código no puede estar vacío.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Code cannot be empty.");
             return "redirect:/gameTypes";
         }
 
-        // Si ya existe y estás editando, simplemente guarda (actualiza)
-        // Si no existe, guarda (crea)
         typeGameService.save(gameType);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Game type updated successfully.");
 
-        redirectAttributes.addFlashAttribute("successMessage", "Tipo de juego guardado correctamente.");
         return "redirect:/gameTypes";
     }
 }

@@ -32,6 +32,14 @@ import com.code.paratour.service.TypeGameService;
 
 import jakarta.transaction.Transactional;
 
+/**
+ * Controller responsible for managing all game-related operations,
+ * including listing games, viewing details, editing, deleting, and
+ * updating both phases and enigmas.
+ *
+ * This controller orchestrates interactions between Game, Phase,
+ * Enigma and GameType entities within a multi-step editing flow.
+ */
 @Controller
 public class GameController {
 
@@ -48,8 +56,8 @@ public class GameController {
     private TypeGameService typeGameService;
 
     /**
-     * Displays the home page with the list of all games.
-     * It also ensures that every game has a default image if none is set.
+     * Displays the home page with a list of all available games.
+     * If any game is missing an image, a default placeholder is used.
      */
     @GetMapping("/")
     public String home(Model model) {
@@ -64,8 +72,14 @@ public class GameController {
     }
 
     /**
-     * Deletes a game by ID, including all related phases and enigmas (cascade
-     * delete).
+     * Deletes a game by ID, including all related phases and enigmas.
+     * Deletion is executed manually to ensure consistency and avoid
+     * orphaned references, despite cascade configuration.
+     *
+     * The method:
+     *  1. Removes all enigmas inside the game's phases  
+     *  2. Deletes all phases  
+     *  3. Deletes the game itself  
      */
     @Transactional
     @GetMapping("/deleteGame/{id}")
@@ -78,10 +92,12 @@ public class GameController {
                 model.addAttribute("message", "Game with ID " + id + " does not exist.");
                 return "error";
             }
-            GameType type = typeGameService.findByCode(game.getGameType());
-            type.setNumGames(type.getNumGames()-1);
 
-            // First, delete all enigmas linked to each phase
+            // Decrement the number of games associated with this type
+            GameType type = typeGameService.findByCode(game.getGameType());
+            type.setNumGames(type.getNumGames() - 1);
+
+            // Delete all enigmas inside all phases
             for (Phase phase : game.getPhases()) {
                 if (phase.getEnigmas() != null) {
                     Set<Enigma> enigmas = phase.getEnigmas();
@@ -92,7 +108,7 @@ public class GameController {
                 }
             }
 
-            // Then, delete all phases associated with the game
+            // Delete each phase after its enigmas are removed
             for (Phase phase : game.getPhases()) {
                 phaseService.delete(phase.getId());
             }
@@ -100,9 +116,8 @@ public class GameController {
             // Finally, delete the game itself
             gameService.deleteGame(id);
 
-            model.addAttribute("games", gameService.findAllGames());
-            model.addAttribute("successMessage", "Game deleted successfully.");
-            redirectAttributes.addFlashAttribute("successMessage", "✅ El juego se ha borrado correctamente.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "✅ Game deleted successfully.");
 
             return "redirect:/";
 
@@ -114,8 +129,11 @@ public class GameController {
     }
 
     /**
-     * Displays a specific game with all its phases and enigmas.
-     * Default placeholders are applied for missing data.
+     * Displays the detailed view of a single game, including its phases
+     * and all associated enigmas.
+     *
+     * Default placeholder values are applied for missing or empty fields,
+     * ensuring the UI always displays clean information.
      */
     @GetMapping("/games/{id}")
     public String viewGame(@PathVariable("id") Long id, Model model) {
@@ -125,15 +143,15 @@ public class GameController {
             throw new IllegalArgumentException("Game not found with id: " + id);
         }
 
-        // Apply default placeholders for empty or null fields
+        // Apply a default image and remove existing enigmas if the game lacks an image
         if (game.getImage() == null || game.getImage().isBlank()) {
             game.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
-            // First, delete all enigmas linked to each phase (avoid
-            // ConcurrentModificationException)
+
+            // Remove existing enigmas to avoid inconsistent states
             for (Phase phase : game.getPhases()) {
                 if (phase.getEnigmas() != null) {
                     List<Long> enigmaIds = new ArrayList<>();
-                    for (Enigma enigma : phase.getEnigmas()) {                        
+                    for (Enigma enigma : phase.getEnigmas()) {
                         enigmaIds.add(enigma.getId());
                     }
                     for (Long enigmaId : enigmaIds) {
@@ -142,25 +160,30 @@ public class GameController {
                 }
             }
         }
-        // Load and prepare associated phases and enigmas
+
+        // Prepare phases and apply defaults on missing data
         Set<Phase> phases = game.getPhases();
         for (Phase phase : phases) {
+
             if (phase.getDescription() == null || phase.getDescription().isBlank()) {
                 phase.setDescription("No description available");
             }
             if (phase.getLiteralText() == null || phase.getLiteralText().isBlank()) {
                 phase.setLiteralText("Phase " + phase.getPhaseName());
             }
-            Set<Enigma> enigmas = phase.getEnigmas();
-            for (Enigma e : enigmas) {
+
+            // Normalize enigmas
+            for (Enigma e : phase.getEnigmas()) {
                 if (e.getQuestion() == null || e.getQuestion().isBlank()) {
-                    e.setQuestion("No hay enunciado definido todavía");
+                    e.setQuestion("No statement defined yet");
                 }
                 if (e.getAnswerFormat() == null || e.getAnswerFormat().isBlank()) {
-                    e.setAnswerFormat("Sin formato definido");
+                    e.setAnswerFormat("No answer format defined");
                 }
             }
         }
+
+        // Sort phases and enigmas by ID for consistent UI ordering
         List<Phase> sortedPhases = new ArrayList<>(game.getPhases());
         sortedPhases.sort(Comparator.comparing(Phase::getId));
 
@@ -177,31 +200,35 @@ public class GameController {
 
     /**
      * Displays the edit form for a game, including its phases and enigmas.
-     * It also reorders the list of game types so that the current type appears
-     * first.
+     * The list of game types is reordered so that the current type
+     * appears first in the selection menu.
      */
     @GetMapping("/editGame2/{id}")
     public String editGame(@PathVariable Long id, Model model, RedirectAttributes ra) {
+
         Game dbGame = gameService.findGameById(id);
 
         if (dbGame == null) {
-            ra.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
+            ra.addFlashAttribute("errorMessage", "❌ Game not found.");
             return "redirect:/";
         }
 
+        // Prepare type list with the current type pre-selected
         for (GameType type : typeGameService.findAll()) {
             type.setSelected(type.getCode().equals(dbGame.getGameType()));
         }
+
         model.addAttribute("typesGame", typeGameService.findAll());
         model.addAttribute("game", dbGame);
 
-        // Construimos filas con índices
-        List<Phase> ordered = new ArrayList<>(dbGame.getPhases());
-        ordered.sort(Comparator.comparing(Phase::getId));
+        // Build structured rows for phases and their respective enigmas
+        List<Phase> orderedPhases = new ArrayList<>(dbGame.getPhases());
+        orderedPhases.sort(Comparator.comparing(Phase::getId));
 
         List<Map<String, Object>> phaseRows = new ArrayList<>();
         int i = 0;
-        for (Phase phase : ordered) {
+
+        for (Phase phase : orderedPhases) {
             Map<String, Object> row = new HashMap<>();
             row.put("idx", i);
 
@@ -210,8 +237,8 @@ public class GameController {
 
             List<Map<String, Object>> enigmaRows = new ArrayList<>();
             int j = 0;
-            for (Enigma enigma : sortedEnigmas) {
 
+            for (Enigma enigma : sortedEnigmas) {
                 Map<String, Object> erow = new HashMap<>();
                 erow.put("eidx", j);
                 erow.put("enigma", enigma);
@@ -222,6 +249,7 @@ public class GameController {
             row.put("phase", phase);
             row.put("enigmaRows", enigmaRows);
             phaseRows.add(row);
+
             i++;
         }
 
@@ -229,6 +257,18 @@ public class GameController {
         return "editGame2";
     }
 
+    /**
+     * Updates a game and all its associated phases and enigmas.
+     *
+     * The method:
+     *  1. Updates basic game fields  
+     *  2. Iterates through dynamically sent phaseRows[X] entries  
+     *  3. For each phase, updates nested enigmas based on parameter keys  
+     *  4. Validates completeness of the game, each phase, and each enigma  
+     *
+     * Any missing or incomplete data triggers a warning message, while
+     * complete updates generate a success confirmation.
+     */
     @PostMapping("/edit/game/{id}")
     public String updateGame(
             @PathVariable Long id,
@@ -239,11 +279,11 @@ public class GameController {
         try {
             Game dbGame = gameService.findGameById(id);
             if (dbGame == null) {
-                ra.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
+                ra.addFlashAttribute("errorMessage", "❌ Game not found.");
                 return "redirect:/";
             }
 
-            // ---------- DATOS BÁSICOS DEL JUEGO ----------
+            // ---------- UPDATE BASIC GAME DATA ----------
             dbGame.setName(formGame.getName());
             dbGame.setDescription(formGame.getDescription());
             dbGame.setGameType(formGame.getGameType());
@@ -252,20 +292,21 @@ public class GameController {
             dbGame.setHasLeaderboard(formGame.isHasLeaderboard());
             dbGame.setManual(formGame.getManual());
 
-            // ---------- FASES ----------
+            // ---------- UPDATE PHASES ----------
             List<Phase> updatedPhases = new ArrayList<>();
             int idx = 0;
 
-            // Recorremos mientras existan filas phaseRows[X]
             while (params.containsKey("phaseRows[" + idx + "].id")) {
 
                 Long phaseId = Long.parseLong(params.get("phaseRows[" + idx + "].id"));
                 Phase phase = phaseService.findPhaseById(phaseId);
+
                 if (phase == null) {
                     phase = new Phase();
                     phase.setId(phaseId);
                 }
 
+                // Update phase fields
                 phase.setPhaseName(params.get("phaseRows[" + idx + "].phaseName"));
                 phase.setDescription(params.get("phaseRows[" + idx + "].description"));
                 phase.setImage(params.get("phaseRows[" + idx + "].image"));
@@ -275,60 +316,32 @@ public class GameController {
                 phase.setMapUrl(params.get("phaseRows[" + idx + "].mapUrl"));
                 phase.setGame(dbGame);
 
-                // ---------- ENIGMAS ----------
+                // ---------- UPDATE ENIGMAS INSIDE THIS PHASE ----------
                 List<Enigma> enigmas = new ArrayList<>();
+
                 for (String key : params.keySet()) {
                     if (key.startsWith("enigmas[")) {
                         try {
                             Long enigmaId = Long.parseLong(key.substring(8, key.indexOf("]")));
                             Enigma enigma = enigmaService.findEnigmaById(enigmaId);
-                            if (enigma == null)
-                                continue;
 
-                            // Solo los que pertenecen a esta fase
-                            if (enigma.getPhase() != null && enigma.getPhase().getId().equals(phaseId)) {
+                            if (enigma == null) continue;
 
-                                if (params.get("enigmas[" + enigmaId + "].literalText") == null ||
-                                        params.get("enigmas[" + enigmaId + "].literalText").isBlank()) {
-                                    enigma.setLiteralText("");
-                                } else {
-                                    enigma.setLiteralText(params.get("enigmas[" + enigmaId + "].literalText"));
-                                }
+                            // Only process enigmas belonging to this phase
+                            if (enigma.getPhase() != null &&
+                                enigma.getPhase().getId().equals(phaseId)) {
 
-                                if (params.get("enigmas[" + enigmaId + "].statement") == null ||
-                                        params.get("enigmas[" + enigmaId + "].statement").isBlank()) {
-                                    enigma.setQuestion("");
-                                } else {
-                                    enigma.setQuestion(params.get("enigmas[" + enigmaId + "].statement"));
-                                }
-
-                                if (params.get("enigmas[" + enigmaId + "].answer") == null ||
-                                        params.get("enigmas[" + enigmaId + "].answer").isBlank()) {
-                                    enigma.setAnswer("");
-                                } else {
-                                    enigma.setAnswer(params.get("enigmas[" + enigmaId + "].answer"));
-                                }
-
-                                if (params.get("enigmas[" + enigmaId + "].hint1") == null ||
-                                        params.get("enigmas[" + enigmaId + "].hint1").isBlank()) {
-                                    enigma.setHint1("");
-                                } else {
-                                    enigma.setHint1(params.get("enigmas[" + enigmaId + "].hint1"));
-                                }
-
-                                if (params.get("enigmas[" + enigmaId + "].hint2") == null ||
-                                        params.get("enigmas[" + enigmaId + "].hint2").isBlank()) {
-                                    enigma.setHint2("");
-                                } else {
-                                    enigma.setHint2(params.get("enigmas[" + enigmaId + "].hint2"));
-                                }
-
-                                if (params.get("enigmas[" + enigmaId + "].answerFormat") == null ||
-                                        params.get("enigmas[" + enigmaId + "].answerFormat").isBlank()) {
-                                    enigma.setAnswerFormat("");
-                                } else {
-                                    enigma.setHint1(params.get("enigmas[" + enigmaId + "].answerFormat"));
-                                }
+                                // Safely update every editable field
+                                enigma.setLiteralText(
+                                        safe(params.get("enigmas[" + enigmaId + "].literalText")));
+                                enigma.setQuestion(
+                                        safe(params.get("enigmas[" + enigmaId + "].statement")));
+                                enigma.setAnswer(
+                                        safe(params.get("enigmas[" + enigmaId + "].answer")));
+                                enigma.setHint1(
+                                        safe(params.get("enigmas[" + enigmaId + "].hint1")));
+                                enigma.setHint2(
+                                        safe(params.get("enigmas[" + enigmaId + "].hint2")));
 
                                 if (params.get("enigmas[" + enigmaId + "].image") == null ||
                                         params.get("enigmas[" + enigmaId + "].image").isBlank()) {
@@ -338,17 +351,17 @@ public class GameController {
                                     enigma.setImage(params.get("enigmas[" + enigmaId + "].image"));
                                 }
 
-                                if (params.get("enigmas[" + enigmaId + "].video") == null ||
-                                        params.get("enigmas[" + enigmaId + "].video").isBlank()) {
-                                    enigma.setEnigmaVideo("");
-                                } else {
-                                    enigma.setEnigmaVideo(params.get("enigmas[" + enigmaId + "].video"));
-                                }
+                                enigma.setAnswerFormat(
+                                        safe(params.get("enigmas[" + enigmaId + "].answerFormat")));
+
+                                enigma.setEnigmaVideo(
+                                        safe(params.get("enigmas[" + enigmaId + "].video")));
+
                                 enigma.setPhase(phase);
                                 enigmas.add(enigma);
                             }
-                        } catch (Exception ignored) {
-                        }
+
+                        } catch (Exception ignored) {}
                     }
                 }
 
@@ -361,56 +374,66 @@ public class GameController {
                 idx++;
             }
 
-            // Reemplazamos las fases anteriores por las nuevas
+            // Replace old phases with updated ones
             dbGame.getPhases().clear();
             for (Phase phase : updatedPhases) {
                 phase.setGame(dbGame);
                 dbGame.getPhases().add(phase);
             }
 
-            // ---------- GUARDAR Y REDIRIGIR ----------
+            // ---------- SAVE AND VALIDATE COMPLETENESS ----------
             gameService.saveGame(dbGame);
-            boolean empty = false;
 
-            if (empty = isEmptyGame(dbGame)) {
-                empty = true;
+            boolean incomplete = false;
+
+            if (isEmptyGame(dbGame)) {
+                incomplete = true;
                 ra.addFlashAttribute("successMessage",
-                        "⚠️ El juego está incompleto. Por favor, revisa las fases y enigmas.");
+                        "⚠️ The game is incomplete. Please review phases and enigmas.");
             }
+
             for (Phase phase : dbGame.getPhases()) {
-                if (empty)
-                    break;
+                if (incomplete) break;
+
                 if (isEmptyPhase(phase)) {
-                    empty = true;
-                    ra.addFlashAttribute("successMessage", "⚠️ La fase '" + phase.getPhaseName()
-                            + "' está incompleta. Por favor, revisa sus campos.");
+                    incomplete = true;
+                    ra.addFlashAttribute("successMessage",
+                            "⚠️ The phase '" + phase.getPhaseName() + "' is incomplete.");
                     break;
                 }
+
                 for (Enigma enigma : phase.getEnigmas()) {
-                    if (empty)
-                        break;
+                    if (incomplete) break;
+
                     if (isEmptyEnigma(enigma)) {
-                        empty = true;
-                        ra.addFlashAttribute("successMessage", "⚠️ El enigma '" + enigma.getLiteralText()
-                                + "' de la fase '" + phase.getPhaseName() + "' está incompleto.");
+                        incomplete = true;
+                        ra.addFlashAttribute("successMessage",
+                                "⚠️ The enigma '" + enigma.getLiteralText()
+                                + "' in phase '" + phase.getPhaseName() + "' is incomplete.");
                         break;
                     }
                 }
             }
-            if (!empty)
-                ra.addFlashAttribute("successMessage", "💾 Cambios guardados correctamente.");
+
+            if (!incomplete) {
+                ra.addFlashAttribute("successMessage", "💾 Changes saved successfully.");
+            }
 
             return "redirect:/editGame2/" + id;
 
         } catch (Exception e) {
             e.printStackTrace();
-            ra.addFlashAttribute("errorMessage", "❌ Error al guardar: " + e.getMessage());
+            ra.addFlashAttribute("errorMessage", "❌ Error while saving: " + e.getMessage());
             return "redirect:/editGame2/" + id;
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Utility Validation Methods
+    // -------------------------------------------------------------------------
+
     /**
-     * Utility methods for safely handling null values.
+     * Safely returns a non-null string (converts null → empty).
      */
     public String safe(String value) {
         return (value == null) ? "" : value;
@@ -424,25 +447,26 @@ public class GameController {
         return (value == null) ? true : value;
     }
 
+    /**
+     * Checks if the game contains empty required fields.
+     */
     public boolean isEmptyGame(Game game) {
-        if (game == null)
-            return true;
+        if (game == null) return true;
 
-        boolean emptyStrings = game.getName().isEmpty()
+        return game.getName().isEmpty()
                 || game.getGameType().isEmpty()
                 || game.getDescription().isEmpty()
                 || game.getImage().isEmpty()
                 || game.getVideo().isEmpty();
-
-        // Si algo está vacío o nulo, retorna true
-        return emptyStrings;
     }
 
+    /**
+     * Checks if a phase contains empty required fields.
+     */
     public boolean isEmptyPhase(Phase phase) {
-        if (phase == null)
-            return true;
+        if (phase == null) return true;
 
-        boolean emptyStrings = phase.getPhaseName().isEmpty()
+        return phase.getPhaseName().isEmpty()
                 || phase.getLiteralText().isEmpty()
                 || phase.getDescription().isEmpty()
                 || phase.getImage().isEmpty()
@@ -450,16 +474,16 @@ public class GameController {
                 || phase.getLatitude().isEmpty()
                 || phase.getLongitude().isEmpty()
                 || phase.getMapUrl().isEmpty();
-
-        // Si algo está vacío o nulo, retorna true
-        return emptyStrings;
     }
 
+    /**
+     * Checks if an enigma contains empty required fields or missing numeric values.
+     */
     public boolean isEmptyEnigma(Enigma enigma) {
-        if (enigma == null)
-            return true;
+        if (enigma == null) return true;
 
-        boolean emptyStrings = enigma.getLiteralText().isEmpty()
+        boolean emptyStrings =
+                enigma.getLiteralText().isEmpty()
                 || enigma.getImage().isEmpty()
                 || enigma.getLocation().isEmpty()
                 || enigma.getIntroduction().isEmpty()
@@ -477,19 +501,24 @@ public class GameController {
                 || enigma.getLongitude().isEmpty()
                 || enigma.getAdditionalInstructions().isEmpty();
 
-        boolean emptyNumbers = (enigma.getEnigmaNumber() == null)
-                || (enigma.getPointsCorrect() == null)
-                || (enigma.getPointsFail() == null)
-                || (enigma.getPointsHint1() == null)
-                || (enigma.getPointsHint2() == null)
-                || (enigma.getMaxTime() == null);
-        // Si algo está vacío o nulo, retorna true
-        return emptyStrings && emptyNumbers;
+        boolean emptyNumbers =
+                enigma.getEnigmaNumber() == null
+                || enigma.getPointsCorrect() == null
+                || enigma.getPointsFail() == null
+                || enigma.getPointsHint1() == null
+                || enigma.getPointsHint2() == null
+                || enigma.getMaxTime() == null;
+
+        return emptyStrings || emptyNumbers;
     }
+
+    // -------------------------------------------------------------------------
+    // Global Exception Handler
+    // -------------------------------------------------------------------------
 
     /**
      * Global exception handler for missing request parameters.
-     * Provides user-friendly error messages instead of stack traces.
+     * Produces user-friendly error messages instead of raw exceptions.
      */
     @ControllerAdvice
     public class GlobalExceptionHandler {
@@ -501,9 +530,9 @@ public class GameController {
         }
     }
 
-        /**
-     * Displays a specific game with all its phases and enigmas.
-     * Default placeholders are applied for missing data.
+    /**
+     * Displays the edit page for phases and enigmas (step 1 in the editing flow).
+     * Similar logic to the viewGame() handler but adapted for the editing UI.
      */
     @GetMapping("/editGames1/{id}")
     public String editGame1(@PathVariable("id") Long id, Model model) {
@@ -513,11 +542,10 @@ public class GameController {
             throw new IllegalArgumentException("Game not found with id: " + id);
         }
 
-        // Apply default placeholders for empty or null fields
+        // Apply default placeholder image and remove inconsistencies
         if (game.getImage() == null || game.getImage().isBlank()) {
             game.setImage("https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
-            // First, delete all enigmas linked to each phase (avoid
-            // ConcurrentModificationException)
+
             for (Phase phase : game.getPhases()) {
                 if (phase.getEnigmas() != null) {
                     List<Long> enigmaIds = new ArrayList<>();
@@ -530,7 +558,8 @@ public class GameController {
                 }
             }
         }
-        // Load and prepare associated phases and enigmas
+
+        // Prepare phases and assign default texts
         Set<Phase> phases = game.getPhases();
         for (Phase phase : phases) {
             if (phase.getDescription() == null || phase.getDescription().isBlank()) {
@@ -539,16 +568,18 @@ public class GameController {
             if (phase.getLiteralText() == null || phase.getLiteralText().isBlank()) {
                 phase.setLiteralText("Phase " + phase.getPhaseName());
             }
-            Set<Enigma> enigmas = phase.getEnigmas();
-            for (Enigma e : enigmas) {
+
+            for (Enigma e : phase.getEnigmas()) {
                 if (e.getQuestion() == null || e.getQuestion().isBlank()) {
-                    e.setQuestion("No hay enunciado definido todavía");
+                    e.setQuestion("No statement defined yet");
                 }
                 if (e.getAnswerFormat() == null || e.getAnswerFormat().isBlank()) {
-                    e.setAnswerFormat("Sin formato definido");
+                    e.setAnswerFormat("No answer format defined");
                 }
             }
         }
+
+        // Order phases and enigmas by ID
         List<Phase> sortedPhases = new ArrayList<>(game.getPhases());
         sortedPhases.sort(Comparator.comparing(Phase::getId));
 
@@ -562,5 +593,4 @@ public class GameController {
         model.addAttribute("game", game);
         return "editGame1";
     }
-
 }

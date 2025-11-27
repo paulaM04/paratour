@@ -41,10 +41,17 @@ public class PhaseController {
     @Autowired
     private TypeGameService typeGameService;
 
-    public static String typeGeneric="FREE";
+    // Default type used when no type is explicitly selected during creation
+    public static String typeGeneric = "FREE";
+
+    // -------------------------------------------------------------------------
+    // STEP 1 — DISPLAY GAME CREATION START PAGE
+    // -------------------------------------------------------------------------
+
     /**
-     * Displays the first step of the new game creation process.
-     * Loads all available game types into the model.
+     * Step 1 of the new game creation workflow.
+     * Displays a form that allows the user to choose the basic properties of a new game.
+     * Loads the list of available GameTypes for selection.
      */
     @GetMapping("/newGame_get1")
     public String newGame_get1(Model model) {
@@ -52,38 +59,55 @@ public class PhaseController {
         return "newGame_1";
     }
 
+    // -------------------------------------------------------------------------
+    // STEP 2 — GENERATE PHASE PLACEHOLDERS
+    // -------------------------------------------------------------------------
+
     /**
      * Step 2 of the game creation process.
-     * Generates placeholder objects for the number of phases specified by the user.
-     * Each placeholder is used to dynamically render input fields in the next form.
+     * Generates a temporary list of Phase objects used as placeholders
+     * to render dynamic input fields for each phase in the front-end.
+     *
+     * All game parameters collected in Step 1 are forwarded again
+     * to preserve input across requests.
      */
     @GetMapping("/newGame_get2")
     public String newGame_get2(
             @RequestParam("numPhases") int numPhases,
             @RequestParam Map<String, String> params,
             Model model) {
+
         try {
-            // Generate placeholder Phase objects (for UI rendering)
             List<Phase> phases = new ArrayList<>();
+
+            // Create dummy phases only for rendering the form
             for (int i = 0; i < numPhases; i++) {
                 Phase p = new Phase();
-                p.setIdFalse(i + 1); // Temporary index for form usage
+                p.setIdFalse(i + 1); // Temporary ID for UI usage
                 phases.add(p);
             }
 
             model.addAttribute("phases", phases);
             copyGameParamsToModel(params, model);
             return "newGame_2";
+
         } catch (Exception e) {
             model.addAttribute("message", e.getMessage());
             return "error";
         }
     }
 
+    // -------------------------------------------------------------------------
+    // STEP 1 FORM SUBMISSION — REDIRECT TO STEP 2
+    // -------------------------------------------------------------------------
+
     /**
-     * Step 1 submission: receives game data and redirects to the phase
-     * configuration view.
-     * The parameters are forwarded via redirect attributes to preserve user input.
+     * Handles submission of Step 1 (basic game information).
+     * Redirects to Step 2, while passing all collected parameters
+     * through URL redirect attributes.
+     *
+     * If the user specifies 0 phases, creates the game immediately
+     * and skips the phase creation process.
      */
     @PostMapping("/newGame_post1")
     public String newGame_post1(
@@ -95,25 +119,30 @@ public class PhaseController {
             @RequestParam(value = "hasLeaderboard", required = false) String hasLeaderboard,
             @RequestParam(value = "manual", required = false) String manual,
             @RequestParam("numPhases") int numPhases,
-            org.springframework.web.servlet.mvc.support.RedirectAttributes ra,
+            RedirectAttributes ra,
             Model model) {
 
-        // Normalize checkbox values (default to true if unchecked)
+        // Default inverted checkbox logic (if unchecked → true)
         hasLeaderboard = (hasLeaderboard == null) ? "true" : hasLeaderboard;
         manual = (manual == null) ? "true" : manual;
 
-        // Add all collected parameters to the redirect query string
+        // Forward all parameters to Step 2
         ra.addAttribute("numPhases", numPhases);
         ra.addAttribute("gameName", gameName);
         ra.addAttribute("gameDescription", gameDescription);
-        if (gameType==null || gameType.isBlank()) {
-            gameType = typeGeneric; // Default type if none selected
+
+        // If no game type selected, fallback to a generic one
+        if (gameType == null || gameType.isBlank()) {
+            gameType = typeGeneric;
         }
+
         ra.addAttribute("gameType", gameType);
         ra.addAttribute("gameImage", gameImage);
         ra.addAttribute("gameVideo", gameVideo);
         ra.addAttribute("hasLeaderboard", hasLeaderboard);
         ra.addAttribute("manual", manual);
+
+        // If no phases are defined, create an empty game and finish
         if (numPhases < 1) {
             Game game = new Game();
             game.setName(gameName);
@@ -124,44 +153,58 @@ public class PhaseController {
             game.setHasLeaderboard(Boolean.parseBoolean(hasLeaderboard));
             game.setManual(Boolean.parseBoolean(manual));
             game.setNumberOfRiddles(0);
+
             gameService.saveGame(game);
             model.addAttribute("games", gameService.findAllGames());
-            return "home"; // Redirect to home if invalid number of phases
+
+            return "home";
         }
-        // Redirect to the phase configuration step
+
         return "redirect:/newGame_get2";
     }
 
+    // -------------------------------------------------------------------------
+    // ALTERNATIVE PHASE CREATION VIEW
+    // -------------------------------------------------------------------------
+
     /**
-     * Generates the form used to configure phases and riddles (enigmas).
-     * Similar to newGame_get2, but used for more complex step navigation.
+     * Generates the combined form used to configure phases and riddles (enigmas)
+     * in a single step. Similar to newGame_get2, but used for mixed workflows.
      */
     @PostMapping("/createPhasesForm")
     public String createPhasesForm(
             @RequestParam("numPhases") int numPhases,
             @RequestParam Map<String, String> params,
             Model model) {
+
         try {
             List<Phase> phases = new ArrayList<>();
+
             for (int i = 0; i < numPhases; i++) {
                 Phase p = new Phase();
                 p.setIdFalse(i + 1);
                 phases.add(p);
             }
+
             model.addAttribute("phases", phases);
             copyGameParamsToModel(params, model);
 
             return "newPhaseAndEnigma";
+
         } catch (Exception e) {
             model.addAttribute("message", e.getMessage());
             return "error";
         }
     }
 
+    // -------------------------------------------------------------------------
+    // FINAL STEP — SAVE GAME, PHASES AND RIDDLES
+    // -------------------------------------------------------------------------
+
     /**
      * Final step of the game creation flow.
-     * Saves the game, its phases, and all associated riddles (enigmas).
-     * Each phase and riddle is dynamically reconstructed from request parameters.
+     * Creates the Game object, persists it, and then reconstructs
+     * all phases and their riddles (enigmas) from dynamic form data.
      */
     @PostMapping("/newGame_lastPost")
     public String newGame_lastPost(
@@ -170,40 +213,42 @@ public class PhaseController {
             @RequestParam(value = "numRiddles", required = false) List<Integer> numRiddles,
             @RequestParam Map<String, String> params,
             Model model) {
+
         try {
-            // Crear el juego
+            // Create base Game object
             Game game = new Game();
 
-            // Validar tipo
+            // Validate game type
             String selectedType = params.get("gameType");
             GameType type = typeGameService.findByCode(selectedType);
             if (type == null) {
                 throw new IllegalArgumentException("Invalid game type: " + selectedType);
             }
 
-            // Atributos base
+            // Assign base attributes
             game.setName(params.get("gameName"));
             game.setDescription(params.get("gameDescription"));
-            game.setGameType(params.get("gameType"));
+            game.setGameType(selectedType);
             game.setImage(params.get("gameImage"));
             game.setVideo(params.get("gameVideo"));
             game.setHasLeaderboard(Boolean.parseBoolean(params.getOrDefault("hasLeaderboard", "true")));
             game.setManual(Boolean.parseBoolean(params.getOrDefault("manual", "true")));
             game.setNumberOfRiddles(0);
 
-            // Guardamos el juego primero (evita TransientObjectException)
+            // Save game first to avoid transient reference issues
             gameService.saveGame(game);
 
-            // Si no hay fases, simplemente guardamos el juego y terminamos
+            // If no phases exist, end creation early
             if (phaseNames == null || phaseNames.isEmpty()) {
                 model.addAttribute("games", gameService.findAllGames());
                 return "home";
             }
 
-            // Lista auxiliar
             List<Phase> savedPhases = new ArrayList<>();
 
+            // Build each phase and its riddles
             for (int i = 0; i < phaseNames.size(); i++) {
+
                 Phase phase = new Phase();
                 phase.setPhaseName(phaseNames.get(i));
                 phase.setDescription(descriptions.get(i));
@@ -213,22 +258,25 @@ public class PhaseController {
                 phase.setManual(Boolean.TRUE);
                 phase.setGame(game);
 
-                // Guardar fase
+                // Save the phase
                 Phase savedPhase = phaseService.save(phase);
                 savedPhases.add(savedPhase);
 
-                // Obtener número de enigmas (0 si no existe)
-                int riddlesCount = (numRiddles != null && numRiddles.size() > i) ? numRiddles.get(i) : 0;
+                int riddlesCount =
+                        (numRiddles != null && numRiddles.size() > i)
+                        ? numRiddles.get(i)
+                        : 0;
 
-                // Permitir 0 enigmas: si riddlesCount == 0, simplemente no entra al bucle
+                // Build each enigma for this phase
                 for (int r = 0; r < riddlesCount; r++) {
+
                     String prefix = "phases[" + i + "].riddles[" + r + "].";
+
                     Enigma enigma = new Enigma();
                     enigma.setPhase(savedPhase);
-                    // enigma.setPhaseId(savedPhase.getId());
                     enigma.setEnigmaNumber(r + 1);
 
-                    // Rellenar datos
+                    // Fill all enigma fields from dynamic parameters
                     enigma.setLiteralText(params.getOrDefault(prefix + "literalText", ""));
                     enigma.setQuestion(params.getOrDefault(prefix + "enigma", ""));
                     enigma.setAnswer(params.getOrDefault(prefix + "answer", ""));
@@ -246,18 +294,23 @@ public class PhaseController {
                     enigma.setLatitude(params.getOrDefault(prefix + "latitude", "0.0"));
                     enigma.setLongitude(params.getOrDefault(prefix + "longitude", "0.0"));
                     enigma.setAdditionalInstructions(params.getOrDefault(prefix + "additionalInstructions", ""));
+
+                    // Parse numeric fields safely
                     enigma.setPointsCorrect(parseIntSafe(params.get(prefix + "pointsCorrect")));
                     enigma.setPointsFail(parseIntSafe(params.get(prefix + "pointsFail")));
                     enigma.setPointsHint1(parseIntSafe(params.get(prefix + "pointsHint1")));
                     enigma.setPointsHint2(parseIntSafe(params.get(prefix + "pointsHint2")));
                     enigma.setMaxTime(parseIntSafe(params.get(prefix + "maxTime")));
+
                     enigma.setManual(Boolean.parseBoolean(params.getOrDefault(prefix + "manual", "true")));
+
                     enigmaService.save(enigma);
                 }
             }
 
-            // Recalcular total de enigmas
-            int totalRiddles = (numRiddles != null)
+            // Compute total riddles across all phases
+            int totalRiddles =
+                    (numRiddles != null)
                     ? numRiddles.stream().mapToInt(Integer::intValue).sum()
                     : 0;
             game.setNumberOfRiddles(totalRiddles);
@@ -273,9 +326,13 @@ public class PhaseController {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // HELPERS & UTILITIES
+    // -------------------------------------------------------------------------
+
     /**
-     * Utility method used to re-inject all game parameters
-     * into the model between multiple request steps.
+     * Preserves all game parameters between steps of the creation workflow.
+     * Used to repopulate views when navigating between multi-step forms.
      */
     private void copyGameParamsToModel(Map<String, String> params, Model model) {
         model.addAttribute("gameName", params.getOrDefault("gameName", ""));
@@ -288,8 +345,8 @@ public class PhaseController {
     }
 
     /**
-     * Safely parses an integer value from a string.
-     * Returns 0 if the value is null, empty, or invalid.
+     * Safely parses integers while avoiding NumberFormatException.
+     * Returns 0 for null, empty, or invalid numeric values.
      */
     public Integer parseIntSafe(String value) {
         try {
@@ -299,39 +356,67 @@ public class PhaseController {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // DELETE PHASE
+    // -------------------------------------------------------------------------
+
+    /**
+     * Deletes a phase and all associated enigmas.
+     * Ensures that the parent game still exists before deletion and
+     * redirects back to the game editing page.
+     */
     @Transactional
     @PostMapping("/deletePhase/{phaseId}")
-    public String deletePhase(@PathVariable Long phaseId,
+    public String deletePhase(
+            @PathVariable Long phaseId,
             RedirectAttributes redirectAttributes) {
 
         Phase phaseToDelete = phaseService.findPhaseById(phaseId);
         Game game = (phaseToDelete != null) ? phaseToDelete.getGame() : null;
+
         if (game == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Game not found.");
             return "redirect:/games";
         }
 
         if (phaseToDelete == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Phase not found.");
             return "redirect:/editGames1/" + game.getId();
         }
-        System.out.println("ENTRA EN BORRAR FASE");
+
+        // Delete all enigmas before deleting the phase
         enigmaService.deleteAll(phaseToDelete.getEnigmas());
         phaseService.delete(phaseToDelete.getId());
         gameService.saveGame(game);
-        redirectAttributes.addFlashAttribute("successMessage", "✅ Fase eliminada correctamente.");
+
+        redirectAttributes.addFlashAttribute("successMessage", "✅ Phase deleted successfully.");
         return "redirect:/editGames1/" + game.getId();
     }
 
+    // -------------------------------------------------------------------------
+    // ADD PHASE TO AN EXISTING GAME
+    // -------------------------------------------------------------------------
+
+    /**
+     * Adds a new phase to an existing game.
+     * Applies default values to missing fields and validates mandatory ones.
+     * Redirects the user back to the game editing view.
+     */
     @PostMapping("/addPhase/{gameId}")
-    public String addPhase(@PathVariable Long gameId,
+    public String addPhase(
+            @PathVariable Long gameId,
             @ModelAttribute Phase newPhase,
-            RedirectAttributes redirectAttributes, Model model) {
+            RedirectAttributes redirectAttributes,
+            Model model) {
+
         try {
             Game game = gameService.findGameById(gameId);
 
             if (newPhase.getPhaseName() != null && !newPhase.getPhaseName().isBlank()) {
+
                 newPhase.setGame(game);
+
+                // Apply default values to missing or empty fields
                 if (newPhase.getLiteralText() == null || newPhase.getLiteralText().isBlank()) {
                     newPhase.setLiteralText("Phase " + newPhase.getPhaseName());
                 }
@@ -343,7 +428,7 @@ public class PhaseController {
                 }
                 if (newPhase.getImage() == null || newPhase.getImage().isBlank()) {
                     newPhase.setImage(
-                            "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
+                        "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png");
                 }
                 if (newPhase.getVideo() == null || newPhase.getVideo().isBlank()) {
                     newPhase.setVideo("");
@@ -351,22 +436,29 @@ public class PhaseController {
 
                 game.addPhase(newPhase);
                 gameService.saveGame(game);
+
                 redirectAttributes.addFlashAttribute("successMessage",
-                        "✅ Nueva fase añadida correctamente.");
+                        "✅ New phase added successfully.");
+
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage",
-                        "❌ Debes introducir un nombre para la fase.");
+                        "❌ You must provide a name for the phase.");
             }
+
+            // Sort phases for a consistent display order
             List<Phase> sortedPhases = new ArrayList<>(game.getPhases());
             sortedPhases.sort(Comparator.comparing(Phase::getId));
+
             model.addAttribute("phases", sortedPhases);
             model.addAttribute("game", game);
+
             return "redirect:/editGames1/" + gameId;
+
         } catch (Exception e) {
             e.printStackTrace();
-            model.addAttribute("message", e.getMessage() != null ? e.getMessage() : "Unknown error");
+            model.addAttribute("message",
+                    e.getMessage() != null ? e.getMessage() : "Unknown error");
             return "error";
         }
     }
-
 }

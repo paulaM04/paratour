@@ -21,6 +21,13 @@ import com.code.paratour.service.GameService;
 import com.code.paratour.service.PhaseService;
 import com.code.paratour.service.TypeGameService;
 
+/**
+ * Controller responsible for managing the creation, editing, and deletion
+ * of enigmas (riddles) associated with a specific phase within a game.
+ *
+ * This controller is part of a multi-step game creation flow and dynamically
+ * handles the structure of phases and their corresponding enigmas.
+ */
 @Controller
 public class EnigmaController {
 
@@ -37,16 +44,18 @@ public class EnigmaController {
     private TypeGameService typeGameService;
 
     /**
-     * Recibe todos los datos de las fases desde el formulario anterior
-     * y prepara dinámicamente la vista "newGame_3" donde el usuario introducirá
-     * los enigmas de cada fase.
+     * Receives the list of phases created in the previous step and builds
+     * a hierarchical structure ready to be rendered in the "newGame_3" view.
      *
-     * Se reorganizan los datos de entrada (listas de nombres, descripciones…)
-     * en una estructura jerárquica:
+     * The resulting view allows the user to input the enigmas belonging to
+     * each phase.
      *
-     *      phases → riddles
+     * This method transforms parallel lists received from the form into a
+     * strongly structured model:
+     *      Phase → List<RiddlePlaceholder>
      *
-     * Cada fase contendrá una lista de "placeholders" para los enigmas.
+     * It also reinjects global game parameters to preserve data consistency
+     * throughout the multi-step process.
      */
     @PostMapping("/newGame_post3")
     public String newGame_post3(
@@ -56,72 +65,65 @@ public class EnigmaController {
             @RequestParam("literalText") List<String> literalTexts,
             @RequestParam("latitude") List<String> latitudes,
             @RequestParam("longitude") List<String> longitudes,
-            @RequestParam Map<String, String> params,  // todos los parámetros del formulario
+            @RequestParam Map<String, String> params,
             Model model) {
-        try {
 
-            // Validación: ningún número de enigmas puede ser negativo
+        try {
+            // Defensive validation: a phase cannot contain a negative number of riddles.
             if (numRiddles.stream().anyMatch(n -> n < 0)) {
-                throw new IllegalArgumentException("El número de enigmas no puede ser negativo.");
+                throw new IllegalArgumentException("Riddle count cannot be negative.");
             }
 
-            // Lista que representará todas las fases que se enviarán a la plantilla
+            // Final structure containing all phases and their riddle placeholders.
             List<Map<String, Object>> phasesForView = new ArrayList<>();
 
-            // Recorremos cada índice de fase para construir su mapa de datos
+            // Iterate through all phases received from the form.
             for (int i = 0; i < phaseNames.size(); i++) {
 
-                // Mapa que contiene los datos básicos de la fase
+                // Map representing a single phase for the view layer.
                 Map<String, Object> phase = new java.util.HashMap<>();
-                phase.put("index", i);                      // índice técnico (0-based)
+                phase.put("index", i);                           // technical index (0-based)
                 phase.put("phaseName", phaseNames.get(i));
                 phase.put("description", descriptions.get(i));
                 phase.put("numRiddles", numRiddles.get(i));
                 phase.put("literalText", literalTexts.get(i));
                 phase.put("latitude", latitudes.get(i));
                 phase.put("longitude", longitudes.get(i));
+                phase.put("display", i + 1);                     // user-friendly index (1-based)
 
-                // Índice human-friendly (1-based)
-                phase.put("display", i + 1);
-
-                // Lista de enigmas *vacíos* que se rellenarán en la plantilla
+                // List of riddle placeholders to display in the UI.
                 List<Map<String, Object>> riddles = new ArrayList<>();
 
-                // Se crean tantos "riddle placeholders" como se indicó
                 for (int r = 0; r < numRiddles.get(i); r++) {
                     Map<String, Object> rid = new java.util.HashMap<>();
-                    rid.put("phaseIndex", i);   // fase a la que pertenece
-                    rid.put("idx", r);          // índice dentro de la fase
-                    rid.put("display", r + 1);  // índice visible
+                    rid.put("phaseIndex", i);
+                    rid.put("idx", r);
+                    rid.put("display", r + 1);
                     riddles.add(rid);
                 }
 
-                // Insertamos los enigmas dentro de la fase
                 phase.put("riddles", riddles);
-
-                // Añadimos esta fase a la lista final
                 phasesForView.add(phase);
             }
 
-            // Añadimos al modelo la lista completa de fases construidas
+            // Make the structured list of phases available to the view.
             model.addAttribute("phases", phasesForView);
 
-            // Reinyectamos los parámetros generales del juego
+            // Preserve global game parameters throughout the multi-step process.
             copyGameParamsToModel(params, model);
 
-            // Mostramos la siguiente vista de creación (donde se rellenan los enigmas)
             return "newGame_3";
 
         } catch (Exception e) {
-            // Si ocurre un error inesperado, mostramos la vista de error
+            // Generic error view for unexpected exceptions.
             model.addAttribute("message", e.getMessage());
             return "error";
         }
     }
 
     /**
-     * Añade parámetros generales del juego al modelo,
-     * para mantenerlos a lo largo del proceso multi-step.
+     * Reinserts main game parameters into the model to ensure that they are
+     * preserved across all steps of the creation process.
      */
     private void copyGameParamsToModel(Map<String, String> params, Model model) {
         model.addAttribute("gameName", params.getOrDefault("gameName", ""));
@@ -134,86 +136,89 @@ public class EnigmaController {
     }
 
     /**
-     * POST que añade un nuevo enigma a una fase existente.
-     * Se llama desde la pantalla de edición de juegos.
+     * Adds a new enigma (riddle) to an existing phase.
+     * This method is triggered from the game editing interface.
+     *
+     * The enigma is validated, normalized, and assigned an incremental
+     * enigma number based on the current size of the phase.
      */
     @PostMapping("/addEnigma/{phaseId}")
     public String addEnigma(
-            @PathVariable Long phaseId,                // fase donde se insertará
-            @ModelAttribute Enigma newEnigma,          // datos del formulario
+            @PathVariable Long phaseId,
+            @ModelAttribute Enigma newEnigma,
             RedirectAttributes redirectAttributes,
             Model model) {
-        try {
 
-            // Cargamos la fase
+        try {
+            // Load and validate the phase.
             Phase phase = phaseService.findPhaseById(phaseId);
             if (phase == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "❌ Fase no encontrada.");
+                redirectAttributes.addFlashAttribute("errorMessage", "❌ Phase not found.");
                 return "redirect:/error";
             }
 
-            // Obtenemos el juego al que pertenece
+            // Ensure that the phase is associated with a valid game.
             Game game = phase.getGame();
             if (game == null) {
                 redirectAttributes.addFlashAttribute("errorMessage",
-                        "❌ El enigma no puede asociarse a un juego inexistente.");
+                        "❌ The enigma cannot be linked to a non-existing game.");
                 return "redirect:/error";
             }
 
-            // Validación: debe tener al menos un nombre o texto literal
+            // Functional validation: the enigma must have a minimum literal text value.
             if (newEnigma.getLiteralText() != null && !newEnigma.getLiteralText().isBlank()) {
 
-                // Asociamos el enigma a la fase
+                // Link the enigma to the phase and normalize empty fields.
                 newEnigma.setPhase(phase);
-
-                // Rellena campos nulos o vacíos con valores por defecto
                 newEnigma.fillEmptyFields();
 
-                // Asignación automática del número de enigma dentro de la fase
+                // Automatically assign the enigma number within the phase (1-based).
                 newEnigma.setEnigmaNumber(phase.getEnigmas().size() + 1);
 
-                // Valores por defecto si no se declararon
+                // Assign a default question if none was provided.
                 if (newEnigma.getQuestion() == null || newEnigma.getQuestion().isBlank()) {
-                    newEnigma.setQuestion("Pregunta pendiente para " + newEnigma.getLiteralText());
+                    newEnigma.setQuestion("Pending question for " + newEnigma.getLiteralText());
                 }
 
-                // Imagen por defecto si no se especifica ninguna
+                // Set a default image if none was provided.
                 if (newEnigma.getImage() == null || newEnigma.getImage().isBlank()) {
                     newEnigma.setImage(
                         "https://lacaja.paratourmadrid.com/juegos/juego-fase0/img-prueba-juegos-horizontal.png"
                     );
                 }
 
-                // Valores vacíos aceptables pero normalizados
+                // Normalize optional fields to avoid null values.
                 if (newEnigma.getEnigmaVideo() == null) newEnigma.setEnigmaVideo("");
                 if (newEnigma.getLatitude() == null) newEnigma.setLatitude("");
                 if (newEnigma.getLongitude() == null) newEnigma.setLongitude("");
 
-                // Guardamos el enigma en la BD y actualizamos relaciones
+                // Persist changes in phase, enigma, and game.
                 phase.addEnigma(newEnigma);
                 enigmaService.save(newEnigma);
                 phaseService.save(phase);
                 gameService.saveGame(game);
 
-                redirectAttributes.addFlashAttribute("successMessage", "✅ Nuevo enigma añadido correctamente.");
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "✅ New enigma added successfully.");
 
             } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "❌ Debes introducir un nombre para el enigma.");
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "❌ You must provide a name for the enigma.");
             }
 
-            // Volvemos a la edición del juego
             return "redirect:/editGames1/" + game.getId();
 
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("message",
-                    e.getMessage() != null ? e.getMessage() : "Error desconocido al añadir el enigma.");
+                    e.getMessage() != null ? e.getMessage() : "Unknown error while adding the enigma.");
             return "error";
         }
     }
 
     /**
-     * Elimina un enigma de una fase.
+     * Deletes an existing enigma from its phase.
+     * The phase and game relationships are updated to maintain integrity.
      */
     @PostMapping("/deleteEnigma/{enigmaId}")
     public String deleteEnigma(@PathVariable Long enigmaId,
@@ -222,25 +227,22 @@ public class EnigmaController {
         System.out.println("DELETE ENIGMA ID: " + enigmaId);
 
         try {
-            // Buscamos el enigma
             Enigma enigma = enigmaService.findEnigmaById(enigmaId);
-
             Phase phase = enigma.getPhase();
             Game game = phase.getGame();
 
             if (game == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "❌ Juego no encontrado.");
+                redirectAttributes.addFlashAttribute("errorMessage", "❌ Game not found.");
                 return "redirect:/error";
             }
 
-            // Eliminamos el enigma de la fase
+            // Remove the enigma from the phase and persist changes.
             phase.getEnigmas().remove(enigma);
             phaseService.save(phase);
             gameService.saveGame(game);
 
-            redirectAttributes.addFlashAttribute("successMessage", "✅ Enigma eliminado correctamente.");
+            redirectAttributes.addFlashAttribute("successMessage", "✅ Enigma deleted successfully.");
 
-            // Volvemos a la edición del juego
             return "redirect:/editGames1/" + game.getId();
 
         } catch (Exception e) {
